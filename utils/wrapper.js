@@ -2,7 +2,7 @@ import cookie from 'utils/cookies';
 
 const wrapper = handler => {
 
-  return async (req, res) => {
+  return (req, res) => {
 
   res.cookieArray = [];
   res.cookie = (name, value, options) => cookie(res, name, value, options);

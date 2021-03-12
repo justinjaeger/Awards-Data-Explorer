@@ -10,17 +10,19 @@ followerController.getFollowers = async (req, res) => {
   console.log('getFollowers')
 
   const { profileUsername } = res.locals;
+  console.log('1')
 
   /* Fetch the user's followers - names and images */
   result = await db.query(`
     SELECT username, image 
     FROM users
-    WHERE username = (
+    WHERE username IN (
       SELECT follower FROM followers
       WHERE username='${profileUsername}' 
     );
   `);
   res.handleErrors(result);
+  console.log('2')
 
   const followers = result.map(user => {
     const image = (user.image) ? user.image : '/PROFILE.png'
@@ -45,7 +47,7 @@ followerController.getFollowing = async (req, res) => {
   result = await db.query(`
     SELECT username, image 
     FROM users
-    WHERE username = (
+    WHERE username IN (
       SELECT username FROM followers
       WHERE follower='${follower}'
     );
@@ -63,7 +65,7 @@ followerController.getFollowing = async (req, res) => {
   res.locals.following = following;
 };
 
-/*************************************/
+/*************************************/ 
 
 followerController.followUser = async (req, res) => {
 
@@ -74,8 +76,7 @@ followerController.followUser = async (req, res) => {
   /* Get the current datetime */
   const datetime = new Date().toISOString().slice(0, 19).replace('T', ' ');
 
-  console.log(datetime)
-  /* Fetch who user is following */
+  /* Follow user */
   result = await db.query(`
     INSERT INTO followers(username, follower, dateCreated)
     VALUES('${profileUsername}', '${follower}', '${datetime}')
@@ -91,7 +92,7 @@ followerController.unfollowUser = async (req, res) => {
 
   const { follower, profileUsername } = res.locals;
 
-  /* Fetch who user is following */
+  /* Unfollow user */
   result = await db.query(`
     DELETE FROM followers 
     WHERE username='${profileUsername}' AND follower='${follower}'
