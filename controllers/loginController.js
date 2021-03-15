@@ -30,13 +30,16 @@ loginController.returnUserData = async (req, res) => {
 
   /* Fetch email or username based on entry */
   result = await db.query(`
-    SELECT *
+    SELECffT *
     FROM users
     WHERE ${entryType}='${emailOrUsername}'
-  `);
-  res.handleErrors(result);
-  res.handleEmptyResult(result, { error: `Credentials do not match` });
-
+  `)
+  res.handleErrors(result)
+  
+  if (result[0]===undefined) {
+    return res.json({error: `Credentials do not match`})
+  };
+  
   /* Deconstruct all the data we just got */
   const { username, email, user_id,  password: dbPassword } = result[0];
   const authenticated = result[0].authenticated[0];
@@ -46,6 +49,8 @@ loginController.returnUserData = async (req, res) => {
   res.locals.user_id = user_id;
   res.locals.dbPassword = dbPassword;
   res.locals.authenticated = authenticated;
+
+  return {};
 };
 
 /*************************************/

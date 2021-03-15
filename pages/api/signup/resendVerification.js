@@ -5,15 +5,18 @@ import emailController from 'controllers/emailController';
  * When user clicks "resend verification email"
  */
 
-const handler = async (req, res) => {
+const handler = async (req, res, next) => {
 
   try {
     res.locals.email = req.body.email;
     res.locals.username = req.body.username;
   
-    /* Send verification email */
-    await emailController.sendVerificationEmail(req, res);
-    if (res.finished) return;
+    await next
+    (
+      emailController.sendVerificationEmail,
+    )
+    .then(result => { if (!result) return; })
+    .catch(err => { throw new Error(err); })
     
     res.sendCookies();
     return res.json({

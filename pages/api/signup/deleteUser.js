@@ -5,14 +5,17 @@ import signupController from 'controllers/signupController';
  * When the user clicks 'Incorrect Email'
  */
 
-const handler = async (req, res) => {
+const handler = async (req, res, next) => {
 
   try {
     res.locals.email = req.body.email;
   
-    /* Delete User */
-    await signupController.deleteUser(req, res);
-    if (res.finished) return;
+    await next
+    (
+      signupController.deleteUser,
+    )
+    .then(result => { if (!result) return; })
+    .catch(err => { throw new Error(err); })
     
     /* Set verification cookie in browser */
     // LATER MAKE THIS LOCAL STORAGE

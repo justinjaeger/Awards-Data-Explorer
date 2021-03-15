@@ -7,7 +7,7 @@ import signupController from 'controllers/signupController';
  * When the user clicks Reset Password
  */
 
-const handler = async (req, res) => {
+const handler = async (req, res, next) => {
 
   try {
     res.locals.password = req.body.password;
@@ -15,21 +15,16 @@ const handler = async (req, res) => {
     res.locals.emailOrUsername = req.body.email;
     res.locals.entryType = 'email';
 
-    /* Return User Data - use it to authenticate */
-    await loginController.returnUserData(req, res);
-    if (res.finished) return;
-    /* Validate Password */
-    await signupController.validatePassword(req, res);
-    if (res.finished) return;
-    /* Hash Password */
-    await signupController.hashPassword(req, res);
-    if (res.finished) return;
-    /* Update Password */
-    await loginController.updatePassword(req, res);
-    if (res.finished) return;
-    /* Create Access Token */
-    await tokenController.createAccessToken(req, res);
-    if (res.finished) return;
+    await next
+    (
+      loginController.returnUserData,
+      signupController.validatePassword,
+      signupController.hashPassword,
+      loginController.updatePassword,
+      tokenController.createAccessToken,
+    )
+    .then(result => { if (!result) return; })
+    .catch(err => { throw new Error(err); })
 
     res.sendCookies();
     return res.json({

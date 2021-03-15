@@ -6,7 +6,6 @@ import Notification from 'components/Notification';
 export default function App(props) { 
 
   const { URL } = props;
-  console.log('url', URL)
 
   // User info
   const [username, setUsername] = useState(props.username);

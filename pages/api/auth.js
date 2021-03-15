@@ -6,19 +6,19 @@ import userController from 'controllers/userController';
  * Verifies access token and returns user data for header
  */
 
-const handler = async (req, res) => {
+const handler = async (req, res, next) => {
 
   try {
     /* Get access_token from req.body */
     res.locals.access_token = req.body.access_token;
 
-    /* Verify the access_token */
-    await tokenController.verifyToken(req, res);
-    if (res.finished) return;
-
-    /* Fetch data for the header */
-    await userController.header(req, res);
-    if (res.finished) return;
+    await next
+    (
+      tokenController.verifyToken,
+      userController.header,
+    )
+    .then(result => { if (!result) return; })
+    .catch(err => { throw new Error(err); })
 
     /* NOTE ON COOKIES: 
     We pass cookieArray to the output object so we can call 

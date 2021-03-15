@@ -6,8 +6,6 @@ import parseCookies from 'utils/parseCookies';
 
 export default function Home(props) {
   
-  console.log('FUCK', props.URL)
-
   return (
     <>
       <Header 

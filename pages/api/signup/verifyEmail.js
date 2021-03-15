@@ -8,7 +8,7 @@ const { decrypt } = require('utils/encrypt');
  * redirects them to re-enter their password
  */
 
-const handler = async (req, res) => {
+const handler = async (req, res, next) => {
 
   try {
     const { username } = req.query;
@@ -23,9 +23,12 @@ const handler = async (req, res) => {
     res.cookie('sent_verification'); // clears it
     res.cookie('authenticated', decryptedUsername);
   
-    /* Authenticate user in db */
-    await signupController.authenticateUser(req, res);
-    if (res.finished) return;
+    await next
+    (
+      signupController.authenticateUser,
+    )
+    .then(result => { if (!result) return; })
+    .catch(err => { throw new Error(err); })
     
     res.sendCookies();
     return res.redirect('/');

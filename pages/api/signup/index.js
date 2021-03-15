@@ -6,7 +6,7 @@ import signupController from 'controllers/signupController';
  * When the user clicks 'Sign Up'
  */
 
-const handler = async (req, res) => {
+const handler = async (req, res, next) => {
 
   try {
     res.locals.email = req.body.email;
@@ -14,24 +14,17 @@ const handler = async (req, res) => {
     res.locals.password = req.body.password;
     res.locals.confirmPassword = req.body.confirmPassword;
 
-    /* Validate email and username */  
-    await signupController.validateEmailAndUsername(req, res);
-    if (res.finished) return;
-    /* Validate password */
-    await signupController.validatePassword(req, res);
-    if (res.finished) return;
-    /* Hash password */
-    await signupController.hashPassword(req, res);
-    if (res.finished) return;
-    /* Create user */
-    await signupController.createUser(req, res);
-    if (res.finished) return;
-    /* Send Verification Email */
-    await emailController.sendVerificationEmail(req, res);
-    if (res.finished) return;
-    /* Mark the DateCreated field */
-    await signupController.markDateCreated(req, res);
-    if (res.finished) return;
+    await next
+    (
+      signupController.validateEmailAndUsername,
+      signupController.validatePassword,
+      signupController.hashPassword,
+      signupController.createUser,
+      emailController.sendVerificationEmail,
+      signupController.markDateCreated,
+    )
+    .then(result => { if (!result) return; })
+    .catch(err => { throw new Error(err); })
 
     /* set a cookie called sent_verification with value email */
     res.cookie('sent_verification', `${res.locals.username}*$%&${res.locals.email}`);
