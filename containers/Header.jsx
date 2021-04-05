@@ -116,6 +116,11 @@ export default function App(props) {
         {notification}
       </Notification> 
       }
+      
+      {loginError && 
+      <Notification setNotification={setNotification}>
+        {loginError}
+      </Notification>}
 
       <div id="Header">
         {!loggedIn &&
@@ -127,7 +132,7 @@ export default function App(props) {
 
         {loggedIn &&
           <>
-            <div id="header-message">Welcome,{space}<a href={`${URL}/${username}`} className="header-button" >{username}</a></div>
+            <div id="header-message">Welcome,{space}<a href={`${URL}/user/${username}`} className="header-button" >{username}</a></div>
             <button 
               onMouseEnter={() => setProfileDropdown(!profileDropdown)} 
               onClick={() => setProfileDropdown(true)} 
@@ -137,7 +142,7 @@ export default function App(props) {
       
             { profileDropdown && 
               <div id="profile-dropdown" onMouseLeave={() => setProfileDropdown(false)}>
-                <a className="profile-dropdown-button no-underline" href={`${URL}/${username}`} >My Profile</a>
+                <a className="profile-dropdown-button no-underline" href={`${URL}/user/${username}`} >My Profile</a>
                 <button className="profile-dropdown-button" onClick={logout} >Log Out</button>
               </div>
             }

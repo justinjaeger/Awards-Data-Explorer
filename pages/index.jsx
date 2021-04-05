@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import cookies from 'next-cookies';
+import { Cookie, withCookie } from 'next-cookie'
 import Header from 'containers/Header';
 import parseCookies from 'utils/parseCookies';
 

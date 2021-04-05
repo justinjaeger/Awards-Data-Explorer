@@ -8,7 +8,7 @@ import Dashboard from 'containers/Dashboard';
 import Four0Four from 'containers/Four0Four';
 
 /**
- * /username123
+ * /user/username123
  */
 
 function UserDashboard(props) { 
@@ -70,7 +70,7 @@ export async function getServerSideProps(context) {
   })();
 
   /* Get the profile username from the slug */
-  const profileUsername = context.req.url.slice(1);
+  const profileUsername = context.req.url.slice(6);
 
   /* Default values for all props */
   const props = { 

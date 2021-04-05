@@ -13,9 +13,11 @@ const handler = async (req, res, next) => {
     res.locals.entryType = (res.locals.emailOrUsername.includes('@')) ? 'email' : 'username';
     /* ^^^ Determine entry type - email or username */
 
+    console.log('locals',res.locals)
+
     await next
     (
-      loginController.retufffrnUserData,
+      loginController.returnUserData,
       loginController.verifyPassword,
       loginController.verifyEmailAuthenticated,
       tokenController.createAccessToken

@@ -130,13 +130,13 @@ function Dashboard(props) {
         </label>
       ]}
 
-      <div id="dashboard info">
+      <div id="dashboard-info">
         { !isMyProfile &&
           <div id="profile-name" >{profileUsername}</div>
         }
 
         { isMyProfile &&
-          <div id="profile-name" >Welcome, {profileUsername}</div>
+          <div id="profile-name" >{profileUsername}</div>
         }
 
         { !isMyProfile && loggedIn && [

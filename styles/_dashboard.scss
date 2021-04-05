@@ -5,6 +5,11 @@
   flex-wrap: wrap;
 }
 
+#dashboard-info {
+  position: absolute;
+  margin-left: 220px;
+}
+
 #modal-background { 
   position: fixed; /* Stay in place */
   z-index: 1; /* Sit on top */

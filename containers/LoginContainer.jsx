@@ -56,8 +56,9 @@ const LoginContainer = (props) => {
 
   // =============================== //
   
+  const r = route.slice(1)
   return (
-    <div id="login-container">
+    <div id="login-container" className={`container-${r}`}>
 
       <button onClick={() => xOut()} className="x-button x-button-login">X</button>
 

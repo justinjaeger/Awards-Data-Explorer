@@ -7,11 +7,11 @@ module.exports = function isValid(username) {
     status: true,
     message: 'valid',
   };
-  const regex = RegExp("^[a-zA-Z0-9_.]*$");
+  const regex = RegExp("^[a-z0-9_.]*$");
 
   if (regex.test(username) === false) {
     output.status = false;
-    output.message = "username can only contain letters, numbers, underscores and periods";
+    output.message = "username can only contain lowercase letters, numbers, underscores and periods";
   };
   if (username.includes("__") === true) {
     output.status = false;

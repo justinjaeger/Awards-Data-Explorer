@@ -30,7 +30,7 @@ loginController.returnUserData = async (req, res) => {
 
   /* Fetch email or username based on entry */
   result = await db.query(`
-    SELECffT *
+    SELECT *
     FROM users
     WHERE ${entryType}='${emailOrUsername}'
   `)

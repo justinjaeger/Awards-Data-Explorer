@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import ListenForOutsideClicks from 'components/wrappers/ListenForOutsideClicks';
 
-export default function Card(props) {
+export default function Modal(props) {
 
   const { children, setModal } = props;
 
