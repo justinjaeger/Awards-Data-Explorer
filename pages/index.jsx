@@ -1,35 +1,25 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import cookies from 'next-cookies';
+import { Cookie, withCookie } from 'next-cookie'
 import Header from 'containers/Header';
 import parseCookies from 'utils/parseCookies';
-import Notification from 'components/Notification';
 
-export default function Home(props) { 
-
-  // Determine the url based on the environment
-  const URL = (() => {
-    switch(process.env.NODE_ENV) {
-      case 'development':
-        return 'localhost:3000'
-      case 'production':
-        return 'localhost:3000'
-    };
-  })();
-
+export default function Home(props) {
+  
   return (
     <>
       <Header 
         loggedIn={props.loggedIn}
         loginDropdown={props.loginDropdown}
         loginRoute={props.loginRoute}
-        loginMessage={props.loginMessage}
-        loginError={props.loginError}
+        notification={props.notification}
+        notification={props.notification}
         username={props.username}
         email={props.email}
         notification={props.notification}
         image={props.image}
-        URL={URL}
+        URL={props.URL}
       />
     </>
   );
@@ -44,18 +34,29 @@ export default function Home(props) {
 
 export async function getServerSideProps(context) {
 
+  // Determine the url based on the environment
+  const URL = (() => {
+    switch(process.env.NODE_ENV) {
+      case 'development':
+        return 'http://localhost:3000'
+      case 'production':
+        return 'https://oscarexpert.com'
+    };
+  })();
+
   /* Default values for all props */
   
   const props = { 
     loggedIn: false,
     loginDropdown: false,
     loginRoute: '/',
-    loginMessage: '',
-    loginError: '',
+    notification: '',
+    notification: '',
     username: '',
     email: '',
     notification: false,
     image: '/PROFILE.png',
+    URL: URL,
   };
 
   /* Handle cookies */
@@ -75,7 +76,7 @@ export async function getServerSideProps(context) {
     props.loginRoute = '/login';
     props.loginDropdown = true;
     props.username = username;
-    props.loginMessage = 'Email verified. Please enter your password.';
+    props.notification = 'Email verified. Please enter your password.';
   };
 
   if (c.reset_password) { // cookie exists after you reset password
@@ -83,7 +84,7 @@ export async function getServerSideProps(context) {
     props.loginRoute = '/resetPassword';
     props.loginDropdown = true;
     props.email = email;
-    props.loginMessage = `Please enter a new password for ${email}.`;
+    props.notification = `Please enter a new password for ${email}.`;
   };
 
   /**
@@ -101,7 +102,7 @@ export async function getServerSideProps(context) {
      * For other prediction pages which will check the cookie, we'll put a slug there to tell it to send back more data
      * - so long as sticking with SSR, can also just do static loading skeleton w/ client side fetching
      */
-    await axios.post(`${process.env.DEV_ROUTE}/api/auth`, payload)
+    await axios.post(`${URL}/api/auth`, payload)
       .then(res => {
         /* If token is verified, set props accordingly */
         if (res.data.loggedIn) {

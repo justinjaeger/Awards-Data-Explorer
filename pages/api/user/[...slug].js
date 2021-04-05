@@ -10,7 +10,7 @@ import followerController from 'controllers/followerController';
  * We know that we have the username in the payload.
  */
 
-const handler = async (req, res) => {
+const handler = async (req, res, next) => {
 
   try {
     /* Get the action from the url string */
@@ -32,15 +32,15 @@ const handler = async (req, res) => {
     /* All the below functions modify the data object */
     switch (action) {
       case 'dashboard':
-        /* Fetch profile image */
-        await userController.getProfileImage(req, res);
-        if (res.finished) return;
-        /* Get people following user */
-        await followerController.getNumFollowers(req, res);
-        if (res.finished) return;
-        /* Get people user is following */
-        await followerController.getNumFollowing(req, res);
-        if (res.finished) return;
+        await next
+        (
+          userController.getProfileImage,
+          followerController.getNumFollowers,
+          followerController.getNumFollowing,
+        )
+        .then(result => { if (!result) return; })
+        .catch(err => { throw new Error(err); })
+
         /* Put all fetched data in data object */
         data.profileImage = res.locals.profileImage;
         data.numFollowers = res.locals.numFollowers;

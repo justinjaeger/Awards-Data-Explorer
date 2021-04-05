@@ -1,7 +1,8 @@
 import { useCookie } from 'next-cookie'
 
 /* 
-  Parses the array of cookies that can normally be set with res.setHeader() on the client
+  Parses the array of cookies 
+  that can normally be set with res.setHeader() on the client
   and extracts key, value, and options to set the cookie on the server
  */
 

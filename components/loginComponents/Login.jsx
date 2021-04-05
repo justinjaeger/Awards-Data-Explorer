@@ -5,8 +5,8 @@ function Login(props) {
 
   const { 
     login, 
-    setLoginMessage, 
-    setErrorMessage, setRoute, 
+    setNotification, 
+    setRoute, 
     setResendEmailLink,
   } = props;
   
@@ -26,14 +26,14 @@ function Login(props) {
 
     axios.post('/api/login', payload)
       .then(res => {
-        if (res.data.error) return setErrorMessage(res.data.error);
+        if (res.data.error) return setNotification(res.data.error);
 
         /* If email is in the body, it means user is not authenticated - reminds them to check email */
         if (res.data.email) {
           console.log('not authenticated...')
           setRoute('/blank');
           setResendEmailLink({ email: res.data.email, username: res.data.username });
-          setLoginMessage(res.data.message); // "please verify the email sent to..."
+          setNotification(res.data.message); // "please verify the email sent to..."
           return;
         };
         return login(res.data); /* log user in & send user data */

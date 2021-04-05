@@ -8,7 +8,7 @@ import Dashboard from 'containers/Dashboard';
 import Four0Four from 'containers/Four0Four';
 
 /**
- * /username123
+ * /user/username123
  */
 
 function UserDashboard(props) { 
@@ -21,8 +21,8 @@ function UserDashboard(props) {
         loggedIn={props.loggedIn}
         loginDropdown={props.loginDropdown}
         loginRoute={props.loginRoute}
-        loginMessage={props.loginMessage}
-        loginError={props.loginError}
+        notification={props.notification}
+        notification={props.notification}
         username={props.username}
         email={props.email}
         notification={props.notification}
@@ -70,15 +70,15 @@ export async function getServerSideProps(context) {
   })();
 
   /* Get the profile username from the slug */
-  const profileUsername = context.req.url.slice(1);
+  const profileUsername = context.req.url.slice(6);
 
   /* Default values for all props */
   const props = { 
     loggedIn: false,
     loginDropdown: false,
     loginRoute: '/',
-    loginMessage: '',
-    loginError: '',
+    notification: '',
+    notification: '',
     username: '',
     email: '',
     image: '/PROFILE.png',
@@ -108,7 +108,7 @@ export async function getServerSideProps(context) {
     props.loginRoute = '/login';
     props.loginDropdown = true;
     props.username = username;
-    props.loginMessage = 'Email verified. Please enter your password.';
+    props.notification = 'Email verified. Please enter your password.';
   };
 
   if (c.reset_password) { // cookie exists after you reset password
@@ -116,7 +116,7 @@ export async function getServerSideProps(context) {
     props.loginRoute = '/resetPassword';
     props.loginDropdown = true;
     props.email = email;
-    props.loginMessage = `Please enter a new password for ${email}.`;
+    props.notification = `Please enter a new password for ${email}.`;
   };
 
   /**

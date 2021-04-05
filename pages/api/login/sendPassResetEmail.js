@@ -6,7 +6,7 @@ import loginController from 'controllers/loginController';
  * When the user submits "forgot password", which sends an email
  */
 
-const handler = async (req, res) => {
+const handler = async (req, res, next) => {
 
   try {
     const { email } = req.body;
@@ -17,12 +17,13 @@ const handler = async (req, res) => {
       return res.json({ error : 'this email is not properly formatted' });
     };
 
-    /* Check if email exists -- if no, don't send an email */
-    await loginController.ifEmailNoExistDontSend(req, res);
-    if (res.finished) return;
-    /* Send password reset email */
-    await emailController.sendResetPasswordEmail(req, res);
-    if (res.finished) return;
+    await next
+    (
+      loginController.ifEmailNoExistDontSend,
+      emailController.sendResetPasswordEmail,
+    )
+    .then(result => { if (!result) return; })
+    .catch(err => { throw new Error(err); })
 
     res.sendCookies();
     return res.json({ 

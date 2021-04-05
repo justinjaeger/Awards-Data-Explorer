@@ -5,7 +5,7 @@ function FollowerUnit(props) {
 
   const { username, image } = props;
 
-  const link = `/${username}`;
+  const link = `/user/${username}`;
   return (
     <>
       <div id="follower-unit">

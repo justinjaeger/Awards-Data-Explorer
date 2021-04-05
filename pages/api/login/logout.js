@@ -5,18 +5,19 @@ import tokenController from 'controllers/tokenController';
  * When the user clicks Log Out
  */
 
-const handler = async (req, res) => {
+const handler = async (req, res, next) => {
 
   try {
     res.locals.access_token = req.cookies.access_token;
 
-    /* Get user_id from token */
-    await tokenController.getTokenData(req, res);
-    if (res.finished) return;
-    /* Delete access token on client and db */
-    await tokenController.deleteAccessToken(req, res);
-    if (res.finished) return;
-
+    await next
+    (
+      tokenController.getTokenData,
+      tokenController.deleteAccessToken,
+    )
+    .then(result => { if (!result) return; })
+    .catch(err => { throw new Error(err); })
+     
     /* Delete access token from browser */
     res.cookie('access_token');
     

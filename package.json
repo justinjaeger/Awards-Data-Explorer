@@ -11,6 +11,8 @@
     "test": "jest --runInBand"
   },
   "dependencies": {
+    "airtable": "^0.10.1",
+    "apollo-server-micro": "^2.21.1",
     "aws-sdk": "^2.855.0",
     "axios": "^0.21.1",
     "bcrypt": "^5.0.0",
@@ -20,6 +22,7 @@
     "formidable-serverless": "^1.1.1",
     "framer-motion": "^3.3.0",
     "fs": "0.0.1-security",
+    "graphql": "^15.5.0",
     "http": "0.0.1-security",
     "jsonwebtoken": "^8.5.1",
     "msw": "^0.26.2",
@@ -34,7 +37,8 @@
     "react-dom": "17.0.1",
     "sass": "^1.32.5",
     "scss": "^0.2.4",
-    "serverless-mysql": "^1.5.4"
+    "serverless-mysql": "^1.5.4",
+    "swr": "^0.5.2"
   },
   "devDependencies": {
     "jest": "^26.6.3",

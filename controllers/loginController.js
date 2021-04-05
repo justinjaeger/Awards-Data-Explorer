@@ -33,10 +33,13 @@ loginController.returnUserData = async (req, res) => {
     SELECT *
     FROM users
     WHERE ${entryType}='${emailOrUsername}'
-  `);
-  res.handleErrors(result);
-  res.handleEmptyResult(result, { error: `Credentials do not match` });
-
+  `)
+  res.handleErrors(result)
+  
+  if (result[0]===undefined) {
+    return res.json({error: `Credentials do not match`})
+  };
+  
   /* Deconstruct all the data we just got */
   const { username, email, user_id,  password: dbPassword } = result[0];
   const authenticated = result[0].authenticated[0];
@@ -46,6 +49,8 @@ loginController.returnUserData = async (req, res) => {
   res.locals.user_id = user_id;
   res.locals.dbPassword = dbPassword;
   res.locals.authenticated = authenticated;
+
+  return {};
 };
 
 /*************************************/
@@ -72,10 +77,12 @@ loginController.ifEmailNoExistDontSend = async (req, res) => {
   res.handleErrors(result);
   /* If user no exist, We should send the message anyway 
   in case a hacker is fishing for valid emails */
-  res.handleEmptyResult(result, { 
-    message: `An email was sent to ${res.locals.email}.`,
-    route: '/blank',
-  });
+  if (result[0] === undefined) {
+    res.json({
+      message: `An email was sent to ${res.locals.email}.`,
+      route: '/blank'
+    })
+  };
 };
 
 /*************************************/
