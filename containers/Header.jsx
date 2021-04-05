@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import LoginContainer from 'containers/LoginContainer';
+import LoginContainer from 'components/LoginContainer';
 import Notification from 'components/Notification';
 
 export default function App(props) { 
@@ -17,8 +17,6 @@ export default function App(props) {
   const [loggedIn, setLoggedIn] = useState(props.loggedIn);
   const [loginDropdown, setLoginDropdown] = useState(props.loginDropdown);
   const [loginRoute, setLoginRoute] = useState(props.loginRoute);
-  const [loginMessage, setLoginMessage] = useState(props.loginMessage);
-  const [loginError, setLoginError] = useState(props.loginError);
   // Notification
   const [notification, setNotification] = useState(props.notification);
   // Login Links
@@ -33,8 +31,7 @@ export default function App(props) {
     setLoggedIn(true);
     setLoginDropdown(false);
     setLoginRoute('/blank');
-    setLoginMessage('');
-    setLoginError('');
+    setNotification('');
     window.location.reload();
   };
 
@@ -42,7 +39,7 @@ export default function App(props) {
   function logout() {
     axios.get('/api/login/logout')
     .then(res => {
-      if (res.data.error) return setErrorMessage(res.data.error);
+      if (res.data.error) return setNotification(res.data.error);
       setLoggedIn(false);
       setUsername('');
       window.location.reload();
@@ -55,15 +52,13 @@ export default function App(props) {
   // X OUT
   function xOut() {
     setLoginDropdown(false);
-    setLoginMessage('');
-    setLoginMessage('');
+    setNotification('');
   };
 
   // REROUTE (has to be its own function cause error messages need to be deleted)
   function redirect(entry) {
     setLoginRoute(entry);
-    setLoginError('');
-    setLoginMessage('');
+    setNotification('');
     setResendEmailLink(false);
     setReEnterEmailLink(false);
     setChangeEmailLink(false);
@@ -74,8 +69,7 @@ export default function App(props) {
     // Displays login dropdown and sets route
     setLoginDropdown(true);
     setLoginRoute(route);
-    setLoginMessage('');
-    setLoginError('');
+    setNotification('');
   };
 
   // When you click "Incorrect Email?"
@@ -83,11 +77,10 @@ export default function App(props) {
     // Delete the user by email
     axios.post('/api/signup/deleteUser', { email })
     .then(res => {
-      if (res.data.error) return setLoginError(res.data.error);
+      if (res.data.error) return setNotification(res.data.error);
       redirect('/signup');
       setUsername(username);
-      setNotification(false);
-      setLoginMessage(res.data.message);
+      setNotification(res.data.message);
       setLoginDropdown(true);
     })
     .catch(err => {
@@ -116,11 +109,6 @@ export default function App(props) {
         {notification}
       </Notification> 
       }
-      
-      {loginError && 
-      <Notification setNotification={setNotification}>
-        {loginError}
-      </Notification>}
 
       <div id="Header">
         {!loggedIn &&
@@ -156,13 +144,11 @@ export default function App(props) {
           route={loginRoute} setRoute={redirect}
           username={username} setUsername={setUsername}
           email={email} setEmail={setEmail}
-          message={loginMessage} setLoginMessage={setLoginMessage}
-          error={loginError} setErrorMessage={setLoginError}
+          setNotification={setNotification}
           resendEmailLink={resendEmailLink} setResendEmailLink={setResendEmailLink}
           reEnterEmailLink={reEnterEmailLink} setReEnterEmailLink={setReEnterEmailLink}
           changeEmailLink={changeEmailLink} setChangeEmailLink={setChangeEmailLink}
           setLoginDropdown={setLoginDropdown}
-          notification={notification} setNotification={setNotification}
           xOut={xOut}
           login={login}
         />

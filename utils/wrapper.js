@@ -25,7 +25,7 @@ const wrapper = handler => {
     /* handle SQL errors, send 500 status by default */
     res.handleErrors = result => {
       if (result.error) {
-        console.log('error: ', result.error.message)
+        console.log('handling error: ', result.error.message)
         throw new Error(result.error);
       };
     };
@@ -33,16 +33,16 @@ const wrapper = handler => {
     /* if message, it sends data back for frontend to handle
       if no message, it throws an error / 500 status */
     res.handleEmptyResult = (result, message) => {
+
+      if (!message) message = 'Did not affect any rows in db';
+
+      console.log('message',message)
       // first check if affected rows is less than one
-      if (result.affectedRows) {
-        if (result.affectedRows === 0) {
-          if (!message) message = 'Did not affect any rows in db';
-          throw new Error(message);
-        };
+      if (result.affectedRows === 0) {
+        throw new Error(message);
       /* not all queries hav affectedRows property... some queries return data
         in that case, if no data is returned, flag it */
       } else if (result[0] === undefined) {
-        if (!message) message = 'Did not affect any rows in db';
         throw new Error(message);
       };
     };

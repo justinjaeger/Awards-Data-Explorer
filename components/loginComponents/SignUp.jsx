@@ -5,9 +5,8 @@ function SignUp(props) {
 
   const { 
     actualSetEmail, actualSetUsername,
-    setNotification, 
     setLoginDropdown, 
-    setErrorMessage
+    setNotification
   } = props;
 
   const [email, setEmail] = useState("");
@@ -35,7 +34,7 @@ function SignUp(props) {
     /* NOTE: The /signup POST request will send the user a verification email, so it won't return anything back except a message */
     axios.post('/api/signup', payload)
       .then(res => {
-        if (res.data.error) return setErrorMessage(res.data.error);   
+        if (res.data.error) return setNotification(res.data.error);   
         console.log('signup suvvsssful') 
         actualSetEmail(email);   
         actualSetUsername(username);

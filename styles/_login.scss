@@ -24,6 +24,10 @@
   position: relative;
   height: 250px;
 };
+.container-forgotPassword {
+  position: relative;
+  height: 140px;
+};
 
 .login-form {
   @include phone {

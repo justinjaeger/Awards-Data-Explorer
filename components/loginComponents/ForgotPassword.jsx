@@ -3,7 +3,7 @@ import axios from 'axios';
 
 function ForgotPassword(props) {
 
-  const { setLoginMessage, setRoute, setErrorMessage, setReEnterEmailLink } = props;
+  const { setRoute, setNotification, setReEnterEmailLink } = props;
   
   const [email, setEmail] = useState("");
 
@@ -19,10 +19,11 @@ function ForgotPassword(props) {
     
     axios.post('/api/login/sendPassResetEmail', payload)
       .then(res => {
-        if (res.data.error) return setErrorMessage(res.data.error);
+        // console.log('res data', res.data)
+        if (res.data.error) return setNotification(res.data.error);
         setRoute('/blank');
         setReEnterEmailLink(true);
-        setLoginMessage(res.data.message);
+        setNotification(res.data.message);
       })
       .catch(err => {
         console.log('err', err.response);

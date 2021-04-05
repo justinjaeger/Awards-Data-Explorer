@@ -77,10 +77,12 @@ loginController.ifEmailNoExistDontSend = async (req, res) => {
   res.handleErrors(result);
   /* If user no exist, We should send the message anyway 
   in case a hacker is fishing for valid emails */
-  res.handleEmptyResult(result, { 
-    message: `An email was sent to ${res.locals.email}.`,
-    route: '/blank',
-  });
+  if (result[0] === undefined) {
+    res.json({
+      message: `An email was sent to ${res.locals.email}.`,
+      route: '/blank'
+    })
+  };
 };
 
 /*************************************/
