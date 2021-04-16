@@ -155,12 +155,14 @@ function Dashboard(props) {
     
       { modal &&
         <Modal setModal={setModal} >
-          {modal === 'follower' && <div id="follower-title">Followers:</div>}
-          {modal === 'following' && <div id="follower-title">Following:</div>}
+          <div id="follower-list-container">
+            {modal === 'follower' && <div id="follower-title">Followers:</div>}
+            {modal === 'following' && <div id="follower-title">Following:</div>}
           <FollowerList 
             title={modal}
             profileUsername={profileUsername}
           />
+          </div>
         </Modal>
       }
 

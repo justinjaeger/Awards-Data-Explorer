@@ -4,6 +4,7 @@ import cookies from 'next-cookies';
 import { Cookie, withCookie } from 'next-cookie'
 import Header from 'containers/Header';
 import parseCookies from 'utils/parseCookies';
+import Homepage from 'containers/Homepage';
 
 export default function Home(props) {
   
@@ -13,14 +14,13 @@ export default function Home(props) {
         loggedIn={props.loggedIn}
         loginDropdown={props.loginDropdown}
         loginRoute={props.loginRoute}
-        notification={props.notification}
-        notification={props.notification}
         username={props.username}
         email={props.email}
         notification={props.notification}
         image={props.image}
         URL={props.URL}
       />
+      <Homepage/>
     </>
   );
 };

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import LoginContainer from 'components/LoginContainer';
+import Modal from 'components/wrappers/modal';
 import Notification from 'components/Notification';
 
 export default function App(props) { 
@@ -102,7 +103,7 @@ export default function App(props) {
   const space = <span>&nbsp;</span>;
 
   return (
-    <div id="App">
+    <>
 
       {notification && 
       <Notification setNotification={setNotification} >
@@ -112,9 +113,11 @@ export default function App(props) {
 
       <div id="Header">
         {!loggedIn &&
-          <>
+        <>
+            <div id="left-header-margin"></div>
             <button onClick={() => toggleLoginDropdown('/login')} className="header-button" >Log In</button>
             <button onClick={() => toggleLoginDropdown('/signup')} className="header-button">Sign Up</button>
+            <div id="right-header-margin"></div>
           </>
         }
 
@@ -139,21 +142,28 @@ export default function App(props) {
       </div>
 
       { loginDropdown && 
-        <LoginContainer
-          loggedIn={loggedIn} setLoggedIn={setLoggedIn}
-          route={loginRoute} setRoute={redirect}
-          username={username} setUsername={setUsername}
-          email={email} setEmail={setEmail}
-          setNotification={setNotification}
-          resendEmailLink={resendEmailLink} setResendEmailLink={setResendEmailLink}
-          reEnterEmailLink={reEnterEmailLink} setReEnterEmailLink={setReEnterEmailLink}
-          changeEmailLink={changeEmailLink} setChangeEmailLink={setChangeEmailLink}
-          setLoginDropdown={setLoginDropdown}
-          xOut={xOut}
-          login={login}
-        />
+        <Modal 
+          setModal={setLoginDropdown} 
+          size={
+              loginRoute==='login' ? "200px" : "350px"
+            }
+        >
+          <LoginContainer
+            loggedIn={loggedIn} setLoggedIn={setLoggedIn}
+            route={loginRoute} setRoute={redirect}
+            username={username} setUsername={setUsername}
+            email={email} setEmail={setEmail}
+            setNotification={setNotification}
+            resendEmailLink={resendEmailLink} setResendEmailLink={setResendEmailLink}
+            reEnterEmailLink={reEnterEmailLink} setReEnterEmailLink={setReEnterEmailLink}
+            changeEmailLink={changeEmailLink} setChangeEmailLink={setChangeEmailLink}
+            setLoginDropdown={setLoginDropdown}
+            xOut={xOut}
+            login={login}
+          />
+        </Modal>
       }
 
-    </div>
+    </>
   );
 }

@@ -61,7 +61,9 @@ tokenController.createAccessToken = async (req, res) => {
     VALUES('${access_token}', ${user_id}) 
   `);
   res.handleErrors(result);
-  res.handleEmptyResult(result);
+  // res.handleEmptyResult(result);
+
+  console.log('1')
 
   /* UPDATE LAST LOGGED IN */
   const datetime = new Date().toISOString().slice(0, 19).replace('T', ' ');
@@ -71,7 +73,9 @@ tokenController.createAccessToken = async (req, res) => {
     WHERE user_id = ${user_id} 
   `);
   res.handleErrors(result);
-  res.handleEmptyResult(result);
+  // res.handleEmptyResult(result);
+
+  console.log('2')
 
   /* Set new cookie in browser */
   res.cookie('access_token', access_token, { httpOnly: true })

@@ -21,11 +21,29 @@
 }
 
 #Header {
+  display: flex;
+  // flex-direction: row;
   @include flexRight();
   background: $off-black;
   color: $off-white;
   width: 100%;
   height: 50px;
+}
+
+.header-button {
+  display: flex;
+  @include headerContent();
+  margin-right: 20px;
+  &:hover {
+      color: $secondary;
+  }
+}
+
+#left-header-margin {
+  display: flex;
+}
+#right-header-margin {
+  display: flex;
 }
 
 #header-message {
@@ -37,14 +55,6 @@
 .header-profile-pic {
   margin-top: 10px;
   margin-right: 10px;
-}
-
-.header-button {
-  @include headerContent();
-  margin-right: 20px;
-  &:hover {
-    color: $secondary;
-  }
 }
 
 #profile-dropdown {
