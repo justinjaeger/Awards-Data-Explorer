@@ -1,12 +1,11 @@
 
 
-export default function Homepage(props) {
+export default function Homepage({URL}) {
   return <>
     <div id="home-menu">
       <div className="home-menu-item">
-        Predict 2022 Oscars
+        <a href={`${URL}/collective`} >Predict 2022 Oscars</a>
       </div>
-      <div className="home-menu-item">Predict 2022 Oscars</div>
     </div>
   </>
 }

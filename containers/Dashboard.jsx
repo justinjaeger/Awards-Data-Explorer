@@ -16,7 +16,7 @@ function Dashboard(props) {
   const [numFollowing,] = useState(props.numFollowing);
   const [followingUser, setFollowingUser] = useState(props.followingUser);
   const [notification, setNotification] = useState(false);
-  const [modal, setModal] = useState(false);
+  const [mmodal, setModal] = useState(false);
 
   /* Determine if page is YOUR profile or someone else's */
   const isMyProfile = (username === profileUsername) ? true : false;
@@ -153,13 +153,13 @@ function Dashboard(props) {
         </div>
       </div>
     
-      { modal &&
+      { mmodal &&
         <Modal setModal={setModal} >
           <div id="follower-list-container">
-            {modal === 'follower' && <div id="follower-title">Followers:</div>}
-            {modal === 'following' && <div id="follower-title">Following:</div>}
+            {mmodal === 'follower' && <div id="follower-title">Followers:</div>}
+            {mmodal === 'following' && <div id="follower-title">Following:</div>}
           <FollowerList 
-            title={modal}
+            title={mmodal}
             profileUsername={profileUsername}
           />
           </div>

@@ -20,7 +20,9 @@ export default function Home(props) {
         image={props.image}
         URL={props.URL}
       />
-      <Homepage/>
+      <Homepage
+        URL={props.URL}
+      />
     </>
   );
 };

@@ -1,11 +1,5 @@
 @import 'styles/variables';
 
-@mixin flexRight() {
-  display: flex;
-  flex-direction: row;
-  justify-content: flex-end;
-}
-
 @mixin centerText() {
   display: flex;
   justify-content: center;
@@ -21,13 +15,18 @@
 }
 
 #Header {
-  display: flex;
-  // flex-direction: row;
-  @include flexRight();
   background: $off-black;
   color: $off-white;
   width: 100%;
   height: 50px;
+}
+
+#header-right {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+}
+#header-left {
 }
 
 .header-button {
@@ -35,21 +34,32 @@
   @include headerContent();
   margin-right: 20px;
   &:hover {
+    color: $secondary;
+  }
+}
+.home-button {
+  @include headerContent();
+  display: flex;
+  float: left;
+  margin: 5px;
+  margin-left: 30px;
+  text-decoration: none;
+  &:hover {
       color: $secondary;
   }
 }
 
-#left-header-margin {
-  display: flex;
-}
-#right-header-margin {
-  display: flex;
-}
+// #left-header-margin {
+//   display: flex;
+// }
+// #right-header-margin {
+//   display: flex;
+// }
 
 #header-message {
   @include centerText();
   @include headerContent();
-  margin: 15px;
+  margin: 5px;
 }
 
 .header-profile-pic {
@@ -58,6 +68,7 @@
 }
 
 #profile-dropdown {
+  z-index: 1;
   position: absolute;
   top: 50px;
   margin-right: 10px;
