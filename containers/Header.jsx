@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import LoginContainer from 'components/LoginContainer';
+import Modal from 'components/wrappers/Modal';
 import Notification from 'components/Notification';
 
 export default function App(props) { 
@@ -102,7 +103,7 @@ export default function App(props) {
   const space = <span>&nbsp;</span>;
 
   return (
-    <div id="App">
+    <>
 
       {notification && 
       <Notification setNotification={setNotification} >
@@ -111,49 +112,64 @@ export default function App(props) {
       }
 
       <div id="Header">
-        {!loggedIn &&
-          <>
-            <button onClick={() => toggleLoginDropdown('/login')} className="header-button" >Log In</button>
-            <button onClick={() => toggleLoginDropdown('/signup')} className="header-button">Sign Up</button>
-          </>
-        }
-
-        {loggedIn &&
-          <>
-            <div id="header-message">Welcome,{space}<a href={`${URL}/user/${username}`} className="header-button" >{username}</a></div>
-            <button 
-              onMouseEnter={() => setProfileDropdown(!profileDropdown)} 
-              onClick={() => setProfileDropdown(true)} 
-              className="header-button">
-              <img className="profile-image-xsm header-profile-pic" src={image} ></img>
-            </button>
       
-            { profileDropdown && 
-              <div id="profile-dropdown" onMouseLeave={() => setProfileDropdown(false)}>
-                <a className="profile-dropdown-button no-underline" href={`${URL}/user/${username}`} >My Profile</a>
-                <button className="profile-dropdown-button" onClick={logout} >Log Out</button>
-              </div>
-            }
-          </>
+        <div id="header-left">
+          <a href={`${URL}`} className="home-button" >Home</a>
+        </div>
+
+        <div id="header-right">
+          {!loggedIn &&
+          <>
+              <div id="left-header-margin"></div>
+              <button onClick={() => toggleLoginDropdown('/login')} className="header-button" >Log In</button>
+              <button onClick={() => toggleLoginDropdown('/signup')} className="header-button">Sign Up</button>
+              <div id="right-header-margin"></div>
+            </>
+          }
+
+          {loggedIn &&
+            <>
+              <div id="header-message">Welcome,{space}<a href={`${URL}/user/${username}`} className="header-button" >{username}</a></div>
+              <button 
+                onMouseEnter={() => setProfileDropdown(!profileDropdown)} 
+                onClick={() => setProfileDropdown(true)} 
+                className="header-button">
+                <img className="profile-image-xsm header-profile-pic" src={image} ></img>
+              </button>
+        
+              { profileDropdown && 
+                <div id="profile-dropdown" onMouseLeave={() => setProfileDropdown(false)}>
+                  <a className="profile-dropdown-button no-underline" href={`${URL}/user/${username}`} >My Profile</a>
+                  <button className="profile-dropdown-button" onClick={logout} >Log Out</button>
+                </div>
+              }
+            </>
+          }
+        </div>
+
+        { loginDropdown && 
+          <Modal 
+            setModal={setLoginDropdown} 
+            size={
+                loginRoute==='login' ? "200px" : "350px"
+              }
+          >
+            <LoginContainer
+              loggedIn={loggedIn} setLoggedIn={setLoggedIn}
+              route={loginRoute} setRoute={redirect}
+              username={username} setUsername={setUsername}
+              email={email} setEmail={setEmail}
+              setNotification={setNotification}
+              resendEmailLink={resendEmailLink} setResendEmailLink={setResendEmailLink}
+              reEnterEmailLink={reEnterEmailLink} setReEnterEmailLink={setReEnterEmailLink}
+              changeEmailLink={changeEmailLink} setChangeEmailLink={setChangeEmailLink}
+              setLoginDropdown={setLoginDropdown}
+              xOut={xOut}
+              login={login}
+            />
+          </Modal>
         }
       </div>
-
-      { loginDropdown && 
-        <LoginContainer
-          loggedIn={loggedIn} setLoggedIn={setLoggedIn}
-          route={loginRoute} setRoute={redirect}
-          username={username} setUsername={setUsername}
-          email={email} setEmail={setEmail}
-          setNotification={setNotification}
-          resendEmailLink={resendEmailLink} setResendEmailLink={setResendEmailLink}
-          reEnterEmailLink={reEnterEmailLink} setReEnterEmailLink={setReEnterEmailLink}
-          changeEmailLink={changeEmailLink} setChangeEmailLink={setChangeEmailLink}
-          setLoginDropdown={setLoginDropdown}
-          xOut={xOut}
-          login={login}
-        />
-      }
-
-    </div>
+    </>
   );
 }

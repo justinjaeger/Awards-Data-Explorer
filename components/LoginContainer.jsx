@@ -58,7 +58,7 @@ const LoginContainer = (props) => {
   return (
     <div id="login-container" className={`container-${r}`}>
 
-      <button onClick={() => xOut()} className="x-button x-button-login">X</button>
+      {/* <button onClick={() => xOut()} className="x-button x-button-login">X</button> */}
 
       {/* { message && <div className="login-message">{message}</div>} */}
 

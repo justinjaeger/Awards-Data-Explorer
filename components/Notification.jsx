@@ -5,6 +5,12 @@ export default function Card(props) {
 
   const { children, setNotification } = props;
 
+  useEffect(() => {
+    setTimeout(() => {
+      setNotification(false)
+    }, 4000)
+  })
+
   return(
     <>
       <motion.div id="notification" 

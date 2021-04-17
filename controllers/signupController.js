@@ -118,7 +118,7 @@ signupController.authenticateUser = async (req, res) => {
     WHERE username='${username}' 
   `); 
   res.handleErrors(result);
-  res.handleEmptyResult(result);
+  // res.handleEmptyResult(result);
 };
 
 /*************************************/

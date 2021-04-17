@@ -17,6 +17,7 @@ $secondary-light: #FFF6B6;
 $phone: 414px;
 $tablet: 768px;
 $desktop: 1024px;
+$desktopXL: 1320px;
 
 @mixin phone {
   @media (max-width: $phone) {
@@ -29,7 +30,12 @@ $desktop: 1024px;
   }
 }
 @mixin desktop {
-  @media (max-width: $desktop) {
+  @media (min-width: $desktop) {
+    @content;
+  }
+}
+@mixin desktopXL {
+  @media (min-width: $desktop) {
     @content;
   }
 }

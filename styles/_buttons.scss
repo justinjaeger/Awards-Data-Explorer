@@ -65,8 +65,10 @@
 }
 
 .x-button-modal {
+  @include circleButton();
   top: 0;
   right: 10px;
+  background-color: $off-white;
 }
 
 .click-here-button {
