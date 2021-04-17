@@ -5,20 +5,36 @@ const nodemailer = require('nodemailer');
  */
 
 const verificationEmail = (email, url, username) => {
-
+  
   const obj = {};
 
-  obj.transport = nodemailer.createTransport({
-    host: "smtp.mailtrap.io",
-    port: 2525,
-    auth: {
-      user: process.env.MAILTRAP_AUTH_USER,
-      pass: process.env.MAILTRAP_AUTH_PASSWORD
-    }
-  });
+  if (process.env.NODE_ENV === 'development') {
+    obj.transport = nodemailer.createTransport({
+      host: "smtp.mailtrap.io",
+      port: 2525,
+      auth: {
+        user: process.env.MAILTRAP_AUTH_USER,
+        pass: process.env.MAILTRAP_AUTH_PASSWORD
+      }
+    });
+  };
+  if (process.env.NODE_ENV === 'production') {
+    obj.transport = nodemailer.createTransport({
+      // NOTE: This def does noot work so
+      host: 'smtp.googlemail.com', // Gmail Host
+      port: 465, // Port
+      secure: true,
+      auth: {
+        type: 'custom',
+        method: 'MY-CUSTOM-METHOD', // forces Nodemailer to use your custom handler
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASSWORD,
+      }
+    });
+  };
 
   obj.emailVerificationOptions = {
-    from: '"Application" <noreply@website.com>',
+    from: '"OscarExpert" <noreply@oscarexpert.com>',
     to: `${email}`,
     subject: 'Verify your email',
     text: `Hi, ${username}. Please click the link to verify your email`, 
@@ -30,7 +46,7 @@ const verificationEmail = (email, url, username) => {
   };
 
   obj.passwordResetOptions = {
-    from: '"Application" <noreply@website.com>',
+    from: '"OscarExpert" <noreply@oscarexpert.com>',
     to: `${email}`,
     subject: 'Reset your password',
     text: `Please click the link to reset your password`, 

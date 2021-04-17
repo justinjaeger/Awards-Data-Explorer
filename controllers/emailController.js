@@ -3,6 +3,14 @@ const mailHelper = require('utils/mailHelper');
 
 const emailController = {};
 let result;
+const BASEURL = (() => {
+  switch(process.env.NODE_ENV) {
+    case 'development':
+      return 'http://localhost:3000'
+    case 'production':
+      return 'https://oscarexpert.com'
+  };
+})();
 
 /*************************************/
 
@@ -15,7 +23,7 @@ emailController.sendVerificationEmail = (req, res) => {
   /* Create the URL that takes the user to reset password page */
   const encryptedUsername = encrypt(username); // encrypts username so we can safetly use it in url
   const encodedUsername = encodeURIComponent(encryptedUsername); // encodes it because encryption will put weird characters in that will otherwise mess up the route
-  const url = `http://localhost:3000/api/signup/verifyEmail/?username=${encodedUsername}`;
+  const url = `${BASEURL}/api/signup/verifyEmail/?username=${encodedUsername}`;
 
   /* utilizes the helper function */
   const { transport, emailVerificationOptions } = mailHelper(email, url, username);
@@ -34,10 +42,9 @@ emailController.sendResetPasswordEmail = (req, res) => {
   const { email } = res.locals;
 
   /* Create the URL that takes the user to reset password page */
-  const DEV_ROUTE = process.env.DEV_ROUTE;
   const encryptedEmail = encrypt(email); // encrypts username so we can safetly use it in url
   const encodedEmail = encodeURIComponent(encryptedEmail); // encodes it because encryption will put weird characters in that will otherwise mess up the route
-  const url = `${DEV_ROUTE}/api/login/servePassResetPage/?email=${encodedEmail}`;
+  const url = `${BASEURL}/api/login/servePassResetPage/?email=${encodedEmail}`;
 
   /* utilizes the mail helper function */
   const { transport, passwordResetOptions } = mailHelper(email, url);

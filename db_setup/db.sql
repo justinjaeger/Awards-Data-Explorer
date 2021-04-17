@@ -22,17 +22,20 @@ CREATE TABLE `followers` (
   PRIMARY KEY (`username`, `follower`)
 );
 
-CREATE TABLE `nominees` (
-  `id` INT PRIMARY KEY NOT NULL AUTO_INCREMENT,
-  `awardsShow` VARCHAR(100) NOT NULL,
-  `year` VARCHAR(5) NOT NULL,
-  `category` VARCHAR(100) NOT NULL,
-  `subcategory` VARCHAR(100),
-  `film` VARCHAR(200) NOT NULL,
-  `nominee` VARCHAR(200) NOT NULL,
-  `winner` BIT(1) DEFAULT 0 NOT NULL
+CREATE TABLE `rank_movie` (
+  `rank_movie_id` INT PRIMARY KEY NOT NULL AUTO_INCREMENT,
+  `name` VARCHAR(250) NOT NULL,
+  `score` INT NOT NULL DEFAULT 0,
+  `category` VARCHAR(250) NOT NULL,
+  `year` VARCHAR(4) NOT NULL
 );
 
+CREATE TABLE `rank_user` (
+  `user_id` INT NOT NULL,
+  `rank_movie_id` INT NOT NULL,
+  `score` INT NOT NULL DEFAULT 0,
+  PRIMARY KEY (`user_id`, `rank_movie_id`)
+);
 
 CREATE TABLE `awardsShows` (
   `awardsShow_id` INT PRIMARY KEY NOT NULL AUTO_INCREMENT,
@@ -100,6 +103,14 @@ ALTER TABLE `userPredictions` ADD FOREIGN KEY (`awardsContender_id`) REFERENCES 
 
 ALTER TABLE `followers` ADD FOREIGN KEY (`follower`) REFERENCES `users` (`username`);
 
+ALTER TABLE `rank_user` ADD FOREIGN KEY (`rank_movie_id`) REFERENCES `rank_movie` (`rank_movie_id`);
+
+ALTER TABLE `rank_user` ADD FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`);
+
 CREATE UNIQUE INDEX `followers_index_0` ON `followers` (`username`, `follower`);
 
-CREATE UNIQUE INDEX `users_awardsShows_index_1` ON `users_awardsShows` (`user_id`, `awardsShow_id`);
+CREATE UNIQUE INDEX `rank_movie_index_1` ON `rank_movie` (`rank_movie_id`, `year`);
+
+CREATE UNIQUE INDEX `rank_user_index_2` ON `rank_user` (`user_id`, `rank_movie_id`);
+
+CREATE UNIQUE INDEX `users_awardsShows_index_3` ON `users_awardsShows` (`user_id`, `awardsShow_id`);

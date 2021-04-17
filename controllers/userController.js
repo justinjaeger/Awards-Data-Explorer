@@ -17,7 +17,7 @@ userController.getUsername = async (req, res) => {
     WHERE user_id=${user_id} 
   `);
   res.handleErrors(result);
-  res.handleEmptyResult(result);
+  // res.handleEmptyResult(result);
 
   res.locals.username = result[0].username;
 };
@@ -37,7 +37,7 @@ userController.header = async (req, res) => {
     WHERE user_id=${user_id} 
   `);
   res.handleErrors(result);
-  res.handleEmptyResult(result);
+  // res.handleEmptyResult(result);
 
   res.locals.username = result[0].username;
   res.locals.image = result[0].image;
@@ -79,7 +79,7 @@ userController.saveProfileImage = async (req, res) => {
     WHERE username='${username}' 
   `);
   res.handleErrors(result);
-  res.handleEmptyResult(result, 'could not upload profile picture to database');
+  // res.handleEmptyResult(result, 'could not upload profile picture to database');
 };
 
 /*************************************/

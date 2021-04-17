@@ -30,6 +30,7 @@ const handler = async (req, res, next) => {
     res.sendCookies();
     return res.json({
       loggedIn: true,
+      user_id: res.locals.user_id,
       username: res.locals.username,
       image: res.locals.image,
       cookieArray: res.cookieArray

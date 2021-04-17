@@ -100,7 +100,7 @@ signupController.createUser = async (req, res) => {
     /* If that's not the error, handle it like any other */
     res.handleErrors(result);
   };
-  res.handleEmptyResult(result);
+  // res.handleEmptyResult(result);
 };
 
 /*************************************/
@@ -136,7 +136,7 @@ signupController.getUserIdByUsername = async (req, res) => {
     WHERE username='${username}' 
   `); 
   res.handleErrors(result);
-  res.handleEmptyResult(result);
+  // res.handleEmptyResult(result);
 
   res.locals.user_id = result[0];
 };
@@ -159,7 +159,7 @@ signupController.markDateCreated = async (req, res) => {
     WHERE username = '${username}' 
   `); 
   res.handleErrors(result);
-  res.handleEmptyResult(result, 'could not mark date created');
+  // res.handleEmptyResult(result, 'could not mark date created');
 };
 
 /*************************************/
@@ -178,7 +178,7 @@ signupController.deleteUser = async (req, res) => {
   `); 
   console.log('result', result)
   res.handleErrors(result);
-  res.handleEmptyResult(result, 'did not delete user');
+  // res.handleEmptyResult(result, 'did not delete user');
 };
 
 /*************************************/
