@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import Modal from 'components/wrappers/Modal';
+import Modal from 'components/Modal';
 import {awardsCategoryNames, awardsShowNames} from 'utils/shorthand';
 
 export default function RankGame({

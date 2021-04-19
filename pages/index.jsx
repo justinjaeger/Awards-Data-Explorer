@@ -4,7 +4,7 @@ import cookies from 'next-cookies';
 import { Cookie, withCookie } from 'next-cookie'
 import Header from 'containers/Header';
 import parseCookies from 'utils/parseCookies';
-import RankCategories from 'containers/RankCategories';
+import RankCategories from 'containers/RankGame/Categories';
 
 export default function Home(props) {
   

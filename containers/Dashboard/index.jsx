@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import FollowerList from 'components/dashboardComponents/FollowerList';
-import Modal from 'components/wrappers/Modal';
+import FollowerList from 'containers/Dashboard/components/FollowerList';
+import Modal from 'components/Modal';
 import Notification from 'components/Notification';
 
 function Dashboard(props) { 
@@ -16,7 +16,7 @@ function Dashboard(props) {
   const [numFollowing,] = useState(props.numFollowing);
   const [followingUser, setFollowingUser] = useState(props.followingUser);
   const [notification, setNotification] = useState(false);
-  const [mmodal, setModal] = useState(false);
+  const [dashboardModal, setModal] = useState(false);
 
   /* Determine if page is YOUR profile or someone else's */
   const isMyProfile = (username === profileUsername) ? true : false;
@@ -153,13 +153,13 @@ function Dashboard(props) {
         </div>
       </div>
     
-      { mmodal &&
+      { dashboardModal &&
         <Modal setModal={setModal} >
           <div id="follower-list-container">
-            {mmodal === 'follower' && <div id="follower-title">Followers:</div>}
-            {mmodal === 'following' && <div id="follower-title">Following:</div>}
+            {dashboardModal === 'follower' && <div id="follower-title">Followers:</div>}
+            {dashboardModal === 'following' && <div id="follower-title">Following:</div>}
           <FollowerList 
-            title={mmodal}
+            title={dashboardModal}
             profileUsername={profileUsername}
           />
           </div>

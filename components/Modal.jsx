@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import ListenForOutsideClicks from 'components/wrappers/ListenForOutsideClicks';
+import ListenForOutsideClicks from 'components/ListenForOutsideClicks';
 
 export default function Modal(props) {
 
