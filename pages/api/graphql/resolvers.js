@@ -1,5 +1,5 @@
-import db from "lib/db";
-import { Datetime, Bit } from "pages/api/graphql/scalars";
+import db from "../../../lib/db";
+import { Datetime, Bit } from "./scalars";
 
 /* RESOLVERS */
 

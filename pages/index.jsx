@@ -1,10 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import axios from 'axios';
 import cookies from 'next-cookies';
-import { Cookie, withCookie } from 'next-cookie'
-import Header from 'containers/Header';
-import parseCookies from 'utils/parseCookies';
-import RankCategories from 'containers/RankCategories';
+import Header from '../containers/Header';
+import parseCookies from '../utils/parseCookies';
+import RankCategories from '../containers/RankGame/Categories';
 
 export default function Home(props) {
   

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import FollowerUnit from 'components/dashboardComponents/FollowerUnit';
+import FollowerUnit from './FollowerUnit';
 
 function FollowerList(props) { 
 

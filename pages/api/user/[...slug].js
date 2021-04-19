@@ -1,6 +1,6 @@
-import wrapper from 'utils/wrapper';
-import userController from 'controllers/userController';
-import followerController from 'controllers/followerController';
+import wrapper from '../../../utils/wrapper';
+import userController from '../../../controllers/userController';
+import followerController from '../../../controllers/followerController';
 
 /**
  * user

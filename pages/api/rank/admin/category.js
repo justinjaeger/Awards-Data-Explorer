@@ -1,4 +1,4 @@
-import db from 'lib/db';
+import db from '../../../../lib/db';
 
 /**
  * Admin actions on rank_category

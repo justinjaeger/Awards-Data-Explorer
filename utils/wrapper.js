@@ -1,4 +1,4 @@
-import cookie from 'utils/cookies';
+import cookie from './cookies';
 
 const wrapper = handler => {
 

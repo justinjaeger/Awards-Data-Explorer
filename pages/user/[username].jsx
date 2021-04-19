@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import cookies from 'next-cookies';
-import parseCookies from 'utils/parseCookies';
 
-import Header from 'containers/Header';
-import Dashboard from 'containers/Dashboard';
-import Four0Four from 'containers/Four0Four';
+import parseCookies from '../../utils/parseCookies';
+import Header from '../../containers/Header';
+import Dashboard from '../../containers/Dashboard';
+import Four0Four from '../../containers/Four0Four';
 
 /**
  * /user/username123

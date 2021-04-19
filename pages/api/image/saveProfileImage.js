@@ -1,5 +1,5 @@
-import wrapper from 'utils/wrapper';
-import userController from 'controllers/userController';
+import wrapper from '../../../utils/wrapper';
+import userController from '../../../controllers/userController';
 
 /**
  * After user creates a new profile picture, this saves it to DB

@@ -1,6 +1,6 @@
-import wrapper from 'utils/wrapper';
-import tokenController from 'controllers/tokenController';
-import loginController from 'controllers/loginController';
+import wrapper from '../../../utils/wrapper';
+import tokenController from '../../../controllers/tokenController';
+import loginController from '../../../controllers/loginController';
 
 /**
  * When the user clicks Log In

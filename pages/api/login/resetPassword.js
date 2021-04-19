@@ -1,7 +1,7 @@
-import wrapper from 'utils/wrapper';
-import tokenController from 'controllers/tokenController';
-import loginController from 'controllers/loginController';
-import signupController from 'controllers/signupController';
+import wrapper from '../../../utils/wrapper';
+import tokenController from '../../../controllers/tokenController';
+import loginController from '../../../controllers/loginController';
+import signupController from '../../../controllers/signupController';
 
 /**
  * When the user clicks Reset Password

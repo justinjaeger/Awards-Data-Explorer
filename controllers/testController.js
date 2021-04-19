@@ -1,4 +1,4 @@
-import db from 'lib/db';
+import db from '../lib/db';
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 

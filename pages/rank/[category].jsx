@@ -1,12 +1,12 @@
-import db from 'lib/db';
+import db from '../../lib/db';
 import React from 'react';
 import axios from 'axios';
 import cookies from 'next-cookies';
-import parseCookies from 'utils/parseCookies';
 
-import Header from 'containers/Header';
-import RankGame from 'containers/RankGame';
-import Four0Four from 'containers/Four0Four';
+import parseCookies from '../../utils/parseCookies';
+import Header from '../../containers/Header';
+import RankGame from '../../containers/RankGame/Game';
+import Four0Four from '../../containers/Four0Four';
 
 /**
  * /rank/2022-AMPAS-picture

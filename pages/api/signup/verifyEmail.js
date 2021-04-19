@@ -1,6 +1,6 @@
-import wrapper from 'utils/wrapper';
-import signupController from 'controllers/signupController';
-const { decrypt } = require('utils/encrypt');
+import wrapper from '../../../utils/wrapper';
+import signupController from '../../../controllers/signupController';
+const { decrypt } = require('../../../utils/encrypt');
 
 /**
  * When the user clicks the link INSIDE EMAIL that verifies them

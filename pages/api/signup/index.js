@@ -1,6 +1,6 @@
-import wrapper from 'utils/wrapper';
-import emailController from 'controllers/emailController';
-import signupController from 'controllers/signupController';
+import wrapper from '../../../utils/wrapper';
+import emailController from '../../../controllers/emailController';
+import signupController from '../../../controllers/signupController';
 
 /**
  * When the user clicks 'Sign Up'
