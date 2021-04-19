@@ -1,32 +1,47 @@
-import React, { useEffect, useState } from 'react';
+import db from 'lib/db';
+import React from 'react';
 import axios from 'axios';
 import cookies from 'next-cookies';
-import { Cookie, withCookie } from 'next-cookie'
-import Header from 'containers/Header';
 import parseCookies from 'utils/parseCookies';
-import RankCategories from 'containers/RankCategories';
 
-export default function Home(props) {
-  
+import Header from 'containers/Header';
+import RankGame from 'containers/RankGame';
+import Four0Four from 'containers/Four0Four';
+
+/**
+ * /rank/2022-AMPAS-picture
+ */
+
+ export default function Rank(props) { 
+
   return (
     <>
       <Header 
         loggedIn={props.loggedIn}
         loginDropdown={props.loginDropdown}
         loginRoute={props.loginRoute}
+        notification={props.notification}
         username={props.username}
         email={props.email}
-        notification={props.notification}
         image={props.image}
         URL={props.URL}
       />
-      <RankCategories
-        URL={props.URL}
-      />
+
+      { (props.send404)
+      ? <Four0Four thingCannotFind={'Page'} /> 
+      : <RankGame 
+        loggedIn={props.loggedIn}
+        user_id={props.user_id}
+        admin={props.admin}
+        year={props.year}
+        awardsShow={props.awardsShow}
+        category={props.category}
+        rank_category_id={props.rank_category_id}
+      />}
     </>
   );
 };
-
+ 
 /**
  * Fetch all SSR (user specific) props
  * Begin by declaring all props' default values
@@ -46,19 +61,25 @@ export async function getServerSideProps(context) {
     };
   })();
 
+  // Deconstruct the slug
+  const slug = context.req.url;
+
   /* Default values for all props */
-  
   const props = { 
     loggedIn: false,
     loginDropdown: false,
     loginRoute: '/',
     notification: '',
-    notification: '',
     username: '',
-    email: '',
-    notification: false,
-    image: '/PROFILE.png',
-    URL: URL,
+    user_id: null,
+    admin: false,
+    send404: false,
+    URL,
+    slug,
+    year: '',
+    awardsShow: '',
+    category: '',
+    rank_category_id: null,
   };
 
   /* Handle cookies */
@@ -94,31 +115,52 @@ export async function getServerSideProps(context) {
    * If access token exists, verify it. 
    * If verified, populate the page with appropriate user data
    */
-  if (c.access_token) { // cookie exists when you are logged in
 
+  if (c.access_token) { // cookie exists when you are logged in
     const payload = { access_token: c.access_token };
-    /**
-     * Request to verify token
-     * The route here is selected based on what is going to load from this file (index.jsx)
-     * We need the username to say "Hi, Username" for home page, and this loads the home page
-     * For other prediction pages which will check the cookie, we'll put a slug there to tell it to send back more data
-     * - so long as sticking with SSR, can also just do static loading skeleton w/ client side fetching
-     */
+    /* Request to verify token and get data no the user */
     await axios.post(`${URL}/api/auth`, payload)
       .then(res => {
         /* If token is verified, set props accordingly */
         if (res.data.loggedIn) {
           props.loggedIn = true;
+          props.user_id = res.data.user_id;
           props.username = res.data.username;
+          props.admin = res.data.admin;
           if (res.data.image) props.image = res.data.image;
         };  
-        /* sets cookies on client (HAVE to do this for getServerSideProps) */
+        /* sets cookies on client (HAVE to do this inside getServerSideProps) */
         parseCookies(res.data.cookieArray, context);
       })
       .catch(err => {
         console.log('something went wrong while verifying access token', err);
       })
   };
+
+  // Deconstruct the slug
+  const slugArray = slug.split('-');
+  props.year = slugArray[0].split('/').slice(-1)[0];
+  props.awardsShow = slugArray[1];
+  props.category = slugArray[2];  
+
+  // Validate the URL the user requested
+  // by seeing if the category exists
+  let result = await db.query(`
+    SELECT rank_category_id 
+    FROM rank_category
+    WHERE year='${props.year}'
+    AND category='${props.category}'
+    AND awardsShow='${props.awardsShow}'
+  `)
+  if (result.error) {
+    throw result.error;
+  };
+  if (!result.length) {
+    // Means we don't have a category to match slug
+    props.send404 = true;
+  };
+
+  props.rank_category_id = result[0].rank_category_id;
 
   /* Return the final props object */
   return { props };
