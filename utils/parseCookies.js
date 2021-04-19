@@ -1,4 +1,4 @@
-import { useCookie } from 'next-cookie'
+import { useCookie } from 'next-cookie';
 
 /* 
   Parses the array of cookies 
@@ -6,7 +6,7 @@ import { useCookie } from 'next-cookie'
   and extracts key, value, and options to set the cookie on the server
  */
 
-function parseCookies(array, context) {
+export default function parseCookies(array, context) {
 
   const cookie = useCookie(context);
 
@@ -34,5 +34,3 @@ function parseCookies(array, context) {
 
   };
 };
-
-export default parseCookies;

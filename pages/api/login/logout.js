@@ -1,5 +1,5 @@
-import wrapper from 'utils/wrapper';
-import tokenController from 'controllers/tokenController';
+import wrapper from '../../../utils/wrapper';
+import tokenController from '../../../controllers/tokenController';
 
 /**
  * When the user clicks Log Out

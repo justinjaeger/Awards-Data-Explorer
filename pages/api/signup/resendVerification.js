@@ -1,5 +1,5 @@
-import wrapper from 'utils/wrapper';
-import emailController from 'controllers/emailController';
+import wrapper from '../../../utils/wrapper';
+import emailController from '../../../controllers/emailController';
 
 /**
  * When user clicks "resend verification email"

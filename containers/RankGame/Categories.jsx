@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import {awardsCategoryNames, awardsShowNames} from 'utils/shorthand';
+import {awardsCategoryNames, awardsShowNames} from '../../utils/shorthand';
 
 export default function RankCategories({URL}) {
 

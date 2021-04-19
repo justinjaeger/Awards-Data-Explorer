@@ -2,11 +2,11 @@ import React from 'react';
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 
-import Login from 'containers/Header/Login/components/Login';
-import SignUp from 'containers/Header/Login/components/SignUp';
-import ForgotPassword from 'containers/Header/Login/components/ForgotPassword';
-import ResetPassword from 'containers/Header/Login/components/ResetPassword';
-import Blank from 'containers/Header/Login/components/Blank';
+import Login from './components/Login';
+import SignUp from './components/SignUp';
+import ForgotPassword from './components/ForgotPassword';
+import ResetPassword from './components/ResetPassword';
+import Blank from './components/Blank';
 
 const LoginContainer = (props) => {
 

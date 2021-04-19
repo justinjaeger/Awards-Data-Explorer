@@ -1,6 +1,6 @@
-import wrapper from 'utils/wrapper';
-import emailController from 'controllers/emailController';
-import loginController from 'controllers/loginController';
+import wrapper from '../../../utils/wrapper';
+import emailController from '../../../controllers/emailController';
+import loginController from '../../../controllers/loginController';
 
 /**
  * When the user submits "forgot password", which sends an email

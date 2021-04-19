@@ -1,5 +1,5 @@
-import wrapper from 'utils/wrapper';
-import followerController from 'controllers/followerController';
+import wrapper from '../../../utils/wrapper';
+import followerController from '../../../controllers/followerController';
 
 
 const handler = async (req, res) => {

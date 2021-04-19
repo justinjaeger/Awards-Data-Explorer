@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import FollowerList from 'containers/Dashboard/components/FollowerList';
-import Modal from 'components/Modal';
-import Notification from 'components/Notification';
+import FollowerList from './components/FollowerList';
+import Modal from '../../components/Modal';
+import Notification from '../../components/Notification';
 
 function Dashboard(props) { 
 

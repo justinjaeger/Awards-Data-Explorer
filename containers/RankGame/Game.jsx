@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import Modal from 'components/Modal';
-import {awardsCategoryNames, awardsShowNames} from 'utils/shorthand';
+import Modal from '../../components/Modal';
+import {awardsCategoryNames, awardsShowNames} from '../../utils/shorthand';
 
 export default function RankGame({
   loggedIn, user_id, admin,

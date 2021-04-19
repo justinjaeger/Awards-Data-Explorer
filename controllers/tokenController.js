@@ -1,5 +1,5 @@
+import db from '../lib/db';
 const jwt = require('jsonwebtoken');
-import db from 'lib/db';
 
 const tokenController = {};
 let result;

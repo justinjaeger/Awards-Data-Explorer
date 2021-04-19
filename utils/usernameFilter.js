@@ -2,7 +2,7 @@
  * Restricts username to alphanumeric and underscore and period
  */
 
-module.exports = function isValid(username) {
+export default function isValid(username) {
   const output = { 
     status: true,
     message: 'valid',

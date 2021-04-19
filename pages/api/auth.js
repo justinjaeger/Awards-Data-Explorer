@@ -1,6 +1,6 @@
-import wrapper from 'utils/wrapper';
-import tokenController from 'controllers/tokenController';
-import userController from 'controllers/userController';
+import wrapper from '../../utils/wrapper';
+import tokenController from '../../controllers/tokenController';
+import userController from '../../controllers/userController';
 
 /**
  * Verifies access token and returns user data for header

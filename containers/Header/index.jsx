@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import LoginContainer from 'containers/Header/Login';
-import Modal from 'components/Modal';
-import Notification from 'components/Notification';
+import LoginContainer from './Login';
+import Modal from '../../components/Modal';
+import Notification from '../../components/Notification';
 
 export default function App(props) { 
 

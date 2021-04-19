@@ -1,4 +1,4 @@
-module.exports = [
+export default [
   "testuser",
   "theoscarexpert",
   "brotherbro",
