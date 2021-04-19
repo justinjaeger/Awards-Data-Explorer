@@ -4,7 +4,7 @@ import cookies from 'next-cookies';
 import { Cookie, withCookie } from 'next-cookie'
 import Header from 'containers/Header';
 import parseCookies from 'utils/parseCookies';
-import Homepage from 'containers/Homepage';
+import RankCategories from 'containers/RankCategories';
 
 export default function Home(props) {
   
@@ -20,7 +20,7 @@ export default function Home(props) {
         image={props.image}
         URL={props.URL}
       />
-      <Homepage
+      <RankCategories
         URL={props.URL}
       />
     </>

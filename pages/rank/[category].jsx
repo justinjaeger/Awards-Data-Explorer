@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import db from 'lib/db';
+import React from 'react';
 import axios from 'axios';
 import cookies from 'next-cookies';
 import parseCookies from 'utils/parseCookies';
@@ -8,12 +9,10 @@ import RankGame from 'containers/RankGame';
 import Four0Four from 'containers/Four0Four';
 
 /**
- * /rank/2022/picture
+ * /rank/2022-AMPAS-picture
  */
 
  export default function Rank(props) { 
-
-  console.log('username', props.username)
 
   return (
     <>
@@ -28,11 +27,17 @@ import Four0Four from 'containers/Four0Four';
         URL={props.URL}
       />
 
-      <RankGame 
+      { (props.send404)
+      ? <Four0Four thingCannotFind={'Page'} /> 
+      : <RankGame 
         loggedIn={props.loggedIn}
         user_id={props.user_id}
-        slug={props.slug}
-      />
+        admin={props.admin}
+        year={props.year}
+        awardsShow={props.awardsShow}
+        category={props.category}
+        rank_category_id={props.rank_category_id}
+      />}
     </>
   );
 };
@@ -56,8 +61,8 @@ export async function getServerSideProps(context) {
     };
   })();
 
-  /* Get the slug */
-  const slug = context.req.url.slice(6);
+  // Deconstruct the slug
+  const slug = context.req.url;
 
   /* Default values for all props */
   const props = { 
@@ -66,10 +71,15 @@ export async function getServerSideProps(context) {
     loginRoute: '/',
     notification: '',
     username: '',
-    user_id: false,
+    user_id: null,
+    admin: false,
     send404: false,
-    URL: URL,
-    slug: slug,
+    URL,
+    slug,
+    year: '',
+    awardsShow: '',
+    category: '',
+    rank_category_id: null,
   };
 
   /* Handle cookies */
@@ -116,6 +126,7 @@ export async function getServerSideProps(context) {
           props.loggedIn = true;
           props.user_id = res.data.user_id;
           props.username = res.data.username;
+          props.admin = res.data.admin;
           if (res.data.image) props.image = res.data.image;
         };  
         /* sets cookies on client (HAVE to do this inside getServerSideProps) */
@@ -125,6 +136,31 @@ export async function getServerSideProps(context) {
         console.log('something went wrong while verifying access token', err);
       })
   };
+
+  // Deconstruct the slug
+  const slugArray = slug.split('-');
+  props.year = slugArray[0].split('/').slice(-1)[0];
+  props.awardsShow = slugArray[1];
+  props.category = slugArray[2];  
+
+  // Validate the URL the user requested
+  // by seeing if the category exists
+  let result = await db.query(`
+    SELECT rank_category_id 
+    FROM rank_category
+    WHERE year='${props.year}'
+    AND category='${props.category}'
+    AND awardsShow='${props.awardsShow}'
+  `)
+  if (result.error) {
+    throw result.error;
+  };
+  if (!result.length) {
+    // Means we don't have a category to match slug
+    props.send404 = true;
+  };
+
+  props.rank_category_id = result[0].rank_category_id;
 
   /* Return the final props object */
   return { props };
