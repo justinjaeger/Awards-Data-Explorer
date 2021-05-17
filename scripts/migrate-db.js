@@ -1,39 +1,39 @@
-const path = require("path")
-const envPath = path.resolve(process.cwd(), ".env.local")
+const path = require("path");
+const envPath = path.resolve(process.cwd(), ".env.local");
 
-console.log({ envPath })
+console.log({ envPath });
 
-require("dotenv").config({ path: envPath })
+require("dotenv").config({ path: envPath });
 
-const mysql = require("serverless-mysql")
+const mysql = require("serverless-mysql");
 
 const db = mysql({
-  config: {
-    host: process.env.MYSQL_HOST,
-    database: process.env.MYSQL_DATABASE,
-    user: process.env.MYSQL_USER,
-    password: process.env.MYSQL_PASSWORD,
-    port: process.env.MYSQL_PORT
-  }
-})
+    config: {
+        host: process.env.MYSQL_HOST,
+        database: process.env.MYSQL_DATABASE,
+        user: process.env.MYSQL_USER,
+        password: process.env.MYSQL_PASSWORD,
+        port: process.env.MYSQL_PORT,
+    },
+});
 
 async function query(q) {
-  try {
-    console.log("trying...")
-    const results = await db.query(q) // this is the line it gets stuck on
-    console.log("ending...")
-    await db.end()
-    return results
-  } catch (e) {
-    throw Error(e.message)
-  }
+    try {
+        console.log("trying...");
+        const results = await db.query(q); // this is the line it gets stuck on
+        console.log("ending...");
+        await db.end();
+        return results;
+    } catch (e) {
+        throw Error(e.message);
+    }
 }
 
 // Create "entries" table if doesn"t exist
 async function migrate() {
-  try {
-    console.log("attempting migration...")
-    await query(`
+    try {
+        console.log("attempting migration...");
+        await query(`
     CREATE TABLE IF NOT EXISTS "users" (
       "user_id" INT PRIMARY KEY NOT NULL AUTO_INCREMENT,
       "email" VARCHAR(100) UNIQUE NOT NULL,
@@ -128,12 +128,14 @@ async function migrate() {
     
     CREATE UNIQUE INDEX "users_awardsShows_index_1" ON "users_awardsShows" ("user_id", "awardsShow_id");
     
-    `)
-    console.log("migration ran successfully")
-  } catch (e) {
-    console.error("could not run migration, double check your credentials.")
-    process.exit(1)
-  }
+    `);
+        console.log("migration ran successfully");
+    } catch (e) {
+        console.error(
+            "could not run migration, double check your credentials."
+        );
+        process.exit(1);
+    }
 }
 
-migrate().then(() => process.exit())
+migrate().then(() => process.exit());
