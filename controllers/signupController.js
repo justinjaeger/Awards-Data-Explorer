@@ -1,7 +1,7 @@
 import db from '../lib/db';
 const bcrypt = require('bcrypt');
-const profanityFilter = require('../utils/profanityFilter');
-const usernameFilter = require('../utils/usernameFilter');
+import profanityFilter from '../utils/profanityFilter';
+import usernameFilter from '../utils/usernameFilter';
 
 const signupController = {};
 let result;

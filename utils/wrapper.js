@@ -13,7 +13,7 @@ const wrapper = handler => {
           break;
         };
       };
-      return next;
+      return finished;
     };
 
     res.cookieArray = [];
