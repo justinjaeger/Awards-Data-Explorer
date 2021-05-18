@@ -1,4 +1,4 @@
-import db from "../../../../lib/db";
+import db from "../../../../../lib/db";
 
 export default async (req, res) => {
     let result;
@@ -6,7 +6,7 @@ export default async (req, res) => {
     const {
         method,
         query: { id },
-        body: {},
+        body: { target_user_id },
     } = req;
 
     try {
@@ -15,7 +15,7 @@ export default async (req, res) => {
                 SELECT userId, username, image
                 FROM users
                 WHERE userId IN (
-                    SELECT follower FROM followers
+                    SELECT userId FROM followers
                     WHERE userId='${userId}'
                 )
             `);
@@ -30,6 +30,14 @@ export default async (req, res) => {
             return res.status(200).json({
                 followers
             });
+        }
+
+        if (method === 'POST') {
+            // Follow user
+        }
+
+        if (method === 'DELETE') {
+            // Unfollow user
         }
 
     } catch (e) {
