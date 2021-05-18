@@ -1,52 +1,52 @@
-@import './variables';
+@import "./variables";
 
 @mixin centerText() {
-  display: flex;
-  justify-content: center;
-  align-items: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 /* includes buttons and text */
 @mixin headerContent() {
-  margin: 0;
-  font-family: $oswald;
-  font-size: 24px;
-  color: $off-white;
+    margin: 0;
+    font-family: $oswald;
+    font-size: 24px;
+    color: $off-white;
 }
 
 #Header {
-  background: $off-black;
-  color: $off-white;
-  width: 100%;
-  height: 50px;
+    background: $off-black;
+    color: $off-white;
+    width: 100%;
+    height: 50px;
 }
 
 #header-right {
-  display: flex;
-  flex-direction: row;
-  justify-content: flex-end;
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
 }
 #header-left {
 }
 
 .header-button {
-  display: flex;
-  @include headerContent();
-  margin-right: 20px;
-  &:hover {
-    color: $secondary;
-  }
+    display: flex;
+    @include headerContent();
+    margin-right: 20px;
+    &:hover {
+        color: $secondary;
+    }
 }
 .home-button {
-  @include headerContent();
-  display: flex;
-  float: left;
-  margin: 5px;
-  margin-left: 30px;
-  text-decoration: none;
-  &:hover {
-      color: $secondary;
-  }
+    @include headerContent();
+    display: flex;
+    float: left;
+    margin: 5px;
+    margin-left: 30px;
+    text-decoration: none;
+    &:hover {
+        color: $secondary;
+    }
 }
 
 // #left-header-margin {
@@ -57,36 +57,36 @@
 // }
 
 #header-message {
-  @include centerText();
-  @include headerContent();
-  margin: 5px;
+    @include centerText();
+    @include headerContent();
+    margin: 5px;
 }
 
 .header-profile-pic {
-  margin-top: 10px;
-  margin-right: 10px;
+    margin-top: 10px;
+    margin-right: 10px;
 }
 
 #profile-dropdown {
-  z-index: 1;
-  position: absolute;
-  top: 50px;
-  margin-right: 10px;
-  margin-left: 10px;
-  margin-top: 0;
-  border-radius: 0px 0px 8px 8px;
-  background-color: $off-black;
+    z-index: 1;
+    position: absolute;
+    top: 50px;
+    margin-right: 10px;
+    margin-left: 10px;
+    margin-top: 0;
+    border-radius: 0px 0px 8px 8px;
+    background-color: $off-black;
 }
 
 .profile-dropdown-button {
-  padding: 10px;
-  display: flex;
-  color: $off-white;
-  align-items: flex-start;
-  font-size: 16px;
-  font-family: $oswald;
-  width: 200px;
-  &:hover {
-    background-color: $secondary;
-  }
+    padding: 10px;
+    display: flex;
+    color: $off-white;
+    align-items: flex-start;
+    font-size: 16px;
+    font-family: $oswald;
+    width: 200px;
+    &:hover {
+        background-color: $secondary;
+    }
 }

@@ -1,17 +1,17 @@
 // FONTS
-@import url('https://fonts.googleapis.com/css2?family=Abril+Fatface&family=Oswald:wght@200;300;400;500;600;700&family=Source+Sans+Pro:ital,wght@0,200;0,300;0,400;0,600;0,700;0,900;1,200;1,300;1,400;1,600;1,700;1,900&display=swap');
-$abril-fatface: 'Abril Fatface', cursive;
-$oswald: 'Oswald', sans-serif;
-$source-sans: 'Source Sans Pro', sans-serif;
+@import url("https://fonts.googleapis.com/css2?family=Abril+Fatface&family=Oswald:wght@200;300;400;500;600;700&family=Source+Sans+Pro:ital,wght@0,200;0,300;0,400;0,600;0,700;0,900;1,200;1,300;1,400;1,600;1,700;1,900&display=swap");
+$abril-fatface: "Abril Fatface", cursive;
+$oswald: "Oswald", sans-serif;
+$source-sans: "Source Sans Pro", sans-serif;
 
 // COLORS
-$off-white: #FCFCED;
-$off-black: #23231A;
+$off-white: #fcfced;
+$off-black: #23231a;
 $gray: #b8b8b1;
-$primary: #A4031F;
-$primary-light: #FFC5C5;
-$secondary: #FFC60A;
-$secondary-light: #FFF6B6;
+$primary: #a4031f;
+$primary-light: #ffc5c5;
+$secondary: #ffc60a;
+$secondary-light: #fff6b6;
 
 // BREAKPOINTS
 $phone: 414px;
@@ -20,22 +20,22 @@ $desktop: 1024px;
 $desktopXL: 1320px;
 
 @mixin phone {
-  @media (max-width: $phone) {
-    @content;
-  }
+    @media (max-width: $phone) {
+        @content;
+    }
 }
 @mixin tablet {
-  @media (max-width: $tablet) {
-    @content;
-  }
+    @media (max-width: $tablet) {
+        @content;
+    }
 }
 @mixin desktop {
-  @media (min-width: $desktop) {
-    @content;
-  }
+    @media (min-width: $desktop) {
+        @content;
+    }
 }
 @mixin desktopXL {
-  @media (min-width: $desktop) {
-    @content;
-  }
+    @media (min-width: $desktop) {
+        @content;
+    }
 }

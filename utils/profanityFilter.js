@@ -1,15 +1,14 @@
-const badWords = require('./profanityList');
+const badWords = require("./profanityList");
 
 export default function profanityFilter(username) {
+    let output = false;
 
-  let output = false;
+    badWords.forEach((word) => {
+        if (username.includes(word) === true) {
+            console.log("it has profanity");
+            output = true;
+        }
+    });
 
-  badWords.forEach(word => {
-    if (username.includes(word) === true) {
-      console.log('it has profanity')
-      output = true;
-    };
-  });
-
-  return output;
-};
+    return output;
+}
