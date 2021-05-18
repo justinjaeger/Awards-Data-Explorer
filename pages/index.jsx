@@ -1,14 +1,13 @@
 import React from "react";
-import axios from "axios";
+// import axios from "axios";
 import db from "../lib/db";
 import cookies from "next-cookies";
 import { useCookie } from "next-cookie";
 import Header from "../containers/Header";
-import parseCookies from "../utils/parseCookies";
+// import parseCookies from "../utils/parseCookies";
 import RankCategories from "../containers/RankGame/Categories";
-import tokenController from "../controllers/tokenController";
+// import tokenController from "../controllers/tokenController";
 import verifyToken from '../controllers/verifyToken';
-import getUserInfo from '../controllers/getUserInfo';
 
 export default function Home(props) {
     return (
@@ -97,7 +96,8 @@ export async function getServerSideProps(context) {
      * If access token exists, verify it.
      * If verified, populate the page with appropriate user data
      */
-    if (c.access_token) {
+    if (c.accessToken) {
+        console.log('access token found')
         // cookie exists when you are logged in
         /**
          * Request to verify token
@@ -105,21 +105,21 @@ export async function getServerSideProps(context) {
          * Everything else we can render on the client.
          */
         try {
-            let res = await verifyToken(c.access_token);
+            let res = await verifyToken(c.accessToken);
             console.log('verifyToken result', res)
             if (res.data.tokenAction === 'delete') {
-                cookie.set('access_token');
+                cookie.set('accessToken');
                 return;
             }
             props.loggedIn = true;
             if (res.data.tokenAction === 'update') {
-                cookie.set('access_token', res.data.accessToken);
+                cookie.set('accessToken', res.data.accessToken);
             }
             // Get logged in user's info
             await db.query(`
                 SELECT username, image, admin
                 FROM users 
-                WHERE user_id=${user_id} 
+                WHERE userId=${userId} 
             `)
             .then(res => {
                 console.log('result getting user info', res)

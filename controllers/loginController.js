@@ -39,12 +39,12 @@ loginController.returnUserData = async (req, res) => {
     }
 
     /* Deconstruct all the data we just got */
-    const { username, email, user_id, password: dbPassword } = result[0];
+    const { username, email, userId, password: dbPassword } = result[0];
     const authenticated = result[0].authenticated[0];
 
     res.locals.username = username;
     res.locals.email = email;
-    res.locals.user_id = user_id;
+    res.locals.userId = userId;
     res.locals.dbPassword = dbPassword;
     res.locals.authenticated = authenticated;
 
@@ -54,10 +54,10 @@ loginController.returnUserData = async (req, res) => {
 /*************************************/
 
 /**
- * Attempts to get the user_id
+ * Attempts to get the userId
  * - if it returns nothing, it doesn't exist
  *   - because we dont want someone to be able to figure out whose email is valid and whose isn't, we send back a message saying we sent the email even if we didn't
- * - if it returns a user_id, we proceed to next middleware
+ * - if it returns a userId, we proceed to next middleware
  */
 
 loginController.ifEmailNoExistDontSend = async (req, res) => {
@@ -65,9 +65,9 @@ loginController.ifEmailNoExistDontSend = async (req, res) => {
 
     const { email } = res.locals;
 
-    /* Fetch user_id. If no result, user doesn't exist */
+    /* Fetch userId. If no result, user doesn't exist */
     result = await db.query(`
-    SELECT user_id 
+    SELECT userId 
     FROM users
     WHERE email='${email}' 
   `);
@@ -87,13 +87,13 @@ loginController.ifEmailNoExistDontSend = async (req, res) => {
 loginController.updatePassword = async (req, res) => {
     console.log("updatePassword");
 
-    const { hashedPassword, user_id } = res.locals;
+    const { hashedPassword, userId } = res.locals;
 
     /* Update the password in db */
     result = await db.query(`
     UPDATE users
     SET password='${hashedPassword}'
-    WHERE user_id=${user_id} 
+    WHERE userId=${userId} 
   `);
     res.handleErrors(result);
     // res.handleEmptyResult(result);

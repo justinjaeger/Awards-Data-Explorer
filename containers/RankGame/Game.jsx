@@ -5,7 +5,7 @@ import { awardsCategoryNames, awardsShowNames } from "../../utils/shorthand";
 
 export default function RankGame({
     loggedIn,
-    user_id,
+    userId,
     admin,
     year,
     category,
@@ -82,7 +82,7 @@ export default function RankGame({
                             <RankGameItem
                                 item={item}
                                 loggedIn={loggedIn}
-                                user_id={user_id}
+                                userId={userId}
                                 key={item.rank_movie_id}
                             />
                         ))}
@@ -120,7 +120,7 @@ export default function RankGame({
 /****************************************************************/
 /****************************************************************/
 
-function RankGameItem({ item, loggedIn, user_id }) {
+function RankGameItem({ item, loggedIn, userId }) {
     // This is where you add the + and - on each list item
     // Needs to have + and - buttons be conditional on whether you're logged in
 
@@ -136,7 +136,7 @@ function RankGameItem({ item, loggedIn, user_id }) {
     useEffect(() => {
         // get the score that the user gave this
         axios
-            .get(`/api/rank/${user_id}?rank_movie_id=${rank_movie_id}`)
+            .get(`/api/rank/${userId}?rank_movie_id=${rank_movie_id}`)
             .then((res) => {
                 setUserScore(res.data.score);
             })
@@ -154,7 +154,7 @@ function RankGameItem({ item, loggedIn, user_id }) {
             : [setUserScore(userScore - 1), setOverallScore(overallScore - 1)];
         // Save vote in database
         axios
-            .post(`/api/rank/${user_id}?rank_movie_id=${rank_movie_id}`, {
+            .post(`/api/rank/${userId}?rank_movie_id=${rank_movie_id}`, {
                 operator,
             })
             .then((res) => {})

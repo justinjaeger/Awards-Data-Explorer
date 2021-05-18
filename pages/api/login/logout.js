@@ -7,7 +7,7 @@ import tokenController from "../../../controllers/tokenController";
 
 const handler = async (req, res, next) => {
     try {
-        res.locals.access_token = req.cookies.access_token;
+        res.locals.accessToken = req.cookies.accessToken;
 
         await next(
             tokenController.getTokenData,
@@ -21,7 +21,7 @@ const handler = async (req, res, next) => {
             });
 
         /* Delete access token from browser */
-        res.cookie("access_token");
+        res.cookie("accessToken");
 
         res.sendCookies();
         return res.json({});

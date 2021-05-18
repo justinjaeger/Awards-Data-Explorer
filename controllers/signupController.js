@@ -125,16 +125,16 @@ signupController.getUserIdByUsername = async (req, res) => {
 
     const { username } = res.locals;
 
-    /* get the user_id from the username */
+    /* get the userId from the username */
     result = await db.query(`
-    SELECT user_id
+    SELECT userId
     FROM users
     WHERE username='${username}' 
   `);
     res.handleErrors(result);
     // res.handleEmptyResult(result);
 
-    res.locals.user_id = result[0];
+    res.locals.userId = result[0];
 };
 
 /*************************************/

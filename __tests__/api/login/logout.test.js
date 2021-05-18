@@ -5,7 +5,7 @@ import testController from "controllers/testController";
 const username = process.env.TEST_USERNAME;
 const email = process.env.TEST_EMAIL;
 const password = process.env.TEST_PASSWORD;
-let hashedPass, user_id, access_token;
+let hashedPass, userId, accessToken;
 
 describe("/login/logout", () => {
     let req, res, r;
@@ -13,12 +13,12 @@ describe("/login/logout", () => {
     beforeAll(async () => {
         hashedPass = await testController.hashPassword(password);
         await testController.createUser(email, username, hashedPass);
-        user_id = await testController.getUserId(username);
-        access_token = await testController.getAccessToken(user_id, username);
+        userId = await testController.getUserId(username);
+        accessToken = await testController.getAccessToken(userId, username);
 
         /* Mock req and res objects */
         req = {
-            cookies: { access_token: `${access_token}` },
+            cookies: { accessToken: `${accessToken}` },
         };
         res = {
             status: jest.fn(() => res),
@@ -44,7 +44,7 @@ describe("/login/logout", () => {
         }
         /* Delete the tokens */
         r = await db.query(`
-      DELETE FROM tokens WHERE access_token="${access_token}"
+      DELETE FROM tokens WHERE accessToken="${accessToken}"
     `);
         if (r.error) console.log(r.error);
     });
@@ -53,7 +53,7 @@ describe("/login/logout", () => {
 
     it("should delete the access token from database", async () => {
         r = await db.query(`
-      SELECT user_id FROM tokens WHERE access_token="${access_token}"
+      SELECT userId FROM tokens WHERE accessToken="${accessToken}"
     `);
         if (r.error) console.log(r.error);
         // I'm not sure this tests for what I think it does... cause wouldn't that be undefined even if it didnt delete it

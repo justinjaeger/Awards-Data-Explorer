@@ -35,7 +35,7 @@ function UserDashboard(props) {
                 <Dashboard
                     loggedIn={props.loggedIn}
                     username={props.username}
-                    user_id={props.user_id}
+                    userId={props.userId}
                     profileImage={props.profileImage}
                     profileUsername={props.profileUsername}
                     numFollowers={props.numFollowers}
@@ -80,7 +80,7 @@ export async function getServerSideProps(context) {
         username: "",
         email: "",
         image: "/PROFILE.png",
-        user_id: false,
+        userId: false,
         notification: false,
         profileImage: "/PROFILE.png",
         profileUsername: profileUsername,
@@ -126,9 +126,9 @@ export async function getServerSideProps(context) {
      * If verified, populate the page with appropriate user data
      */
 
-    if (c.access_token) {
+    if (c.accessToken) {
         // cookie exists when you are logged in
-        const payload = { access_token: c.access_token };
+        const payload = { accessToken: c.accessToken };
         /* Request to verify token and get data no the user */
         await axios
             .post(`${URL}/api/auth`, payload)

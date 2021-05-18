@@ -8,8 +8,8 @@ import userController from "../../controllers/userController";
 
 const handler = async (req, res, next) => {
     try {
-        /* Get access_token from req.body */
-        res.locals.access_token = req.body.access_token;
+        /* Get accessToken from req.body */
+        res.locals.accessToken = req.body.accessToken;
 
         await next(tokenController.verifyToken, userController.header)
             .then((result) => {
@@ -29,7 +29,7 @@ const handler = async (req, res, next) => {
         res.sendCookies();
         return res.json({
             loggedIn: true,
-            user_id: res.locals.user_id,
+            userId: res.locals.userId,
             username: res.locals.username,
             image: res.locals.image,
             admin: res.locals.admin,

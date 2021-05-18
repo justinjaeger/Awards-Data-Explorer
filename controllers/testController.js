@@ -32,32 +32,32 @@ testController.createUser = async (email, username, hashedPass) => {
 };
 
 /**
- * Retrieves and returns user_id
+ * Retrieves and returns userId
  * @param {string} username
- * @returns {integer} user_id
+ * @returns {integer} userId
  */
 testController.getUserId = async (username) => {
     r = await db.query(`
-    SELECT user_id FROM users WHERE username='${username}'
+    SELECT userId FROM users WHERE username='${username}'
   `);
     if (r.error) console.log(r.error);
-    const user_id = r[0].user_id;
-    return user_id;
+    const userId = r[0].userId;
+    return userId;
 };
 
 /**
- * Creates, stores, and returns access_token
+ * Creates, stores, and returns accessToken
  * @param {string} username
- * @returns {string} access_token
+ * @returns {string} accessToken
  */
-testController.getAccessToken = async (user_id, username) => {
-    const access_token = jwt.sign({ user_id }, process.env.ACCESS_TOKEN_SECRET);
+testController.getAccessToken = async (userId, username) => {
+    const accessToken = jwt.sign({ userId }, process.env.ACCESS_TOKEN_SECRET);
     r = await db.query(`
-    INSERT INTO tokens(access_token, user_id, username)
-    VALUES('${access_token}', ${user_id}, '${username}')
+    INSERT INTO tokens(accessToken, userId, username)
+    VALUES('${accessToken}', ${userId}, '${username}')
   `);
     if (r.error) console.log(r.error);
-    return access_token;
+    return accessToken;
 };
 
 /**************************/

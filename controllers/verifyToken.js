@@ -17,7 +17,7 @@ export default async (accessToken) => {
 
     try {
         /**
-         * Get the expiration and user_id from the token / JWT
+         * Get the expiration and userId from the token / JWT
          */
         let result = await jwt.verify(
             accessToken, 
@@ -25,7 +25,7 @@ export default async (accessToken) => {
             { ignoreExpiration: true }, // options
         );
         if (result.error) throw new Error(result.error);
-        const { user_id, exp: expiration } = result;
+        const { userId, exp: expiration } = result;
 
         /**
          * If token is expired, delete access token from database.
@@ -45,7 +45,7 @@ export default async (accessToken) => {
             // DELETE TOKEN FROM DB
             let deleteTokenResult = await db.query(`
                 DELETE FROM tokens
-                WHERE access_token='${accessToken}' 
+                WHERE accessToken='${accessToken}' 
             `);
             if (deleteTokenResult.error) throw new Error(deleteTokenResult.error);
             
@@ -56,7 +56,7 @@ export default async (accessToken) => {
                 console.log("deleting all user tokens");
                 await db.query(`
                     DELETE FROM tokens
-                    WHERE user_id=${user_id}`
+                    WHERE userId=${userId}`
                 );
                 return {
                     tokenAction: 'delete',
@@ -65,15 +65,15 @@ export default async (accessToken) => {
 
             // CREATE ACCESS TOKEN
             const newAccessToken = jwt.sign(
-                { user_id },
+                { userId },
                 process.env.ACCESS_TOKEN_SECRET,
                 { expiresIn: '10m' }
             );
 
             // SAVE TOKEN IN DB
             await db.query(`
-                INSERT INTO tokens(access_token, user_id)
-                VALUES('${newAccessToken}', ${user_id}) 
+                INSERT INTO tokens(accessToken, userId)
+                VALUES('${newAccessToken}', ${userId}) 
             `);
 
             // UPDATE LAST LOGGED IN
@@ -81,7 +81,7 @@ export default async (accessToken) => {
             await db.query(`
                 UPDATE users
                 SET lastLoggedIn = '${datetime}'
-                WHERE user_id = ${user_id} 
+                WHERE userId = ${userId} 
             `);
 
             // Set new cookie in browser
