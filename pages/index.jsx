@@ -1,9 +1,14 @@
 import React from "react";
 import axios from "axios";
+import db from "../lib/db";
 import cookies from "next-cookies";
+import { useCookie } from "next-cookie";
 import Header from "../containers/Header";
 import parseCookies from "../utils/parseCookies";
 import RankCategories from "../containers/RankGame/Categories";
+import tokenController from "../controllers/tokenController";
+import verifyToken from '../controllers/verifyToken';
+import getUserInfo from '../controllers/getUserInfo';
 
 export default function Home(props) {
     return (
@@ -35,7 +40,7 @@ export async function getServerSideProps(context) {
     const URL = (() => {
         switch (process.env.NODE_ENV) {
             case "development":
-                return "http://localhost:3000";
+                return "http://localhost:3003";
             case "production":
                 return "https://oscarexpert.com";
         }
@@ -48,7 +53,6 @@ export async function getServerSideProps(context) {
         loginDropdown: false,
         loginRoute: "/",
         notification: "",
-        notification: "",
         username: "",
         email: "",
         notification: false,
@@ -59,33 +63,34 @@ export async function getServerSideProps(context) {
     /* Handle cookies */
 
     const c = cookies(context); // for getting cookies
+    const cookie = useCookie(context); // for setting cookies
 
-    if (c.sent_verification) {
-        // cookie exists after you sign up but NOT after you authenticate email
-        const username = c.sent_verification.split("*$%&")[0];
-        const email = c.sent_verification.split("*$%&")[1];
-        props.email = email;
-        props.username = username;
-        props.notification = "please verify email";
-    }
+    // if (c.sent_verification) {
+    //     // cookie exists after you sign up but NOT after you authenticate email
+    //     const username = c.sent_verification.split("*$%&")[0];
+    //     const email = c.sent_verification.split("*$%&")[1];
+    //     props.email = email;
+    //     props.username = username;
+    //     props.notification = "please verify email";
+    // }
 
-    if (c.authenticated) {
-        // cookie exists after you authenticate email
-        const username = c.authenticated;
-        props.loginRoute = "/login";
-        props.loginDropdown = true;
-        props.username = username;
-        props.notification = "Email verified. Please enter your password.";
-    }
+    // if (c.authenticated) {
+    //     // cookie exists after you authenticate email
+    //     const username = c.authenticated;
+    //     props.loginRoute = "/login";
+    //     props.loginDropdown = true;
+    //     props.username = username;
+    //     props.notification = "Email verified. Please enter your password.";
+    // }
 
-    if (c.reset_password) {
-        // cookie exists after you reset password
-        const email = c.reset_password;
-        props.loginRoute = "/resetPassword";
-        props.loginDropdown = true;
-        props.email = email;
-        props.notification = `Please enter a new password for ${email}.`;
-    }
+    // if (c.reset_password) {
+    //     // cookie exists after you reset password
+    //     const email = c.reset_password;
+    //     props.loginRoute = "/resetPassword";
+    //     props.loginDropdown = true;
+    //     props.email = email;
+    //     props.notification = `Please enter a new password for ${email}.`;
+    // }
 
     /**
      * This is basically what logs you in.
@@ -94,33 +99,39 @@ export async function getServerSideProps(context) {
      */
     if (c.access_token) {
         // cookie exists when you are logged in
-
-        const payload = { access_token: c.access_token };
         /**
          * Request to verify token
-         * The route here is selected based on what is going to load from this file (index.jsx)
-         * We need the username to say "Hi, Username" for home page, and this loads the home page
-         * For other prediction pages which will check the cookie, we'll put a slug there to tell it to send back more data
-         * - so long as sticking with SSR, can also just do static loading skeleton w/ client side fetching
+         * We're going to load all the auth info on the server - the profile information.
+         * Everything else we can render on the client.
          */
-        await axios
-            .post(`${URL}/api/auth`, payload)
-            .then((res) => {
-                /* If token is verified, set props accordingly */
-                if (res.data.loggedIn) {
-                    props.loggedIn = true;
-                    props.username = res.data.username;
-                    if (res.data.image) props.image = res.data.image;
-                }
-                /* sets cookies on client (HAVE to do this for getServerSideProps) */
-                parseCookies(res.data.cookieArray, context);
+        try {
+            let res = await verifyToken(c.access_token);
+            console.log('verifyToken result', res)
+            if (res.data.tokenAction === 'delete') {
+                cookie.set('access_token');
+                return;
+            }
+            props.loggedIn = true;
+            if (res.data.tokenAction === 'update') {
+                cookie.set('access_token', res.data.accessToken);
+            }
+            // Get logged in user's info
+            await db.query(`
+                SELECT username, image, admin
+                FROM users 
+                WHERE user_id=${user_id} 
+            `)
+            .then(res => {
+                console.log('result getting user info', res)
+                // set the user's information in props
+                props.username = res.username;
+                if (res.data.image) props.image = res.image;
+            }).catch(err => {
+                console.log('error getting user ', err)
             })
-            .catch((err) => {
-                console.log(
-                    "something went wrong while verifying access token",
-                    err
-                );
-            });
+        } catch(err) {
+            console.log('ERRROR', err)
+        }
     }
 
     /* Return the final props object */

@@ -55,7 +55,7 @@ export async function getServerSideProps(context) {
     const URL = (() => {
         switch (process.env.NODE_ENV) {
             case "development":
-                return "http://localhost:3000";
+                return "http://localhost:3003";
             case "production":
                 return "https://oscarexpert.com";
         }
