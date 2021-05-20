@@ -105,32 +105,31 @@ export async function getServerSideProps(context) {
          * Everything else we can render on the client.
          */
         try {
-            let res = await verifyToken(c.accessToken);
-            console.log('verifyToken result', res)
-            if (res.data.tokenAction === 'delete') {
+            let result;
+            result = await verifyToken(c.accessToken);
+            const { userId, tokenAction, accessToken } = result.data;
+            if (tokenAction === 'delete') {
                 cookie.set('accessToken');
                 return;
             }
             props.loggedIn = true;
-            if (res.data.tokenAction === 'update') {
-                cookie.set('accessToken', res.data.accessToken);
+            if (tokenAction === 'update') {
+                cookie.set('accessToken', accessToken);
             }
             // Get logged in user's info
-            await db.query(`
+            result = await db.query(`
                 SELECT username, image, admin
                 FROM users 
                 WHERE userId=${userId} 
-            `)
-            .then(res => {
-                console.log('result getting user info', res)
-                // set the user's information in props
-                props.username = res.username;
-                if (res.data.image) props.image = res.image;
-            }).catch(err => {
-                console.log('error getting user ', err)
-            })
-        } catch(err) {
-            console.log('ERRROR', err)
+            `);
+            if (result.error) throw new Error(result.error);
+            console.log('result getting user info', result[0])
+            // set the user's information in props
+            const { username, image } = result[0];
+            props.username = username;
+            if (image) props.image = image;
+        } catch(e) {
+            console.log("error in index.jsx: ", e.message);
         }
     }
 

@@ -137,10 +137,10 @@ followerController.determineFollowing = async (req, res) => {
 
     /* Fetch who user is following - user is the follower */
     result = await db.query(`
-    SELECT * FROM followers
-    WHERE username='${profileUsername}'
-    AND follower='${username}'
-  `);
+        SELECT * FROM followers
+        WHERE username='${profileUsername}'
+        AND follower='${username}'
+    `);
     res.handleErrors(result);
 
     res.locals.followingUser = result.length ? true : false;

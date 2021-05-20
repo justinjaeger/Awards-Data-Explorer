@@ -1,7 +1,6 @@
 import db from "../../../../../lib/db";
 
 export default async (req, res) => {
-    let result;
 
     const {
         method,
@@ -10,8 +9,16 @@ export default async (req, res) => {
 
     try {
         // count how many followers id has
-    } catch (e) {
-        console.log("error ", e);
+        if (method === 'GET') {
+            let result = await db.query(`
+                SELECT COUNT(*) AS sum FROM followers 
+                WHERE userId='${id}'
+            `)
+            if (result.error) throw new Error(result.error);
+            return res.json({ numFollowers: result[0].sum });
+        };
+    } catch(e) {
+        console.log("error: ", e.message);
         return res.status(500).send(e.message);
     }
 };

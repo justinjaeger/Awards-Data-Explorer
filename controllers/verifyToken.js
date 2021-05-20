@@ -15,11 +15,13 @@ import jwt from "jsonwebtoken";
 
 export default async (accessToken) => {
 
+    let result;
+
     try {
         /**
          * Get the expiration and userId from the token / JWT
          */
-        let result = await jwt.verify(
+        result = await jwt.verify(
             accessToken, 
             process.env.ACCESS_TOKEN_SECRET,
             { ignoreExpiration: true }, // options
@@ -43,21 +45,22 @@ export default async (accessToken) => {
             console.log("TOKEN EXPIRED");
 
             // DELETE TOKEN FROM DB
-            let deleteTokenResult = await db.query(`
+            result = await db.query(`
                 DELETE FROM tokens
                 WHERE accessToken='${accessToken}' 
             `);
-            if (deleteTokenResult.error) throw new Error(deleteTokenResult.error);
+            if (result.error) throw new Error(result.error);
             
             console.log("token deleted from db");
 
             // IF NO TOKEN DELETED, DELETE ALL TOKENS ASSOCIATED WITH USER
-            if (deleteTokenResult.affectedRows === 0) {
+            if (result.affectedRows === 0) {
                 console.log("deleting all user tokens");
-                await db.query(`
+                result = await db.query(`
                     DELETE FROM tokens
                     WHERE userId=${userId}`
                 );
+                if (result.error) throw new Error(result.error);
                 return {
                     tokenAction: 'delete',
                 };
@@ -71,21 +74,24 @@ export default async (accessToken) => {
             );
 
             // SAVE TOKEN IN DB
-            await db.query(`
+            result = await db.query(`
                 INSERT INTO tokens(accessToken, userId)
                 VALUES('${newAccessToken}', ${userId}) 
             `);
+            if (result.error) throw new Error(result.error);
 
             // UPDATE LAST LOGGED IN
             const datetime = new Date().toISOString().slice(0, 19).replace("T", " ");
-            await db.query(`
+            result = await db.query(`
                 UPDATE users
                 SET lastLoggedIn = '${datetime}'
                 WHERE userId = ${userId} 
             `);
+            if (result.error) throw new Error(result.error);
 
             // Set new cookie in browser
             return {
+                userId,
                 tokenAction: 'update',
                 accessToken: newAccessToken,
             };
@@ -93,7 +99,8 @@ export default async (accessToken) => {
         return {
             tokenAction: 'none'
         }
-    } catch(err) {
-        console.log('error in verifyToken', err)
-    };
+    } catch(e) {
+        console.log("error in verifyToken: ", e.message);
+        return res.status(500).send(e.message);
+    }
 };

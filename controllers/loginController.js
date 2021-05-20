@@ -28,10 +28,10 @@ loginController.returnUserData = async (req, res) => {
 
     /* Fetch email or username based on entry */
     result = await db.query(`
-    SELECT *
-    FROM users
-    WHERE ${entryType}='${emailOrUsername}'
-  `);
+        SELECT *
+        FROM users
+        WHERE ${entryType}='${emailOrUsername}'
+    `);
     res.handleErrors(result);
 
     if (result[0] === undefined) {
@@ -67,10 +67,10 @@ loginController.ifEmailNoExistDontSend = async (req, res) => {
 
     /* Fetch userId. If no result, user doesn't exist */
     result = await db.query(`
-    SELECT userId 
-    FROM users
-    WHERE email='${email}' 
-  `);
+        SELECT userId 
+        FROM users
+        WHERE email='${email}' 
+    `);
     res.handleErrors(result);
     /* If user no exist, We should send the message anyway 
   in case a hacker is fishing for valid emails */
@@ -91,10 +91,10 @@ loginController.updatePassword = async (req, res) => {
 
     /* Update the password in db */
     result = await db.query(`
-    UPDATE users
-    SET password='${hashedPassword}'
-    WHERE userId=${userId} 
-  `);
+        UPDATE users
+        SET password='${hashedPassword}'
+        WHERE userId=${userId} 
+    `);
     res.handleErrors(result);
     // res.handleEmptyResult(result);
 };
