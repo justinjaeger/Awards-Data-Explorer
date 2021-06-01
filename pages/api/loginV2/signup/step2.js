@@ -3,7 +3,12 @@ import bcrypt from "bcrypt";
 import profanityFilter from "../../utils/profanityFilter";
 import usernameFilter from "../../utils/usernameFilter";
 import { encrypt } from "../utils/encrypt";
-import mailHelper from "../utils/mailHelper";
+import { verificationEmail, verificationCode } from "../utils/mailHelper";
+
+/**
+ * User submits SignUp info. Account is created, and they redirect to dashboard
+ * Once you create your account, you are verified with the email this came from AND authenticated. But do not authenticate before that
+ */
 
 export default async (req, res) => {
 
@@ -11,16 +16,12 @@ export default async (req, res) => {
 
     const {
         method,
-        body: { email, username, password, confirmPassword },
+        body: { userId, username, password, confirmPassword },
     } = req;
     
     try {
-        // POST: signup / create new user
+        // POST: update info for user and verify account
         if (method === 'POST') {
-            // Check that email is properly formatted
-            if (!email.includes("@") || !email.includes(".")) {
-                return res.json({ error: "This email is not properly formatted." });
-            }
             // Check that username is properly formatted
             const filterResult = usernameFilter(username);
             if (filterResult.status === false) {
@@ -34,7 +35,6 @@ export default async (req, res) => {
             if (password !== confirmPassword) {
                 return res.json({ error: "Passwords do not match." });
             }
-
             // Check that password is proper length
             if (password.length < 8) {
                 return res.json({ error: "Password must be more than 8 characters." });
@@ -52,8 +52,8 @@ export default async (req, res) => {
 
             // Create new user in database
             result = await db.query(`
-                INSERT INTO users(email, username, password, dateCreated)
-                VALUES('${email}', '${username}', '${hashedPassword}', '${datetime}') 
+                INSERT INTO users(email, username, password, dateCreated, lastLoggedIn, authenticated)
+                VALUES('${username}', '${hashedPassword}', '${datetime}', '${datetime}', 1) 
             `);
             if (result.error) {
                 // Handle duplicate entry errors with an error message
@@ -66,26 +66,25 @@ export default async (req, res) => {
                 throw new Error(result.error);
             }
 
-            // SEND VERIFICATION CODE: (right now it's just email)
-                // we will simply take them to an enter verification code URL
-                // entering the code properly will set authenticated to 1
-            // Create the URL that takes the user to reset password page
-            const encryptedUsername = encrypt(username); // encrypts username so we can safetly use it in url
-            const encodedUsername = encodeURIComponent(encryptedUsername); // encodes it because encryption will put weird characters in that will otherwise mess up the route
-            const url = `${BASEURL}/api/signup/verifyEmail/?username=${encodedUsername}`;
-
-            // Utilizes the helper function to create e-mail
-            const { transport, emailVerificationOptions } = mailHelper(
-                email,
-                url,
-                username
+            // Create access token
+            const accessToken = jwt.sign(
+                { userId }, // payload
+                process.env.ACCESS_TOKEN_SECRET,
+                { expiresIn: "10m" } // options
             );
 
-            // Actually sends the email
-            result = transport.sendMail(emailVerificationOptions);
+            // Save token in db
+            result = await db.query(`
+                INSERT INTO tokens(accessToken, userId)
+                VALUES('${accessToken}', ${userId}) 
+            `);
             if (result.error) throw new Error(result.error);
 
-            return res.status(200);
+            // Set new cookie in browser
+            cookies.set("accessToken", accessToken, { httpOnly: true });
+
+            // Redirect to user dashboard (login data will be obtained from access token there)
+            return res.redirect(`user/${username}`);
         };
 
     } catch(e) {

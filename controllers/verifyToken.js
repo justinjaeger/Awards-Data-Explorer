@@ -4,10 +4,10 @@ import jwt from "jsonwebtoken";
 /**
  * Verifies the access token
  * 
- * Return object is tokenAction, which is either:
+ * Return object status, which is either:
  * - delete
  * - update
- * - none
+ * - verified
  * 
  * Then wherever this is called, it will set or delete 
  * a cookie or do nothing
@@ -18,9 +18,7 @@ export default async (accessToken) => {
     let result;
 
     try {
-        /**
-         * Get the expiration and userId from the token / JWT
-         */
+        // Get the expiration and userId from the token / JWT
         result = await jwt.verify(
             accessToken, 
             process.env.ACCESS_TOKEN_SECRET,
@@ -62,7 +60,7 @@ export default async (accessToken) => {
                 );
                 if (result.error) throw new Error(result.error);
                 return {
-                    tokenAction: 'delete',
+                    status: 'delete',
                 };
             };
 
@@ -91,14 +89,14 @@ export default async (accessToken) => {
 
             // Set new cookie in browser
             return {
+                status: 'update',
                 userId,
-                tokenAction: 'update',
                 accessToken: newAccessToken,
             };
         };
         return {
-            tokenAction: 'none'
-        }
+            status: 'verified'
+        };
     } catch(e) {
         console.log("error in verifyToken: ", e.message);
         return res.status(500).send(e.message);

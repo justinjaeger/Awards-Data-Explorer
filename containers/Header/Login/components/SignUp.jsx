@@ -2,19 +2,11 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 
 function SignUp(props) {
-    const {
-        actualSetEmail,
-        actualSetUsername,
-        setLoginDropdown,
-        setNotification,
-    } = props;
+    const { userId, email, setNotification } = props;
 
-    const [email, setEmail] = useState("");
-    const [username, setUsername] = useState(props.username);
+    const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
-
-    console.log("username in signup", username);
 
     function validateForm() {
         return email.length > 0 && password.length > 0;
@@ -22,30 +14,24 @@ function SignUp(props) {
 
     function handleSubmit(event) {
         const payload = {
-            email,
+            userId,
             username,
             password,
             confirmPassword,
         };
 
-        console.log("submitting payload", payload);
-
-        /* NOTE: The /signup POST request will send the user a verification email, so it won't return anything back except a message */
-        axios
-            .post("/api/signup", payload)
+        axios.post("/api/signup/step2", payload)
             .then((res) => {
                 if (res.data.error) return setNotification(res.data.error);
-                console.log("signup suvvsssful");
-                actualSetEmail(email);
-                actualSetUsername(username);
-                setNotification("please verify email");
-                setLoginDropdown(false);
+                console.log("signup successful, redirecting");
+                // Redirect to dashboard
+                return res.redirect(`/user/${username}`);
             })
             .catch((err) => {
                 console.log("error in signup", err.response);
             });
 
-        event.preventDefault(); /* prevents it from refreshing */
+        event.preventDefault(); // prevents it from refreshing
     }
 
     return (
@@ -57,9 +43,7 @@ function SignUp(props) {
                     autoFocus
                     type="text"
                     value={email}
-                    onChange={(e) =>
-                        setEmail(e.target.value)
-                    } /* so it updates visually when you type */
+                    readOnly={true}
                 />
 
                 <div className="login-form-label">Username</div>

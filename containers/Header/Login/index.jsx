@@ -10,6 +10,7 @@ import Blank from "./components/Blank";
 
 const LoginContainer = (props) => {
     const {
+        userId,
         route,
         setRoute,
         username,
@@ -22,7 +23,6 @@ const LoginContainer = (props) => {
         setReEnterEmailLink,
         changeEmailLink,
         setChangeEmailLink,
-        xOut,
         login,
         setLoginDropdown,
         setNotification,
@@ -65,9 +65,6 @@ const LoginContainer = (props) => {
     console.log("r", r);
     return (
         <div id="login-container" className={`container-${r}`}>
-            {/* <button onClick={() => xOut()} className="x-button x-button-login">X</button> */}
-
-            {/* { message && <div className="login-message">{message}</div>} */}
 
             {route === "/login" && (
                 <Login
@@ -75,51 +72,45 @@ const LoginContainer = (props) => {
                     username={username}
                     login={login}
                     setNotification={setNotification}
+                    setResendEmailLink={setResendEmailLink} // delete
+                    setReEnterEmailLink={setReEnterEmailLink} // delete
+                />
+            )}
+
+            {route === "/email" && (
+                <EnterEmail
                     setNotification={setNotification}
-                    setResendEmailLink={setResendEmailLink}
-                    setReEnterEmailLink={setReEnterEmailLink}
                 />
             )}
 
             {route === "/signup" && (
                 <SignUp
-                    username={username}
-                    actualSetEmail={setEmail}
-                    actualSetUsername={setUsername}
-                    setRoute={setRoute}
-                    setNotification={setNotification}
-                    setNotification={setNotification}
-                    setResendEmailLink={setResendEmailLink}
-                    setReEnterEmailLink={setReEnterEmailLink}
-                    setLoginDropdown={setLoginDropdown}
+                    userId={userId}
+                    email={email}
                     setNotification={setNotification}
                 />
             )}
 
             {route === "/forgotPassword" && (
                 <ForgotPassword
-                    setRoute={setRoute}
+                    setRoute={setRoute} // probably delete
                     setNotification={setNotification}
-                    setNotification={setNotification}
-                    setReEnterEmailLink={setReEnterEmailLink}
+                    setReEnterEmailLink={setReEnterEmailLink} // probably delete
                 />
             )}
 
             {route === "/resetPassword" && (
                 <ResetPassword
                     email={email}
-                    setRoute={setRoute}
-                    setNotification={setNotification}
+                    setRoute={setRoute} // probably delete
                     setNotification={setNotification}
                     login={login}
                 />
             )}
 
-            {route === "/blank" && <Blank />}
+            {route === "/blank" && <></> /* do we need this anymore? */}
 
-            {/* { error && <div className="error-message">{error}</div>} */}
-
-            {resendEmailLink && (
+            {/* {resendEmailLink && (
                 <div className="login-message">
                     <button
                         onClick={() => {
@@ -160,7 +151,7 @@ const LoginContainer = (props) => {
                         Change email
                     </button>
                 </div>
-            )}
+            )} */}
         </div>
     );
 };

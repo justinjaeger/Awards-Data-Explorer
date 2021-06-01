@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from "react";
 
-export default function Card({ children, action }) {
+export default function Card({ children, action, disabled }) {
     /*** Detect clicks outside the component ***/
     const ref = useRef(null);
     /* handles a click outside of the div with ref={ref} passed in */
@@ -18,5 +18,7 @@ export default function Card({ children, action }) {
         };
     }, []);
 
-    return <div ref={ref}>{children}</div>;
+    return disabled 
+        ? <div>{children}</div> 
+        : <div ref={ref}>{children}</div>;
 }

@@ -13,14 +13,12 @@ export default function Home(props) {
     return (
         <>
             <Header
-                loggedIn={props.loggedIn}
-                loginDropdown={props.loginDropdown}
-                loginRoute={props.loginRoute}
+                URL={props.URL}
+                userId={props.userId}
                 username={props.username}
+                image={props.image}
                 email={props.email}
                 notification={props.notification}
-                image={props.image}
-                URL={props.URL}
             />
             <RankCategories URL={props.URL} />
         </>
@@ -35,61 +33,21 @@ export default function Home(props) {
  */
 
 export async function getServerSideProps(context) {
+
     // Determine the url based on the environment
-    const URL = (() => {
-        switch (process.env.NODE_ENV) {
-            case "development":
-                return "http://localhost:3003";
-            case "production":
-                return "https://oscarexpert.com";
-        }
-    })();
+    const URL = (process.env.NODE_ENV === "development") ? "http://localhost:3003" : "https://oscarexpert.com";
 
-    /* Default values for all props */
-
-    const props = {
-        loggedIn: false,
-        loginDropdown: false,
-        loginRoute: "/",
-        notification: "",
-        username: "",
-        email: "",
-        notification: false,
-        image: "/PROFILE.png",
-        URL: URL,
+    const emptyProps = {
+        URL,
+        userId: undefined,
+        username: undefined,
+        email: undefined,
+        image: undefined,
+        admin: false,
     };
-
-    /* Handle cookies */
 
     const c = cookies(context); // for getting cookies
     const cookie = useCookie(context); // for setting cookies
-
-    // if (c.sent_verification) {
-    //     // cookie exists after you sign up but NOT after you authenticate email
-    //     const username = c.sent_verification.split("*$%&")[0];
-    //     const email = c.sent_verification.split("*$%&")[1];
-    //     props.email = email;
-    //     props.username = username;
-    //     props.notification = "please verify email";
-    // }
-
-    // if (c.authenticated) {
-    //     // cookie exists after you authenticate email
-    //     const username = c.authenticated;
-    //     props.loginRoute = "/login";
-    //     props.loginDropdown = true;
-    //     props.username = username;
-    //     props.notification = "Email verified. Please enter your password.";
-    // }
-
-    // if (c.reset_password) {
-    //     // cookie exists after you reset password
-    //     const email = c.reset_password;
-    //     props.loginRoute = "/resetPassword";
-    //     props.loginDropdown = true;
-    //     props.email = email;
-    //     props.notification = `Please enter a new password for ${email}.`;
-    // }
 
     /**
      * This is basically what logs you in.
@@ -98,41 +56,46 @@ export async function getServerSideProps(context) {
      */
     if (c.accessToken) {
         console.log('access token found')
-        // cookie exists when you are logged in
         /**
          * Request to verify token
+         * May respond with action to delete or update token: handle that
          * We're going to load all the auth info on the server - the profile information.
          * Everything else we can render on the client.
          */
         try {
             let result;
             result = await verifyToken(c.accessToken);
-            const { userId, tokenAction, accessToken } = result.data;
-            if (tokenAction === 'delete') {
+            const { status, userId, accessToken } = result.data;
+            if (status === 'delete') {
                 cookie.set('accessToken');
-                return;
+                return emptyProps;
             }
-            props.loggedIn = true;
-            if (tokenAction === 'update') {
+            if (status === 'update') {
                 cookie.set('accessToken', accessToken);
             }
-            // Get logged in user's info
+            // Get verified user's info
             result = await db.query(`
-                SELECT username, image, admin
+                SELECT username, email, image, admin
                 FROM users 
                 WHERE userId=${userId} 
             `);
             if (result.error) throw new Error(result.error);
-            console.log('result getting user info', result[0])
-            // set the user's information in props
-            const { username, image } = result[0];
-            props.username = username;
-            if (image) props.image = image;
+            console.log('result getting user info', result[0]); // so we can see result
+            const { username, email, image, admin } = result[0];
+            // Return the final props object */
+            return {
+                URL,
+                userId,
+                username,
+                email,
+                image: image ? image : '/PROFILE.png',
+                admin,
+            }
         } catch(e) {
             console.log("error in index.jsx: ", e.message);
         }
     }
 
-    /* Return the final props object */
-    return { props };
+    // If no accessToken, return empty props
+    return emptyProps;
 }

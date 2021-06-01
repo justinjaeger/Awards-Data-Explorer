@@ -15,6 +15,11 @@ CREATE TABLE `tokens` (
   `userId` INT NOT NULL
 );
 
+CREATE TABLE `codes` (
+  `verificationCode` INT PRIMARY KEY NOT NULL,
+  `userId` INT NOT NULL
+);
+
 CREATE TABLE `followers` (
   `userId` INT NOT NULL,
   `follower` INT NOT NULL,
@@ -117,6 +122,8 @@ ALTER TABLE `users` ADD FOREIGN KEY (`userId`) REFERENCES `users` (`username`);
 ALTER TABLE `followers` ADD FOREIGN KEY (`userId`) REFERENCES `users` (`userId`);
 
 ALTER TABLE `followers` ADD FOREIGN KEY (`follower`) REFERENCES `users` (`userId`);
+
+ALTER TABLE `codes` ADD FOREIGN KEY (`userId`) REFERENCES `users` (`userId`);
 
 CREATE UNIQUE INDEX `followers_index_0` ON `followers` (`userId`, `follower`);
 

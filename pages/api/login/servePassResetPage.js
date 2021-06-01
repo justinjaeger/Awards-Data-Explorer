@@ -1,5 +1,5 @@
 import wrapper from "../../../utils/wrapper";
-const { decrypt } = require("../../../utils/encrypt");
+import { decrypt } from "../../../utils/encrypt";
 
 /**
  * When the user clicks "forgot password?"

@@ -4,7 +4,7 @@ import LoginContainer from "./Login";
 import Modal from "../../components/Modal";
 import Notification from "../../components/Notification";
 
-export default function App(props) {
+export default function Header(props) {
     const { URL } = props;
 
     // User info
@@ -66,8 +66,8 @@ export default function App(props) {
         setLoginDropdown(true);
     }
 
-    function toggleLoginDropdown(route) {
-        // Displays login dropdown and sets route
+    function toggleLoginModal(route) {
+        // Displays login modal and sets route
         setLoginDropdown(true);
         setLoginRoute(route);
         setNotification("");
@@ -101,8 +101,6 @@ export default function App(props) {
             </button>,
         ]);
 
-    const space = <span>&nbsp;</span>;
-
     return (
         <>
             {notification && (
@@ -123,13 +121,13 @@ export default function App(props) {
                         <>
                             <div id="left-header-margin"></div>
                             <button
-                                onClick={() => toggleLoginDropdown("/login")}
+                                onClick={() => toggleLoginModal("/login")}
                                 className="header-button"
                             >
                                 Log In
                             </button>
                             <button
-                                onClick={() => toggleLoginDropdown("/signup")}
+                                onClick={() => toggleLoginModal("/email")}
                                 className="header-button"
                             >
                                 Sign Up
@@ -141,7 +139,7 @@ export default function App(props) {
                     {loggedIn && (
                         <>
                             <div id="header-message">
-                                Welcome,{space}
+                                Welcome,{' '}
                                 <a
                                     href={`${URL}/user/${username}`}
                                     className="header-button"
@@ -162,6 +160,7 @@ export default function App(props) {
                                 ></img>
                             </button>
 
+                            {/** Profile Dropdown */}
                             {profileDropdown && (
                                 <div
                                     id="profile-dropdown"
@@ -193,6 +192,7 @@ export default function App(props) {
                         size={loginRoute === "login" ? "200px" : "350px"}
                     >
                         <LoginContainer
+                            userId={props.userId}
                             loggedIn={loggedIn}
                             setLoggedIn={setLoggedIn}
                             route={loginRoute}
