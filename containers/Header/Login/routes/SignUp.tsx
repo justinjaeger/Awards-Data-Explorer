@@ -1,12 +1,12 @@
-import React, { useState, useEffect } from "react";
-import axios from "axios";
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 
 function SignUp(props) {
     const { userId, email, setNotification } = props;
 
-    const [username, setUsername] = useState("");
-    const [password, setPassword] = useState("");
-    const [confirmPassword, setConfirmPassword] = useState("");
+    const [username, setUsername] = useState('');
+    const [password, setPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
 
     function validateForm() {
         return email.length > 0 && password.length > 0;
@@ -20,15 +20,15 @@ function SignUp(props) {
             confirmPassword,
         };
 
-        axios.post("/api/signup/step2", payload)
+        axios.post('/api/signup/step2', payload)
             .then((res) => {
                 if (res.data.error) return setNotification(res.data.error);
-                console.log("signup successful, redirecting");
+                console.log('signup successful, redirecting');
                 // Redirect to dashboard
                 return res.redirect(`/user/${username}`);
             })
             .catch((err) => {
-                console.log("error in signup", err.response);
+                console.log('error in signup', err.response);
             });
 
         event.preventDefault(); // prevents it from refreshing
@@ -36,41 +36,41 @@ function SignUp(props) {
 
     return (
         <>
-            <form onSubmit={handleSubmit} className="login-form">
-                <div className="login-form-label">Email</div>
+            <form onSubmit={handleSubmit} className='login-form'>
+                <div className='login-form-label'>Email</div>
                 <input
-                    className="login-form-input"
+                    className='login-form-input'
                     autoFocus
-                    type="text"
+                    type='text'
                     value={email}
                     readOnly={true}
                 />
 
-                <div className="login-form-label">Username</div>
+                <div className='login-form-label'>Username</div>
                 <input
-                    className="login-form-input"
-                    type="text"
+                    className='login-form-input'
+                    type='text'
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
                 />
 
-                <div className="login-form-label">Password</div>
+                <div className='login-form-label'>Password</div>
                 <input
-                    className="login-form-input"
-                    type="password"
+                    className='login-form-input'
+                    type='password'
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                 />
 
-                <div className="login-form-label">Confirm Password</div>
+                <div className='login-form-label'>Confirm Password</div>
                 <input
-                    className="login-form-input"
-                    type="password"
+                    className='login-form-input'
+                    type='password'
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                 />
 
-                <button disabled={!validateForm()} className="submit-button">
+                <button disabled={!validateForm()} className='submit-button'>
                     Create Account
                 </button>
             </form>

@@ -6,11 +6,13 @@ import Cookies from 'cookies';
 export default async (req, res) => {
 
     let result;
+
     const cookies = new Cookies(req, res);
 
     const {
         method,
         query: { },
+        cookies: { accessToken },
         body: { emailOrUsername, password },
     } = req;
     
@@ -22,13 +24,16 @@ export default async (req, res) => {
 
             // Get data based on emailOrUsername entry
             result = await db.query(`
-                SELEC44T userId, username, email, admin, image, password
+                SELECT userId, username, email, admin, image, password
                 FROM users
                 WHERE ${entryType}='${emailOrUsername}'
             `)
             if (result.error) throw new Error(result.error);
             if (result[0] === undefined) {
-                return res.json({ error: `Credentials do not match` });
+                return res.json({ 
+                    status: 'rejected', 
+                    message: `Credentials do not match` 
+                });
             }
             const { userId, username, email, admin, image, password: hashedPassword } = result[0];
             const authenticated = result[0].authenticated[0];
@@ -37,16 +42,18 @@ export default async (req, res) => {
             result = await bcrypt.compare(password, hashedPassword);
             // If it returns false, set error on client
             if (result === false) {
-                return res.json({ error: `Credentials do not match` });
+                return res.json({ 
+                    status: 'rejected', 
+                    message: `Credentials do not match` 
+                });
             }
 
             // Check if authenticated
             if (authenticated === 0) {
                 console.log("not authenticated");
                 return res.json({
+                    status: 'rejected',
                     message: `Please verify the email sent to ${email}.`,
-                    email,
-                    username,
                 });
             }
 
@@ -77,12 +84,14 @@ export default async (req, res) => {
             cookies.set("accessToken", accessToken, { httpOnly: true });
 
             return res.status(200).json({
-                loggedIn: true,
-                userId,
-                username,
-                email,
-                admin,
-                image
+                status: 'success',
+                user: {
+                    userId,
+                    username,
+                    email,
+                    image,
+                    admin,
+                }
             })
         };
 
@@ -112,15 +121,18 @@ export default async (req, res) => {
                 result = await db.query(`
                     DELETE FROM tokens
                     WHERE userId=${userId}`
-                );s
+                );
                 if (result.error) throw new Error(result.error);
             };
 
-            return res.status(200);
+            return res.status(200).send({ status: 'success' });
         };
 
     } catch(e) {
         console.log("error: ", e.message);
-        return res.status(500).send(e.message);
+        return res.status(500).send({ 
+            status: 'error',
+            message: e.message
+        });
     }
 };

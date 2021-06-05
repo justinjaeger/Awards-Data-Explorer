@@ -1,26 +1,30 @@
 import React from "react";
-// import axios from "axios";
 import db from "../lib/db";
 import cookies from "next-cookies";
 import { useCookie } from "next-cookie";
 import Header from "../containers/Header";
-// import parseCookies from "../utils/parseCookies";
 import RankCategories from "../containers/RankGame/Categories";
-// import tokenController from "../controllers/tokenController";
 import verifyToken from '../controllers/verifyToken';
+import { IUser } from '../types';
 
-export default function Home(props) {
+type IHomeProps = {
+    URL: string,
+    user: IUser,
+}
+
+export default function Home(props: IHomeProps) {
+
+    const { URL, user } = props;
+
+    console.log(URL, user)
+
     return (
         <>
             <Header
-                URL={props.URL}
-                userId={props.userId}
-                username={props.username}
-                image={props.image}
-                email={props.email}
-                notification={props.notification}
+                URL={URL}
+                user={user}
             />
-            <RankCategories URL={props.URL} />
+            <RankCategories URL={URL} />
         </>
     );
 }
@@ -37,13 +41,9 @@ export async function getServerSideProps(context) {
     // Determine the url based on the environment
     const URL = (process.env.NODE_ENV === "development") ? "http://localhost:3003" : "https://oscarexpert.com";
 
-    const emptyProps = {
+    const emptyProps: IHomeProps = {
         URL,
-        userId: undefined,
-        username: undefined,
-        email: undefined,
-        image: undefined,
-        admin: false,
+        user: null,
     };
 
     const c = cookies(context); // for getting cookies
@@ -67,8 +67,8 @@ export async function getServerSideProps(context) {
             result = await verifyToken(c.accessToken);
             const { status, userId, accessToken } = result.data;
             if (status === 'delete') {
-                cookie.set('accessToken');
-                return emptyProps;
+                cookie.set('accessToken', undefined); // should delete token
+                return { props: emptyProps };
             }
             if (status === 'update') {
                 cookie.set('accessToken', accessToken);
@@ -83,19 +83,24 @@ export async function getServerSideProps(context) {
             console.log('result getting user info', result[0]); // so we can see result
             const { username, email, image, admin } = result[0];
             // Return the final props object */
-            return {
-                URL,
-                userId,
-                username,
-                email,
-                image: image ? image : '/PROFILE.png',
-                admin,
+            return { 
+                props: {
+                    URL,
+                    user: {
+                        userId,
+                        username,
+                        email,
+                        image: image ? image : '/PROFILE.png',
+                        admin,
+                    },
+                }
             }
         } catch(e) {
             console.log("error in index.jsx: ", e.message);
         }
     }
 
+    console.log('empty', emptyProps)
     // If no accessToken, return empty props
-    return emptyProps;
+    return { props: emptyProps };
 }

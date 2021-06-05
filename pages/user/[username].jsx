@@ -18,7 +18,7 @@ function UserDashboard(props) {
         <>
             <Header
                 loggedIn={props.loggedIn}
-                loginDropdown={props.loginDropdown}
+                loginModal={props.loginModal}
                 loginRoute={props.loginRoute}
                 notification={props.notification}
                 notification={props.notification}
@@ -73,7 +73,7 @@ export async function getServerSideProps(context) {
     /* Default values for all props */
     const props = {
         loggedIn: false,
-        loginDropdown: false,
+        loginModal: false,
         loginRoute: "/",
         notification: "",
         notification: "",
@@ -106,7 +106,7 @@ export async function getServerSideProps(context) {
         // cookie exists after you authenticate email
         const username = c.authenticated;
         props.loginRoute = "/login";
-        props.loginDropdown = true;
+        props.loginModal = true;
         props.username = username;
         props.notification = "Email verified. Please enter your password.";
     }
@@ -115,7 +115,7 @@ export async function getServerSideProps(context) {
         // cookie exists after you reset password
         const email = c.reset_password;
         props.loginRoute = "/resetPassword";
-        props.loginDropdown = true;
+        props.loginModal = true;
         props.email = email;
         props.notification = `Please enter a new password for ${email}.`;
     }
