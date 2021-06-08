@@ -1,7 +1,7 @@
-import wrapper from "../../../utils/wrapper";
-import tokenController from "../../../controllers/tokenController";
-import loginController from "../../../controllers/loginController";
-import signupController from "../../../controllers/signupController";
+import wrapper from '../../../utils/wrapper';
+import tokenController from '../../../controllers/tokenController';
+import loginController from '../../../controllers/loginController';
+import signupController from '../../../controllers/signupController';
 
 /**
  * When the user clicks Reset Password
@@ -12,7 +12,7 @@ const handler = async (req, res, next) => {
         res.locals.password = req.body.password;
         res.locals.confirmPassword = req.body.confirmPassword;
         res.locals.emailOrUsername = req.body.email;
-        res.locals.entryType = "email";
+        res.locals.entryType = 'email';
 
         await next(
             loginController.returnUserData,
@@ -34,7 +34,7 @@ const handler = async (req, res, next) => {
             username: res.locals.username,
         });
     } catch (e) {
-        console.log("error ", e);
+        console.log('error ', e);
         return res.status(500).send(e.message);
     }
 };

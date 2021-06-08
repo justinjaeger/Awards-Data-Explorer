@@ -1,9 +1,9 @@
-import wrapper from "../../../utils/wrapper";
-import emailController from "../../../controllers/emailController";
-import loginController from "../../../controllers/loginController";
+import wrapper from '../../../utils/wrapper';
+import emailController from '../../../controllers/emailController';
+import loginController from '../../../controllers/loginController';
 
 /**
- * When the user submits "forgot password", which sends an email
+ * When the user submits 'forgot password', which sends an email
  */
 
 const handler = async (req, res, next) => {
@@ -12,8 +12,8 @@ const handler = async (req, res, next) => {
         res.locals.email = email;
 
         /* Check if email is valid */
-        if (!email.includes("@") || !email.includes(".")) {
-            return res.json({ error: "this email is not properly formatted" });
+        if (!email.includes('@') || !email.includes('.')) {
+            return res.json({ error: 'this email is not properly formatted' });
         }
 
         await next(
@@ -30,10 +30,10 @@ const handler = async (req, res, next) => {
         res.sendCookies();
         return res.json({
             message: `An email was sent to ${email}.`,
-            route: "/blank",
+            route: '/blank',
         });
     } catch (e) {
-        console.log("error ", e);
+        console.log('error ', e);
         return res.status(500).send(e.message);
     }
 };

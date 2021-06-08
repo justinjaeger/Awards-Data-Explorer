@@ -52,7 +52,7 @@ export async function getServerSideProps(context) {
     /**
      * This is basically what logs you in.
      * If access token exists, verify it.
-     * If verified, populate the page with appropriate user data
+     * If verified, populate the page with user data
      */
     if (c.accessToken) {
         console.log('access token found')
@@ -100,7 +100,6 @@ export async function getServerSideProps(context) {
         }
     }
 
-    console.log('empty', emptyProps)
     // If no accessToken, return empty props
     return { props: emptyProps };
 }

@@ -1,5 +1,5 @@
-import db from "../../../lib/db";
-import { Datetime, Bit } from "./scalars";
+import db from '../../../lib/db';
+import { Datetime, Bit } from './scalars';
 
 /* RESOLVERS */
 
@@ -127,7 +127,7 @@ export const resolvers = {
                 const datetime = new Date()
                     .toISOString()
                     .slice(0, 19)
-                    .replace("T", " ");
+                    .replace('T', ' ');
                 const users = await db.query(`
           INSERT INTO followers(username, follower, dateCreated)
           VALUES('${args.username}', '${args.follower}', '${datetime}')
@@ -144,7 +144,7 @@ export const resolvers = {
                 const datetime = new Date()
                     .toISOString()
                     .slice(0, 19)
-                    .replace("T", " ");
+                    .replace('T', ' ');
                 const users = await db.query(`
         DELETE FROM followers 
         WHERE username='${args.username}' AND follower='${args.follower}'

@@ -1,4 +1,4 @@
-import db from "../../../lib/db";
+import db from '../../../lib/db';
 
 /**
  * All user-specific actions for RANK game
@@ -15,7 +15,7 @@ export default async (req, res) => {
 
     try {
         // GET: Get user specific score for individual film
-        if (method === "GET") {
+        if (method === 'GET') {
             result = await db.query(`
                 SELECT * FROM rank_user
                 WHERE userId=${userId}
@@ -32,7 +32,7 @@ export default async (req, res) => {
         }
 
         // POST: Increment or decrement score
-        if (method === "POST") {
+        if (method === 'POST') {
             // Alter rank_movie score
         result = await db.query(`
             UPDATE rank_movie
@@ -43,7 +43,7 @@ export default async (req, res) => {
                 throw result.error;
             }
             if (!result.affectedRows) {
-                return res.status(500).send("No change made to rank_movie");
+                return res.status(500).send('No change made to rank_movie');
             }
 
             // Insert entry into rank_user if not exists
@@ -66,13 +66,13 @@ export default async (req, res) => {
                 throw result.error;
             }
             if (!result.affectedRows) {
-                return res.status(500).send("No change made to rank_user");
+                return res.status(500).send('No change made to rank_user');
             }
 
-            return res.status(200).send("Success");
+            return res.status(200).send('Success');
         }
     } catch (e) {
-        console.log("error ", e);
+        console.log('error ', e);
         return res.status(500).send(e.message);
     }
 };

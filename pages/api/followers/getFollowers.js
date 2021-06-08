@@ -1,5 +1,5 @@
-import wrapper from "../../../utils/wrapper";
-import followerController from "../../../controllers/followerController";
+import wrapper from '../../../utils/wrapper';
+import followerController from '../../../controllers/followerController';
 
 /**
  * When user loads followers list from dashboard
@@ -17,7 +17,7 @@ const handler = async (req, res) => {
             followers: res.locals.followers,
         });
     } catch (e) {
-        console.log("error in api/followers/getFollowers", e);
+        console.log('error in api/followers/getFollowers', e);
         return res.status(500).send(e.message);
     }
 };

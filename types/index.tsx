@@ -26,3 +26,7 @@ export interface IGenericResponse {
 export interface ILoginResponse extends IGenericResponse {
     user?: IUser,
 }
+
+export interface ISignupStepOneResponse extends IGenericResponse {
+    userId: number,
+}

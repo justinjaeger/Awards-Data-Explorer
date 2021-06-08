@@ -1,6 +1,6 @@
-import wrapper from "../../../utils/wrapper";
-import emailController from "../../../controllers/emailController";
-import signupController from "../../../controllers/signupController";
+import wrapper from '../../../utils/wrapper';
+import emailController from '../../../controllers/emailController';
+import signupController from '../../../controllers/signupController';
 
 /**
  * When the user clicks 'Sign Up'
@@ -30,7 +30,7 @@ const handler = async (req, res, next) => {
 
         /* set a cookie called sent_verification with value email */
         res.cookie(
-            "sent_verification",
+            'sent_verification',
             `${res.locals.username}*$%&${res.locals.email}`
         );
 
@@ -39,7 +39,7 @@ const handler = async (req, res, next) => {
             message: `Please verify the email sent to ${res.locals.email}.`,
         });
     } catch (e) {
-        console.log("error ", e);
+        console.log('error ', e);
         return res.status(500).send(e.message);
     }
 };

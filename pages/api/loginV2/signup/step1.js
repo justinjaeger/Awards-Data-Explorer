@@ -1,5 +1,5 @@
-import db from "../../../../lib/db";
-import { verificationEmail, verificationCode } from "../utils/mailHelper";
+import db from '../../../../lib/db';
+import { verificationEmail, verificationCode } from '../utils/mailHelper';
 
 /**
  * User submits email and gets a confirmation link sent to them
@@ -11,7 +11,7 @@ export default async (req, res) => {
 
     const {
         method,
-        body: { userId, email },
+        body: { email },
     } = req;
     
     try {
@@ -19,8 +19,11 @@ export default async (req, res) => {
         if (method === 'POST') {
 
             // Check that email is properly formatted
-            if (!email.includes("@") || !email.includes(".")) {
-                return res.json({ error: "This email is not properly formatted." });
+            if (!email.includes('@') || !email.includes('.')) {
+                return res.json({
+                    status: 'rejected',
+                    message: 'This email is not properly formatted.'
+                });
             }
 
             // Create new user in database
@@ -30,8 +33,11 @@ export default async (req, res) => {
             `);
             if (result.error) {
                 // Handle duplicate entry errors with an error message
-                if (result.error.code === "ER_DUP_ENTRY") {
-                    return res.json({ error: "This email is already registered." });
+                if (result.error.code === 'ER_DUP_ENTRY') {
+                    return res.json({
+                        status: 'rejected',
+                        message: 'This email is already registered.'
+                    });
                 }
                 // If that's not the error, handle it like any other
                 throw new Error(result.error);
@@ -48,37 +54,34 @@ export default async (req, res) => {
             // Generate verification code
             const verificationCode = Math.floor(100000 + Math.random() * 900000);
 
-            // Utilizes the helper function to create e-mail
+            // Utilize the helper function to create e-mail
             const { transport, options } = verificationCode(email, verificationCode);
 
             // Actually sends the email
             result = transport.sendMail(options);
             if (result.error) throw new Error(result.error);
 
+            // Get expiration time (now + 30 minutes)
+            const dt = new Date();
+            dt.setMinutes( dt.getMinutes() + 30 );
+            const expiration = dt.toISOString().slice(0, 19).replace("T", " ");
+
+            // Sets verification code in database
+            result = await db.query(`
+                INSERT INTO codes(verificationCode, userId, expiration)
+                VALUES('${verificationCode}', ${userId}, '${expiration}')
+            `)
+            if (result.error) throw new Error(result.error);
+
             // Send a 200 status back, where it will display a confirmation message to check email
-            return res.status(200).json({ userId });
+            return res.status(200).json({ status: 'success' });
         };
 
-         // POST: signup / delete user by userId
-         if (method === 'POST') {
-            // Delete user from database
-            result = await db.query(`
-                DELETE FROM users
-                WHERE userId='${userId}'
-            `);
-            if (result.error) throw new Error(result.error);
-            // Delete user code
-            result = await db.query(`
-                DELETE FROM users
-                WHERE userId='${userId}'
-            `);
-            if (result.error) throw new Error(result.error);
-
-            return res.status(200);
-         }
-
     } catch(e) {
-        console.log("error: ", e.message);
-        return res.status(500).send(e.message);
+        console.log('error in step1: ', e.message);
+        return res.status(500).json({
+            status: 'error',
+            message: e.message,
+        });
     }
 };

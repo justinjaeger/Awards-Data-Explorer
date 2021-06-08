@@ -1,4 +1,4 @@
-import db from "../../../../../lib/db";
+import db from '../../../../../lib/db';
 
 export default async (req, res) => {
 
@@ -23,7 +23,7 @@ export default async (req, res) => {
         }
         // validate if id is following a target user
     } catch(e) {
-        console.log("error: ", e.message);
+        console.log('error: ', e.message);
         return res.status(500).send(e.message);
     }
 };

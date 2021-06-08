@@ -1,5 +1,5 @@
-import wrapper from "../../../utils/wrapper";
-import followerController from "../../../controllers/followerController";
+import wrapper from '../../../utils/wrapper';
+import followerController from '../../../controllers/followerController';
 
 const handler = async (req, res) => {
     try {
@@ -14,7 +14,7 @@ const handler = async (req, res) => {
             followingUser: res.locals.followingUser,
         });
     } catch (e) {
-        console.log("error in api/followers/determineFollowing", e);
+        console.log('error in api/followers/determineFollowing', e);
         return res.status(500).send(e.message);
     }
 };

@@ -1,4 +1,4 @@
-import db from "../../../../../lib/db";
+import db from '../../../../../lib/db';
 
 export default async (req, res) => {
 
@@ -20,7 +20,7 @@ export default async (req, res) => {
                 )
             `);
             const followers = result.map(user => {
-                const image = user.image ? user.image : "/PROFILE.png";
+                const image = user.image ? user.image : '/PROFILE.png';
                 return {
                     userId: user.userId,
                     username: user.username,
@@ -34,7 +34,7 @@ export default async (req, res) => {
 
         // Follow a target user
         if (method === 'POST') {
-            const datetime = new Date().toISOString().slice(0, 19).replace("T", " ");
+            const datetime = new Date().toISOString().slice(0, 19).replace('T', ' ');
             await db.query(`
                 INSERT INTO followers(userId, follower, dateCreated)
                 VALUES('${target_user_id}', '${id}', '${datetime}')
@@ -62,7 +62,7 @@ export default async (req, res) => {
             `);
             if (result.error) throw new Error(result.error);
             const followers = result.map(user => {
-                const image = user.image ? user.image : "/PROFILE.png";
+                const image = user.image ? user.image : '/PROFILE.png';
                 return {
                     userId: user.userId,
                     username: user.username,
@@ -75,7 +75,7 @@ export default async (req, res) => {
         }
 
     } catch(e) {
-        console.log("error: ", e.message);
+        console.log('error: ', e.message);
         return res.status(500).send(e.message);
     }
 };

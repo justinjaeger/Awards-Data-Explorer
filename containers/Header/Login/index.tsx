@@ -44,9 +44,8 @@ const LoginContainer = (props: ILoginContainerProps) => {
     //         });
     // }
 
-    const r = loginRoute.slice(1);
     return (
-        <div id='login-container' className={`container-${r}`}>
+        <div id='login-container' className={`container-${loginRoute}`}>
 
             {loginRoute === 'login' && (
                 <Login

@@ -1,4 +1,4 @@
-import db from "../../../lib/db";
+import db from '../../../lib/db';
 
 /**
  * All non-user-specific actions for RANK game
@@ -11,7 +11,7 @@ export default async (req, res) => {
 
     try {
         // GET: Load the data for this set
-        if (method === "GET") {
+        if (method === 'GET') {
             // Get movies associated with category
             result = await db.query(`
         SELECT * FROM rank_category
@@ -26,10 +26,10 @@ export default async (req, res) => {
         }
 
         // POST: Create a new category
-        if (method === "POST") {
+        if (method === 'POST') {
         }
     } catch (e) {
-        console.log("error ", e);
+        console.log('error ', e);
         return res.status(500).send(e.message);
     }
 };

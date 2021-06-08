@@ -1,4 +1,4 @@
-import db from "../../../../../lib/db";
+import db from '../../../../../lib/db';
 
 export default async (req, res) => {
     let result;
@@ -22,7 +22,7 @@ export default async (req, res) => {
             `);
             if (result.error) throw new Error(result.error);
             const followers = result.map(user => {
-                const image = user.image ? user.image : "/PROFILE.png";
+                const image = user.image ? user.image : '/PROFILE.png';
                 return {
                     userId: user.userId,
                     username: user.username,
@@ -35,7 +35,7 @@ export default async (req, res) => {
         }
 
     } catch(e) {
-        console.log("error: ", e.message);
+        console.log('error: ', e.message);
         return res.status(500).send(e.message);
     }
 };

@@ -1,5 +1,5 @@
-import wrapper from "../../../utils/wrapper";
-import userController from "../../../controllers/userController";
+import wrapper from '../../../utils/wrapper';
+import userController from '../../../controllers/userController';
 
 /**
  * After user creates a new profile picture, this saves it to DB
@@ -16,7 +16,7 @@ const handler = async (req, res) => {
 
         return res.json({});
     } catch (e) {
-        console.log("error ", e);
+        console.log('error ', e);
         return res.status(500).send(e.message);
     }
 };

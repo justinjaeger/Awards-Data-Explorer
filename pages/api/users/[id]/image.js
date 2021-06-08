@@ -1,8 +1,8 @@
-import db from "../../../../../lib/db";
-import AWS from "aws-sdk";
-import formidable from "formidable-serverless";
-import fs from "fs";
-import sharp from "sharp";
+import db from '../../../../../lib/db';
+import AWS from 'aws-sdk';
+import formidable from 'formidable-serverless';
+import fs from 'fs';
+import sharp from 'sharp';
 
 export const config = { // idk if this shit is going to give me hell
     api: {
@@ -18,7 +18,7 @@ export default async (req, res) => {
         body: { key }, // had different names on frontend
     } = req;
 
-    console.log("key", key);
+    console.log('key', key);
 
     try {
         // GET: profile image
@@ -30,10 +30,10 @@ export default async (req, res) => {
         if (method === 'POST') {
             // create S3 instance with credentials
             const s3 = new AWS.S3({
-                endpoint: new AWS.Endpoint("nyc3.digitaloceanspaces.com"),
+                endpoint: new AWS.Endpoint('nyc3.digitaloceanspaces.com'),
                 accessKeyId: process.env.SPACES_KEY,
                 secretAccessKey: process.env.SPACES_SECRET,
-                region: "nyc3",
+                region: 'nyc3',
             });
             // parse request to readable form
             const form = new formidable.IncomingForm();
@@ -43,14 +43,14 @@ export default async (req, res) => {
                 // Convert to binary string
                 const file = fs.readFileSync(files.file.path);
         
-                console.log("file", file);
+                console.log('file', file);
         
                 const params = {
                     Bucket: process.env.SPACES_BUCKET,
-                    ACL: "public-read",
+                    ACL: 'public-read',
                     Key: `ProfileImages/${key}`,
                     Body: file,
-                    ContentType: "image/jpeg",
+                    ContentType: 'image/jpeg',
                 };
         
                 // Downsize the image
@@ -58,7 +58,7 @@ export default async (req, res) => {
                     .resize(200, 200) // width, height
                     .toBuffer()
                     .then((buffer) => {
-                        console.log("sharp success", buffer);
+                        console.log('sharp success', buffer);
                         params.Body = buffer;
                     })
                     .catch((err) => {
@@ -71,7 +71,7 @@ export default async (req, res) => {
                         throw new Error(err);
                     }
                     if (data) {
-                        console.log("s3 upload data", data);
+                        console.log('s3 upload data', data);
 
                         const url = data.Location;
                         // save URL in database
@@ -92,10 +92,10 @@ export default async (req, res) => {
         if (method === 'DELETE') {
             // create S3 instance with credentials
             const s3 = new AWS.S3({
-                endpoint: new AWS.Endpoint("nyc3.digitaloceanspaces.com"),
+                endpoint: new AWS.Endpoint('nyc3.digitaloceanspaces.com'),
                 accessKeyId: process.env.SPACES_KEY,
                 secretAccessKey: process.env.SPACES_SECRET,
-                region: "nyc3",
+                region: 'nyc3',
             });
             const params = {
                 Bucket: process.env.SPACES_BUCKET,
@@ -103,7 +103,7 @@ export default async (req, res) => {
             };
             s3.deleteObject(params, (err, data) => {
                 if (err) {
-                    console.log("err deleting profile image from Spaces", err);
+                    console.log('err deleting profile image from Spaces', err);
                     return res.status(500);
                 }
                 if (data) {
@@ -113,7 +113,7 @@ export default async (req, res) => {
         }
 
     } catch(e) {
-        console.log("error: ", e.message);
+        console.log('error: ', e.message);
         return res.status(500).send(e.message);
     }
 };

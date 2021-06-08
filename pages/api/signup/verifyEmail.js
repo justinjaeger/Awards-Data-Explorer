@@ -1,6 +1,6 @@
-import wrapper from "../../../utils/wrapper";
-import signupController from "../../../controllers/signupController";
-const { decrypt } = require("../../../utils/encrypt");
+import wrapper from '../../../utils/wrapper';
+import signupController from '../../../controllers/signupController';
+const { decrypt } = require('../../../utils/encrypt');
 
 /**
  * When the user clicks the link INSIDE EMAIL that verifies them
@@ -18,9 +18,9 @@ const handler = async (req, res, next) => {
         res.locals.username = decryptedUsername;
 
         /* set a cookie in the browser so it loads the re-enter password screen */
-        res.cookie("reset_password"); // clears it
-        res.cookie("sent_verification"); // clears it
-        res.cookie("authenticated", decryptedUsername);
+        res.cookie('reset_password'); // clears it
+        res.cookie('sent_verification'); // clears it
+        res.cookie('authenticated', decryptedUsername);
 
         await next(signupController.authenticateUser)
             .then((result) => {
@@ -31,9 +31,9 @@ const handler = async (req, res, next) => {
             });
 
         res.sendCookies();
-        return res.redirect("/");
+        return res.redirect('/');
     } catch (e) {
-        console.log("error ", e);
+        console.log('error ', e);
         return res.status(500).send(e.message);
     }
 };

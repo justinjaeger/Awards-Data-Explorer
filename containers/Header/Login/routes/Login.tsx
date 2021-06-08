@@ -16,16 +16,13 @@ export default function Login(props: ILoginProps) {
 
     function validateForm() {
         return emailOrUsername.length > 0 && password.length > 0;
-    }
+    };
 
     function handleSubmit(event) {
-        const payload = {
+        axios.post('/api/loginV2', {
             emailOrUsername,
             password,
-        };
-
-        axios.post('/api/loginV2', payload)
-            .then((res: AxiosResponse<ILoginResponse>) => {
+        }).then((res: AxiosResponse<ILoginResponse>) => {
                 if (['rejected', 'error'].includes(res.data.status)) {
                     return setNotification(res.data.message);
                 };
@@ -38,9 +35,8 @@ export default function Login(props: ILoginProps) {
                         err
                     );
             });
-
         event.preventDefault(); // prevents it from refreshing
-    }
+    };
 
     return (
         <>

@@ -1,41 +1,51 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import React, { useState } from 'react';
+import axios, { AxiosResponse } from 'axios';
+import { ISignupStepOneResponse } from '../../../../types';
 
-export default EnterEmail = (props) => {
+type IEnterEmailProps = {
+    setNotification:  React.Dispatch<React.SetStateAction<string>>,
+}
+
+export default function EnterEmail(props: IEnterEmailProps) {
     const { setNotification } = props;
 
-    const [email, setEmail] = useState('');
-    const [userId, setUserId] = useState(undefined);
-    const [confirm, setConfirm] = useState(false);
-    const [displayResend, setDisplayResend] = userState(true);
+    const [email, setEmail] = useState<string>('');
+    const [userId, setUserId] = useState<number | null>(null);
+    const [confirm, setConfirm] = useState<boolean>(false);
+    const [displayResend, setDisplayResend] = useState<boolean>(true);
 
-    function validateForm() {
-        return email.length > 0;
-    }
+    function validateForm() { 
+        return email.length > 0 
+    };
 
     function handleSubmit(event) {
         // If success, display confirmation message
-        axios.post('/api/login/signup/step1', { email })
-            .then((res) => {
-                if (res.data.error) return setNotification(res.data.error);
+        axios.post('/api/loginV2/signup/step1', { email })
+            .then((res: AxiosResponse<ISignupStepOneResponse>) => {
+                if (['rejected', 'error'].includes(res.data.status)) {
+                    return setNotification(res.data.message);
+                };
                 setConfirm(true);
                 setUserId(res.data.userId);
             })
             .catch((err) => {
-                console.log('error1 in signup', err.response);
+                console.log('error in EnterEmail: ', err.response);
             });
-        event.preventDefault(); // prevents it from refreshing
+        event.preventDefault(); // prevents from refreshing
     };
 
     function removeUser() {
-        axios.delete('/api/login/signup/step1', { userId })
-        .then((res) => {
+        axios.delete(`/api/loginV2/signup/:${userId}`)
+        .then((res: AxiosResponse) => {
+            if (['rejected', 'error'].includes(res.data.status)) {
+                return setNotification(res.data.message);
+            };
             setConfirm(false);
-            setEmail(false);
+            setEmail('');
             setDisplayResend(false);
         })
-        .catch((err) => {
-            console.log('error2 in signup', err.response);
+        .catch((err: AxiosResponse) => {
+            console.log('error2 in signup', err.data.message); // DATE Wonder if this names sense that it woudl be the same structure response
         });
     };
 
