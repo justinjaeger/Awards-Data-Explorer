@@ -1,10 +1,42 @@
-export type IUser = {
-    userId: string;
+export interface IInitialProps {
+    app: IAppContext;
+    auth: IAuthState;
+}
+
+export type IAppContext = {
+    url: string;
+}
+
+export interface IAuthState {
+    token: string | undefined;
+    user: IUser | undefined;
+}
+
+export type IAuthContext = IAuthState & {
+    setImage: (image: string) => void;
+}
+
+export interface IUser {
+    userId: number;
     username: string;
     email: string;
-    image?: string;
     admin: boolean,
-} | null;
+    image?: string;
+}
+
+export type IProfileUser = {
+    image: string;
+    username: string;
+    userId: number | undefined;
+    followers: number | undefined;
+    following: number | undefined;
+};
+
+export type IFollowers = {
+    userId: number,
+    username: string,
+    image: string,
+}[];
 
 export type ILoginRoute = 
     '' |
@@ -13,20 +45,3 @@ export type ILoginRoute =
     'signup' | 
     'forgotPassword' |
     'resetPassword';
-
-/**
- * Rejected is a controlled error
- * ex: username not long enough
- */
-export interface IGenericResponse {
-    status: 'success' | 'rejected' | 'error';
-    message?: string;
-}
-
-export interface ILoginResponse extends IGenericResponse {
-    user?: IUser,
-}
-
-export interface ISignupStepOneResponse extends IGenericResponse {
-    userId: number,
-}

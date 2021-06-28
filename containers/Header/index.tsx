@@ -1,17 +1,16 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useContext } from 'react';
 import axios, { AxiosResponse } from 'axios';
 import LoginContainer from './Login';
 import Modal from '../../components/Modal';
 import Notification from '../../components/Notification';
-import { IUser, ILoginRoute, IGenericResponse } from '../../types';
+import { IUser, ILoginRoute } from '../../types';
+import { IGenericResponse } from '../../types/responses';
+import Context from '../../utils/context';
 
-type IHomeProps = {
-    URL: string,
-    user: IUser,
-}
+export default function Header() {
 
-export default function Header(props: IHomeProps) {
-    const { URL, user: u } = props;
+    const { url } = useContext(Context.App);
+    const { token, user: u } = useContext(Context.Auth);
 
     const [user, setUser] = useState<IUser>(u);
     const [profileDropdown, setProfileDropdown] = useState<boolean>(false);
@@ -82,7 +81,7 @@ export default function Header(props: IHomeProps) {
 
             <div id='Header'>
                 <div id='header-left'>
-                    <a href={URL} className='home-button'>
+                    <a href={url} className='home-button'>
                         Home
                     </a>
                 </div>
@@ -110,7 +109,7 @@ export default function Header(props: IHomeProps) {
                             <div id='header-message'>
                                 Welcome,{' '}
                                 <a
-                                    href={`${URL}/user/${user.username}`}
+                                    href={`${url}/user/${user.username}`}
                                     className='header-button'
                                 >
                                     {user.username}
@@ -137,7 +136,7 @@ export default function Header(props: IHomeProps) {
                                 >
                                     <a
                                         className='profile-dropdown-button no-underline'
-                                        href={`${URL}/user/${user.username}`}
+                                        href={`${url}/user/${user.username}`}
                                     >
                                         My Profile
                                     </a>

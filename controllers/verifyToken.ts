@@ -1,31 +1,26 @@
 import db from "../lib/db";
 import jwt from "jsonwebtoken";
 
-/**
- * Verifies the access token
- * 
- * Return object status, which is either:
- * - delete
- * - update
- * - verified
- * 
- * Then wherever this is called, it will set or delete 
- * a cookie or do nothing
- */
+export type IVerifyTokenResponse = {
+    status: 'verified' | 'update' | 'delete' | 'error';
+    message?: string;
+    data?: {
+        userId?: number;
+        updatedAccessToken?: string;
+    };
+}
 
-export default async (accessToken) => {
-
-    let result;
+export default async (accessToken: string): Promise<IVerifyTokenResponse> => {
 
     try {
         // Get the expiration and userId from the token / JWT
-        result = await jwt.verify(
+        const jwtData = await jwt.verify(
             accessToken, 
             process.env.ACCESS_TOKEN_SECRET,
             { ignoreExpiration: true }, // options
         );
-        if (result.error) throw new Error(result.error);
-        const { userId, exp: expiration } = result;
+        if (jwtData.error) throw new Error(jwtData.error);
+        const { userId, exp: expiration } = jwtData;
 
         /**
          * If token is expired, delete access token from database.
@@ -43,62 +38,68 @@ export default async (accessToken) => {
             console.log("TOKEN EXPIRED");
 
             // DELETE TOKEN FROM DB
-            result = await db.query(`
+            const deleteTokenResponse = await db.query(`
                 DELETE FROM tokens
                 WHERE accessToken='${accessToken}' 
             `);
-            if (result.error) throw new Error(result.error);
+            if (deleteTokenResponse.error) throw new Error(deleteTokenResponse.error);
             
             console.log("token deleted from db");
 
             // IF NO TOKEN DELETED, DELETE ALL TOKENS ASSOCIATED WITH USER
-            if (result.affectedRows === 0) {
+            if (deleteTokenResponse.affectedRows === 0) {
                 console.log("deleting all user tokens");
-                result = await db.query(`
+                const deleteAllTokensResponse = await db.query(`
                     DELETE FROM tokens
                     WHERE userId=${userId}`
                 );
-                if (result.error) throw new Error(result.error);
+                if (deleteAllTokensResponse.error) throw new Error(deleteAllTokensResponse.error);
                 return {
                     status: 'delete',
                 };
             };
 
             // CREATE ACCESS TOKEN
-            const newAccessToken = jwt.sign(
+            const updatedAccessToken = jwt.sign(
                 { userId },
                 process.env.ACCESS_TOKEN_SECRET,
                 { expiresIn: '10m' }
             );
 
             // SAVE TOKEN IN DB
-            result = await db.query(`
+            const saveTokenResponse = await db.query(`
                 INSERT INTO tokens(accessToken, userId)
-                VALUES('${newAccessToken}', ${userId}) 
+                VALUES('${updatedAccessToken}', ${userId}) 
             `);
-            if (result.error) throw new Error(result.error);
+            if (saveTokenResponse.error) throw new Error(saveTokenResponse.error);
 
             // UPDATE LAST LOGGED IN
             const datetime = new Date().toISOString().slice(0, 19).replace("T", " ");
-            result = await db.query(`
+            const lastLoggedInResponse = await db.query(`
                 UPDATE users
                 SET lastLoggedIn = '${datetime}'
                 WHERE userId = ${userId} 
             `);
-            if (result.error) throw new Error(result.error);
+            if (lastLoggedInResponse.error) throw new Error(lastLoggedInResponse.error);
 
             // Set new cookie in browser
             return {
                 status: 'update',
-                userId,
-                accessToken: newAccessToken,
+                data: {
+                    userId,
+                    updatedAccessToken,
+                }
             };
         };
         return {
-            status: 'verified'
+            status: 'verified',
+            data: { userId },
         };
     } catch(e) {
         console.log("error in verifyToken: ", e.message);
-        return res.status(500).send(e.message);
+        return {
+            status: 'error',
+            message: e.message,
+        };
     }
 };

@@ -1,18 +1,17 @@
 import db from '../../../../../lib/db';
+import { IFollowers } from '../../../../../types';
 
 export default async (req, res) => {
-    let result;
 
     const {
         method,
         query: { id },
-        body: {},
     } = req;
 
     try {
         // Return all of id's followers
         if (method === 'GET') {
-            result = await db.query(`
+            const result = await db.query(`
                 SELECT userId, username, image
                 FROM users
                 WHERE userId IN (
@@ -21,7 +20,8 @@ export default async (req, res) => {
                 )
             `);
             if (result.error) throw new Error(result.error);
-            const followers = result.map(user => {
+            
+            const followers: IFollowers = result.map(user => {
                 const image = user.image ? user.image : '/PROFILE.png';
                 return {
                     userId: user.userId,
@@ -30,12 +30,16 @@ export default async (req, res) => {
                 };
             });
             return res.status(200).json({
-                followers
+                status: 'success',
+                followers,
             });
         }
 
     } catch(e) {
         console.log('error: ', e.message);
-        return res.status(500).send(e.message);
+        return res.status(500).send({
+            status: 'error',
+            message: e.message
+        });
     }
 };

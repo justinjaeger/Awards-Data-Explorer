@@ -1,6 +1,7 @@
 import db from '../../../../lib/db';
+import { IProfileUserResponse } from '../../../../types/responses';
 
-export default async (req, res) => {
+export default async (req, res): Promise<IProfileUserResponse> => {
 
     const {
         method,
@@ -8,9 +9,12 @@ export default async (req, res) => {
         body: {},
     } = req;
     
+    /**
+     * An "unprotected" route for getting data on other users
+     */
 
     try {
-        /** Called whenever request is made to /username
+        /**
          * Check that a user with this name exists...
          * if not, throw a 404 page
          */
@@ -21,9 +25,13 @@ export default async (req, res) => {
                 WHERE username='${username}'
             `);
             if (result.error) throw new Error(result.error);
-            if (!result.length) return res.json({ send404: true });
+            if (!result.length) return res.json({ 
+                status: 'rejected',
+                message: '404',
+            });
             const { userId, image } = result[0];
             return res.status(200).json({
+                status: 'success',
                 userId,
                 image,
             });
@@ -31,6 +39,9 @@ export default async (req, res) => {
 
     } catch(e) {
         console.log('error: ', e.message);
-        return res.status(500).send(e.message);
+        return res.status(500).json({
+            status: 'error',
+            message: e.message,
+        });
     }
 };
