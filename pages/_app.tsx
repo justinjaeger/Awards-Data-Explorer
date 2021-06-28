@@ -10,6 +10,13 @@ import { IInitialProps } from '../types';
 import Context from '../utils/context';
 
 /**
+ * NOTE:
+ *  I shsould probably render <Notifications /> here
+ * but then I would have to call setNotification and pass that down which is annoyingg
+ * Alt, I could just have <Notifications notification={''} /> render in eacah page that calls a notification, at the bottom or something. That would prob be easier
+ */
+
+/**
  * Component is the your page eg /index
  * pageProps injects any props from getServerSideProps in that component file
  * initialProps injects props from getInitialProps
