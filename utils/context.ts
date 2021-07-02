@@ -1,6 +1,11 @@
 
 import React, { useState } from 'react';
-import { IAuthContext, IAppContext, IAuthState } from '../types';
+import { 
+    IAuthContext, 
+    IAppContext, 
+    IAuthState, 
+    IUser,
+} from '../types';
 
 const [state, setState] = useState<IAuthState>({
     token: undefined,
@@ -9,6 +14,11 @@ const [state, setState] = useState<IAuthState>({
 
 const AppContext = React.createContext<IAppContext>({ 
     url: '',
+    notification: '',
+    setNotification: (notification: string) => setState((s) => ({
+        ...s,
+        notification,
+    }))
 });
 
 const AuthContext = React.createContext<IAuthContext>({
@@ -20,6 +30,10 @@ const AuthContext = React.createContext<IAuthContext>({
             ...s.user,
             image
         }
+    })),
+    setUser: (user: IUser | undefined) => setState((s) => ({
+        ...s,
+        user,
     })),
 });
 

@@ -9,14 +9,12 @@ import Context from '../../utils/context';
 
 export default function Header() {
 
-    const { url } = useContext(Context.App);
-    const { token, user: u } = useContext(Context.Auth);
+    const { url, notification } = useContext(Context.App);
+    const { token, user, setUser } = useContext(Context.Auth);
 
-    const [user, setUser] = useState<IUser>(u);
     const [profileDropdown, setProfileDropdown] = useState<boolean>(false);
     const [loginModal, setLoginModal] = useState<boolean>(false);
     const [loginRoute, setLoginRoute] = useState<ILoginRoute>('');
-    const [notification, setNotification] = useState<string>('');
 
     // RESET VARIOUS COMPONENTS
     function reset(): void {
@@ -28,7 +26,7 @@ export default function Header() {
     // LOG IN
     function login(data: IUser) {
         console.log('logging user in with this data: ', data);
-        setUser(data)
+        setUser(data); // use context
         reset();
         window.location.reload();
     }
@@ -38,7 +36,7 @@ export default function Header() {
         axios.get('/api/login/logout')
             .then((res: AxiosResponse<IGenericResponse>) => {
                 if (res.data.status === 'error') return setNotification(res.data.message!);
-                setUser(null);
+                setUser(undefined);
                 reset();
                 window.location.reload();
             })
@@ -73,10 +71,8 @@ export default function Header() {
 
     return (
         <>
-            {notification && (
-                <Notification setNotification={setNotification}>
-                    {notification}
-                </Notification>
+            {notification !== '' && (
+                <Notification />
             )}
 
             <div id='Header'>
@@ -128,7 +124,6 @@ export default function Header() {
                                 ></img>
                             </button>
 
-                            {/** Profile Dropdown */}
                             {profileDropdown && (
                                 <div
                                     id='profile-dropdown'
@@ -158,7 +153,6 @@ export default function Header() {
                         size={loginRoute === 'login' ? '200px' : '350px'}
                     >
                         <LoginContainer
-                            user={user}
                             loginRoute={loginRoute}
                             redirect={redirect}
                             setNotification={setNotification}

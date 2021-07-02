@@ -1,8 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 
-export default function Card(props) {
-    const { children, setNotification } = props;
+export default function Notification() {
 
     useEffect(() => {
         setTimeout(() => {

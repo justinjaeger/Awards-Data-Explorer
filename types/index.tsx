@@ -5,6 +5,8 @@ export interface IInitialProps {
 
 export type IAppContext = {
     url: string;
+    notification: string;
+    setNotification: (notification: string) => void;
 }
 
 export interface IAuthState {
@@ -13,6 +15,7 @@ export interface IAuthState {
 }
 
 export type IAuthContext = IAuthState & {
+    setUser: (user: IUser) => void;
     setImage: (image: string) => void;
 }
 

@@ -47,7 +47,7 @@ MyApp.getInitialProps = async (context) => {
         : "https://oscarexpert.com";
     
     const emptyProps: IInitialProps = {
-        app: { url },
+        app: { url, notification: '' },
         auth: { 
             token: undefined,
             user: undefined
@@ -91,7 +91,7 @@ MyApp.getInitialProps = async (context) => {
             // Return the final props object
             return { 
                 initialProps: {
-                    app: { url },
+                    app: emptyProps.app,
                     auth: {
                         token: updatedAccessToken 
                             ? updatedAccessToken 
@@ -112,6 +112,7 @@ MyApp.getInitialProps = async (context) => {
     }
 
     // If no accessToken, return empty props
+    // Returning ...appProps is standard Next stuff
     return { initialProps: emptyProps, ...appProps };
 }
 
