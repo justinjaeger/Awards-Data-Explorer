@@ -18,7 +18,7 @@ export default function Rank(props) {
             <Header
                 loggedIn={props.loggedIn}
                 loginModal={props.loginModal}
-                loginRoute={props.loginRoute}
+                form={props.form}
                 notification={props.notification}
                 username={props.username}
                 email={props.email}
@@ -68,7 +68,7 @@ export async function getServerSideProps(context) {
     const props = {
         loggedIn: false,
         loginModal: false,
-        loginRoute: "/",
+        form: "/",
         notification: "",
         username: "",
         userId: null,
@@ -98,7 +98,7 @@ export async function getServerSideProps(context) {
     if (c.authenticated) {
         // cookie exists after you authenticate email
         const username = c.authenticated;
-        props.loginRoute = "/login";
+        props.form = "/login";
         props.loginModal = true;
         props.username = username;
         props.notification = "Email verified. Please enter your password.";
@@ -107,7 +107,7 @@ export async function getServerSideProps(context) {
     if (c.reset_password) {
         // cookie exists after you reset password
         const email = c.reset_password;
-        props.loginRoute = "/resetPassword";
+        props.form = "/resetPassword";
         props.loginModal = true;
         props.email = email;
         props.notification = `Please enter a new password for ${email}.`;

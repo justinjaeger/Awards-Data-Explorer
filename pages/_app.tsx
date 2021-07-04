@@ -7,7 +7,7 @@ import { useCookie } from 'next-cookie';
 import verifyToken, { IVerifyTokenResponse } from '../controllers/verifyToken';
 import Header from '../containers/Header';
 import { IInitialProps } from '../types';
-import Context from '../utils/context';
+import Context from '../context';
 
 /**
  * NOTE:
@@ -47,7 +47,7 @@ MyApp.getInitialProps = async (context) => {
         : "https://oscarexpert.com";
     
     const emptyProps: IInitialProps = {
-        app: { url, notification: '' },
+        app: { url, notification: undefined },
         auth: { 
             token: undefined,
             user: undefined

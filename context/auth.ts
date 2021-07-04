@@ -1,8 +1,7 @@
 
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { 
     IAuthContext, 
-    IAppContext, 
     IAuthState, 
     IUser,
 } from '../types';
@@ -10,15 +9,6 @@ import {
 const [state, setState] = useState<IAuthState>({
     token: undefined,
     user: undefined,
-});
-
-const AppContext = React.createContext<IAppContext>({ 
-    url: '',
-    notification: '',
-    setNotification: (notification: string) => setState((s) => ({
-        ...s,
-        notification,
-    }))
 });
 
 const AuthContext = React.createContext<IAuthContext>({
@@ -37,4 +27,6 @@ const AuthContext = React.createContext<IAuthContext>({
     })),
 });
 
-export default { Auth: AuthContext, App: AppContext };
+export const { token, user, setImage, setUser } = useContext(AuthContext);
+
+export default AuthContext;

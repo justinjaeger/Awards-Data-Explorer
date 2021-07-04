@@ -1,5 +1,5 @@
-import db from '../../../../lib/db';
-import { IProfileUserResponse } from '../../../../types/responses';
+import db from '../../../../../lib/db';
+import { IProfileUserResponse } from '../../../../../types/responses';
 
 export default async (req, res): Promise<IProfileUserResponse> => {
 

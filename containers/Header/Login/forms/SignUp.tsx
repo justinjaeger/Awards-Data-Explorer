@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { user, setUser } from '../../context/auth';
 
-function SignUp(props) {
-    const { userId, email, setNotification } = props;
+function SignUp() {
 
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');

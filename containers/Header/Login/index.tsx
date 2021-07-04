@@ -1,27 +1,21 @@
 import React from 'react';
-import Login from './routes/Login';
-import SignUp from './routes/SignUp';
-import EnterEmail from './routes/EnterEmail';
-import ForgotPassword from './routes/ForgotPassword';
-import ResetPassword from './routes/ResetPassword';
-import { IUser, IGenericResponse } from '../../../types';
+import Login from './forms/Login';
+import SignUp from './forms/SignUp';
+import EnterEmail from './forms/EnterEmail';
+import ForgotPassword from './forms/ForgotPassword';
+import ResetPassword from './forms/ResetPassword';
 
 type ILoginContainerProps = {
-    user: IUser,
-    loginRoute: string,
+    form: string,
     redirect: (route: string) => void,
-    setNotification: React.Dispatch<React.SetStateAction<string>>,
-    login: (data: IUser) => void,
     reset: () => void,
 }
 
-const LoginContainer = (props: ILoginContainerProps) => {
+export default function LoginContainer(props: ILoginContainerProps) {
+
     const {
-        user,
-        loginRoute,
+        form,
         redirect,
-        setNotification,
-        login,
         reset,
     } = props;
 
@@ -44,49 +38,37 @@ const LoginContainer = (props: ILoginContainerProps) => {
     //         });
     // }
 
+    function RenderInside(): JSX.Element {
+        switch(form) {
+            case 'login':
+                return <Login
+                    redirect={redirect}
+                    reset={reset}
+                />;
+            case 'email':
+                return <EnterEmail />
+            case 'signup':
+                return <SignUp />
+            case 'forgotPassword':
+                return <ForgotPassword
+                    redirect={redirect}
+                />
+            case 'resetPassword':
+                return <ResetPassword
+                    redirect={redirect}
+                    reset={reset}
+                />
+            default:
+                return <></>;
+        }
+    }
+
+    // this class styling -- later let's just make this inline or something
+    // this is also just bad styling practice -- should have this render differently for each in the switch above
+    // not positive this way of calling the functiono is going to work
     return (
-        <div id='login-container' className={`container-${loginRoute}`}>
-
-            {loginRoute === 'login' && (
-                <Login
-                    redirect={redirect}
-                    login={login}
-                    setNotification={setNotification}
-                />
-            )}
-
-            {loginRoute === 'email' && (
-                <EnterEmail
-                    setNotification={setNotification}
-                />
-            )}
-
-            {loginRoute === 'signup' && (
-                <SignUp
-                    user={user}
-                    setNotification={setNotification}
-                />
-            )}
-
-            {loginRoute === 'forgotPassword' && (
-                <ForgotPassword
-                    user={user}
-                    redirect={redirect}
-                    setNotification={setNotification}
-                />
-            )}
-
-            {loginRoute === 'resetPassword' && (
-                <ResetPassword
-                    user={user}
-                    redirect={redirect}
-                    setNotification={setNotification}
-                    login={login}
-                />
-            )}
-
+        <div id='login-container' className={`container-${form}`}>
+            <RenderInside />
         </div>
     );
 };
-
-export default LoginContainer;

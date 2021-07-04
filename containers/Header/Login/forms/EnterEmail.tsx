@@ -1,13 +1,9 @@
 import React, { useState } from 'react';
 import axios, { AxiosResponse } from 'axios';
-import { ISignupStepOneResponse } from '../../../../types';
+import { ISignupStepOneResponse } from '../../../../types/responses';
+import { setNotification } from '../../../../context/app';
 
-type IEnterEmailProps = {
-    setNotification:  React.Dispatch<React.SetStateAction<string>>,
-}
-
-export default function EnterEmail(props: IEnterEmailProps) {
-    const { setNotification } = props;
+export default function EnterEmail() {
 
     const [email, setEmail] = useState<string>('');
     const [userId, setUserId] = useState<number | null>(null);
@@ -20,7 +16,7 @@ export default function EnterEmail(props: IEnterEmailProps) {
 
     function handleSubmit(event) {
         // If success, display confirmation message
-        axios.post('/api/loginV2/signup/step1', { email })
+        axios.post('/api/v2/login/signup/step1', { email })
             .then((res: AxiosResponse<ISignupStepOneResponse>) => {
                 if (['rejected', 'error'].includes(res.data.status)) {
                     return setNotification(res.data.message);
@@ -35,7 +31,7 @@ export default function EnterEmail(props: IEnterEmailProps) {
     };
 
     function removeUser() {
-        axios.delete(`/api/loginV2/signup/:${userId}`)
+        axios.delete(`/api/v2/login/signup/:${userId}`)
         .then((res: AxiosResponse) => {
             if (['rejected', 'error'].includes(res.data.status)) {
                 return setNotification(res.data.message);
@@ -51,33 +47,33 @@ export default function EnterEmail(props: IEnterEmailProps) {
 
     return (
         <>
-            {!confirm 
-                ? <form onSubmit={handleSubmit} className='login-form'>
-                    <div className='login-form-label'>Email</div>
-                    <input
-                        className='login-form-input'
-                        autoFocus
-                        type='text'
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                    />
-                    <button disabled={!validateForm()} className='submit-button'>
-                        Create Account
+        {!confirm 
+            ? <form onSubmit={handleSubmit} className='login-form'>
+                <div className='login-form-label'>Email</div>
+                <input
+                    className='login-form-input'
+                    autoFocus
+                    type='text'
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                />
+                <button disabled={!validateForm()} className='submit-button'>
+                    Create Account
+                </button>
+            </form>
+            : <>
+            <div>Please verify the email sent to {email}.</div>
+                {displayResend && <div className='login-message'>
+                    Incorrect email?
+                    <button
+                        onClick={removeUser}
+                        className='click-here-button'
+                    >
+                        Click here to resend.
                     </button>
-                </form>
-                : <>
-                <div>Please verify the email sent to {email}.</div>
-                    {displayResend && <div className='login-message'>
-                        Incorrect email?
-                        <button
-                            onClick={removeUser}
-                            className='click-here-button'
-                        >
-                            Click here to resend.
-                        </button>
-                    </div>}
-                </>
-            }
+                </div>}
+            </>
+        }
         </>
     );
 }

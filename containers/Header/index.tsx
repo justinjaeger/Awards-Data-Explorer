@@ -1,41 +1,30 @@
-import React, { useState, useContext } from 'react';
+import React, { useState } from 'react';
 import axios, { AxiosResponse } from 'axios';
 import LoginContainer from './Login';
 import Modal from '../../components/Modal';
 import Notification from '../../components/Notification';
-import { IUser, ILoginRoute } from '../../types';
+import { ILoginRoute } from '../../types';
 import { IGenericResponse } from '../../types/responses';
-import Context from '../../utils/context';
+import { 
+    url, 
+    notification, 
+    setNotification 
+} from '../../context/app';
+import { user, setUser } from '../../context/auth';
 
 export default function Header() {
 
-    const { url, notification } = useContext(Context.App);
-    const { token, user, setUser } = useContext(Context.Auth);
-
     const [profileDropdown, setProfileDropdown] = useState<boolean>(false);
     const [loginModal, setLoginModal] = useState<boolean>(false);
-    const [loginRoute, setLoginRoute] = useState<ILoginRoute>('');
-
-    // RESET VARIOUS COMPONENTS
-    function reset(): void {
-        setLoginModal(false);
-        setLoginRoute('');
-        setNotification('');
-    };
-
-    // LOG IN
-    function login(data: IUser) {
-        console.log('logging user in with this data: ', data);
-        setUser(data); // use context
-        reset();
-        window.location.reload();
-    }
+    const [form, setForm] = useState<ILoginRoute>(undefined);
 
     // LOG OUT
     function logout() {
-        axios.get('/api/login/logout')
+        axios.get('/api/v2/login/logout')
             .then((res: AxiosResponse<IGenericResponse>) => {
-                if (res.data.status === 'error') return setNotification(res.data.message!);
+                if (res.data.status === 'error') {
+                    return setNotification(res.data.message!)
+                };
                 setUser(undefined);
                 reset();
                 window.location.reload();
@@ -45,35 +34,22 @@ export default function Header() {
             });
     }
 
+    // RESET VARIOUS COMPONENTS
+    function reset(): void {
+        setLoginModal(false);
+        setForm(undefined);
+        setNotification(undefined);
+    };
+
     // Displays login modal and sets route
     function redirect(route) {
         setLoginModal(true);
-        setLoginRoute(route);
-        setNotification('');
+        setForm(route);
     }
-
-    // When you click 'Incorrect Email?'
-    // function deleteUserAndSignUpAgain() {
-    //     // Delete the user by email
-    //     axios
-    //         .post('/api/signup/deleteUser', { email: user.email })
-    //         .then((res) => {
-    //             if (res.data.error) return setNotification(res.data.error);
-    //             redirect('/signup');
-    //             setNotification(res.data.message);
-    //             setLoginModal(true);
-    //         })
-    //         .catch((err) => {
-    //             // gtting an error here
-    //             console.log('err in notification.jsx', err.response);
-    //         });
-    // }
 
     return (
         <>
-            {notification !== '' && (
-                <Notification />
-            )}
+            {notification && <Notification />}
 
             <div id='Header'>
                 <div id='header-left'>
@@ -150,13 +126,11 @@ export default function Header() {
                 {loginModal && (
                     <Modal
                         setModal={setLoginModal}
-                        size={loginRoute === 'login' ? '200px' : '350px'}
+                        size={form === 'login' ? '200px' : '350px'}
                     >
                         <LoginContainer
-                            loginRoute={loginRoute}
+                            form={form}
                             redirect={redirect}
-                            setNotification={setNotification}
-                            login={login}
                             reset={reset}
                         />
                     </Modal>

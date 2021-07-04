@@ -1,5 +1,5 @@
-import db from '../../../../../lib/db';
-import { IFollowerCountResponse } from '../../../../../types/responses';
+import db from '../../../../../../lib/db';
+import { IFollowerCountResponse } from '../../../../../../types/responses';
 
 export default async (req, res): Promise<IFollowerCountResponse> => {
 
@@ -9,11 +9,11 @@ export default async (req, res): Promise<IFollowerCountResponse> => {
     } = req;
 
     try {
-        // count how many users are following id
+        // count how many followers id has
         if (method === 'GET') {
             const result = await db.query(`
                 SELECT COUNT(*) AS sum FROM followers 
-                WHERE follower=${id}
+                WHERE userId=${id}
             `)
             if (result.error) throw new Error(result.error);
             return res.json({ 

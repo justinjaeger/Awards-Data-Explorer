@@ -1,4 +1,4 @@
-import db from '../../../lib/db';
+import db from '../../../../lib/db';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import Cookies from 'cookies';

@@ -1,12 +1,12 @@
 export interface IInitialProps {
-    app: IAppContext;
+    app: IAppState;
     auth: IAuthState;
 }
 
-export type IAppContext = {
+// CONTEXT
+export interface IAppState {
     url: string;
-    notification: string;
-    setNotification: (notification: string) => void;
+    notification: string | undefined;
 }
 
 export interface IAuthState {
@@ -14,11 +14,16 @@ export interface IAuthState {
     user: IUser | undefined;
 }
 
+export type IAppContext = IAppState & {
+    setNotification: (notification: string) => void;
+}
+
 export type IAuthContext = IAuthState & {
     setUser: (user: IUser) => void;
     setImage: (image: string) => void;
 }
 
+// TYPES
 export interface IUser {
     userId: number;
     username: string;
@@ -42,9 +47,9 @@ export type IFollowers = {
 }[];
 
 export type ILoginRoute = 
-    '' |
     'login' | 
     'email' | 
     'signup' | 
     'forgotPassword' |
-    'resetPassword';
+    'resetPassword' |
+    undefined;

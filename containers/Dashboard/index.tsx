@@ -3,7 +3,7 @@ import axios, { AxiosResponse } from "axios";
 import FollowerList from "./components/FollowerList";
 import Modal from "../../components/Modal";
 import Notification from "../../components/Notification";
-import Context from '../../utils/context';
+import Context from '../../context/auth';
 import { IProfileUser } from '../../types';
 import { 
     IGenericResponse,

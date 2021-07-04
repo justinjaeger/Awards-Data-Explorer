@@ -19,7 +19,7 @@ export default function Home(props) {
         <>
             <Header
                 userId={props.userId}
-                loginRoute={props.loginRoute}
+                form={props.form}
                 username={props.username}
                 email={props.email}
                 notification={props.notification}
@@ -51,7 +51,7 @@ export async function getServerSideProps(context) {
         email: undefined,
         image: undefined,
         admin: false,
-        loginRoute: undefined,
+        form: undefined,
         notification: 'Access code expired',
         status: 'expired',
     };
@@ -93,7 +93,7 @@ export async function getServerSideProps(context) {
         // and send user to signup screen
         return { 
             ...emptyProps, 
-            loginRoute: 'signup',
+            form: 'signup',
             notification: undefined,
             userId,
             email,

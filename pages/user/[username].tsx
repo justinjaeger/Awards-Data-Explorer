@@ -5,7 +5,7 @@ import axios, { AxiosResponse } from "axios";
 import Dashboard from '../../containers/Dashboard';
 import Four0Four from '../../containers/Four0Four';
 import Loading from '../../components/Loading';
-import Context from '../../utils/context';
+import Context from '../../context/auth';
 import { IProfileUser } from '../../types';
 import { 
     IProfileUserResponse, 
