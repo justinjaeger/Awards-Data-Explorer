@@ -1,5 +1,6 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect } from "react";
 import { motion } from "framer-motion";
+import { notification, setNotification } from '../context/app';
 
 export default function Notification() {
 
@@ -10,21 +11,19 @@ export default function Notification() {
     });
 
     return (
-        <>
-            <motion.div
-                id="notification"
-                animate={{ opacity: 1 }}
-                initial={{ opacity: 0 }}
-                transition={{ delay: 0, duration: 0.5 }}
+        <motion.div
+            id="notification"
+            animate={{ opacity: 1 }}
+            initial={{ opacity: 0 }}
+            transition={{ delay: 0, duration: 0.5 }}
+        >
+            {notification}
+            <button
+                id="notif-x-button"
+                onClick={() => setNotification(false)}
             >
-                {children}
-                <button
-                    id="notif-x-button"
-                    onClick={() => setNotification(false)}
-                >
-                    X
-                </button>
-            </motion.div>
-        </>
+                X
+            </button>
+        </motion.div>
     );
 }

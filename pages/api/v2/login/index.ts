@@ -2,10 +2,9 @@ import db from '../../../../lib/db';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import Cookies from 'cookies';
+import { ILoginResponse } from '../../../../types/responses';
 
-export default async (req, res) => {
-
-    let result;
+export default async (req, res): Promise<ILoginResponse> => {
 
     const cookies = new Cookies(req, res);
 
@@ -23,13 +22,13 @@ export default async (req, res) => {
             const entryType = emailOrUsername.includes('@') ? 'email' : 'username';
 
             // Get data based on emailOrUsername entry
-            result = await db.query(`
+            const userData = await db.query(`
                 SELECT userId, username, email, admin, image, password
                 FROM users
                 WHERE ${entryType}='${emailOrUsername}'
             `)
-            if (result.error) throw new Error(result.error);
-            if (result[0] === undefined) {
+            if (userData.error) throw new Error(userData.error);
+            if (userData[0] === undefined) {
                 return res.json({ 
                     status: 'rejected', 
                     message: `Credentials do not match` 
@@ -41,14 +40,14 @@ export default async (req, res) => {
                 email, 
                 admin, 
                 image, 
-                password: hashedPassword 
-            } = result[0];
-            const authenticated = result[0].authenticated[0];
+                password: hashedPassword,
+            } = userData[0];
+            const authenticated = userData[0].authenticated[0];
 
             // Verify password with bcrypt
-            result = await bcrypt.compare(password, hashedPassword);
+            const passCheck = await bcrypt.compare(password, hashedPassword);
             // If it returns false, set error on client
-            if (result === false) {
+            if (passCheck === false) {
                 return res.json({ 
                     status: 'rejected', 
                     message: `Credentials do not match` 
@@ -72,20 +71,20 @@ export default async (req, res) => {
             );
 
             // SAVE TOKEN IN DB
-            result = await db.query(`
+            const tokenResponse = await db.query(`
                 INSERT INTO tokens(accessToken, userId)
                 VALUES('${accessToken}', ${userId}) 
             `);
-            if (result.error) throw new Error(result.error);
+            if (tokenResponse.error) throw new Error(tokenResponse.error);
 
             // UPDATE LAST LOGGED IN
             const datetime = new Date().toISOString().slice(0, 19).replace('T', ' ');
-            result = await db.query(`
+            const lastLogRes = await db.query(`
                 UPDATE users
                 SET lastLoggedIn = '${datetime}'
                 WHERE userId = ${userId} 
             `);
-            if (result.error) throw new Error(result.error);
+            if (lastLogRes.error) throw new Error(lastLogRes.error);
 
             // Set new cookie in browser
             cookies.set('accessToken', accessToken, { httpOnly: true });
@@ -98,38 +97,38 @@ export default async (req, res) => {
                     email,
                     image,
                     admin,
-                }
+                },
             })
         };
 
         // DELETE: logout
         if (method === 'DELETE') {
             // DELETE TOKEN FROM DB
-            result = await db.query(`
+            const logoutRes = await db.query(`
                 DELETE FROM tokens
                 WHERE accessToken='${accessToken}' 
             `);
-            if (result.error) throw new Error(result.error);
+            if (logoutRes.error) throw new Error(logoutRes.error);
             
             console.log('token deleted from db');
 
             // IF NO TOKEN DELETED, DELETE ALL TOKENS ASSOCIATED WITH USER
-            if (result.affectedRows === 0) {
+            if (logoutRes.affectedRows === 0) {
                 console.log('deleting all user tokens');
 
                 // First, get the userId from accessToken
                 const { accessToken } = req.cookies;
-                result = await jwt.verify(accessToken, process.env.ACCESS_TOKEN_SECRET, {
+                const tokenRes = await jwt.verify(accessToken, process.env.ACCESS_TOKEN_SECRET, {
                     ignoreExpiration: true,
                 });
-                const { userId } = result;
+                const { userId } = tokenRes;
 
                 // Second, delete all user tokens
-                result = await db.query(`
+                const delAllRes = await db.query(`
                     DELETE FROM tokens
                     WHERE userId=${userId}`
                 );
-                if (result.error) throw new Error(result.error);
+                if (delAllRes.error) throw new Error(delAllRes.error);
             };
 
             return res.status(200).json({ status: 'success' });

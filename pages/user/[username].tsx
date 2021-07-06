@@ -5,7 +5,7 @@ import axios, { AxiosResponse } from "axios";
 import Dashboard from '../../containers/Dashboard';
 import Four0Four from '../../containers/Four0Four';
 import Loading from '../../components/Loading';
-import Context from '../../context/auth';
+import { user } from '../../context/auth';
 import { IProfileUser } from '../../types';
 import { 
     IProfileUserResponse, 
@@ -20,7 +20,6 @@ import {
 export default function UserDashboard() {
 
     const router = useRouter();
-    const { user } = useContext(Context.Auth);
     const profileUsername = router.query.username;
 
     const [_404, set404] = useState<boolean>(false);

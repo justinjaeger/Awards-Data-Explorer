@@ -1,15 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { user, setUser } from '../../context/auth';
+import { user, setUser } from '../../../../context/auth';
 
 function SignUp() {
+
+    // This is after the user enters their email and is redirected here
+    // Actually, we're going to make this its OWN PAGE
+    // /signup/:secretCode
+    // this page is JUST for that secret code and signing you up
+    // it will redirect back to '/' at the end
+    // Basically, this page shouldn't exist the way it does
+    // we can do that later
 
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
 
     function validateForm() {
-        return email.length > 0 && password.length > 0;
+        return user.email.length > 0 && password.length > 0;
     }
 
     function handleSubmit(event) {

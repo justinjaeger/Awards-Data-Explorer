@@ -1,10 +1,11 @@
 import nodemailer from "nodemailer";
+import { url } from '../context/app';
 
 /**
  * Exports an object with all the mail configurations we need
  */
 
-export const verificationCode = (email, verificationCode) => {
+export const createVerificationCodeEmail = (email, verificationCode) => {
 
     const obj = {};
 
@@ -32,9 +33,6 @@ export const verificationCode = (email, verificationCode) => {
             },
         });
     }
-
-    const BASEURL = (process.env.NODE_ENV === "development") ? "http://localhost:3003" : "https://oscarexpert.com";
-    const url = `${BASEURL}/verify`;
 
     obj.options = {
         from: '"The Oscar Expert" <noreply@oscarexpert.com>',

@@ -2,17 +2,16 @@ import React, { useState } from 'react';
 import axios, { AxiosResponse } from 'axios';
 import { ILoginResponse } from '../../../../types/responses';
 import { setNotification } from '../../../../context/app';
-import { setUser } from '../../../../context/auth';
-import ResetPassword from './ResetPassword';
+import { IUser } from '../../../../types';
 
 type ILoginProps = {
-    redirect: (route: string) => void
-    reset: () => void,
+    changeForm: (form: string) => void;
+    login: (user: IUser) => void;
 }
 
 export default function Login(props: ILoginProps) {
 
-    const { redirect, reset } = props;
+    const { changeForm, login } = props;
 
     const [emailOrUsername, setEmailOrUsername] = useState<string>('');
     const [password, setPassword] = useState<string>('');
@@ -29,9 +28,7 @@ export default function Login(props: ILoginProps) {
                 if (['rejected', 'error'].includes(res.data.status)) {
                     return setNotification(res.data.message);
                 };
-                setUser(res.data.user);
-                reset();
-                window.location.reload();
+                return login(res.data.user);
             })
             .catch((err) => {
                 if (err)
@@ -67,7 +64,7 @@ export default function Login(props: ILoginProps) {
             </button>
 
             <button
-                onClick={() => redirect('forgotPassword')}
+                onClick={() => changeForm('forgotPassword')}
                 className='forgot-password-button'
             >
                 Forgot your password?

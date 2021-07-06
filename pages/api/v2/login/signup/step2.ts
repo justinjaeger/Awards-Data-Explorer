@@ -1,23 +1,27 @@
-import db from '../../../../lib/db';
+import db from '../../../../../lib/db';
 import bcrypt from 'bcrypt';
-import profanityFilter from '../../utils/profanityFilter';
-import usernameFilter from '../../utils/usernameFilter';
-import { encrypt } from '../utils/encrypt';
-import { verificationEmail, verificationCode } from '../utils/mailHelper';
+import jwt from "jsonwebtoken";
+import Cookies from 'cookies';
+import profanityFilter from '../../../../../utils/profanityFilter';
+import usernameFilter from '../../../../../utils/usernameFilter';
+import { encrypt } from '../../../utils/encrypt';
+import { verificationEmail, verificationCode } from '../../../utils/mailHelper';
 
 /**
  * User submits SignUp info. Account is created, and they redirect to dashboard
  * Once you create your account, you are verified with the email this came from AND authenticated. But do not authenticate before that
  */
 
-export default async (req, res) => {
+// Overall, this needs to verify the user and create them in the database
 
-    let result;
+export default async (req, res) => {
 
     const {
         method,
         body: { userId, username, password, confirmPassword },
     } = req;
+
+    const cookies = new Cookies(req, res);
     
     try {
         // POST: update info for user and verify account
@@ -51,19 +55,19 @@ export default async (req, res) => {
             const datetime = new Date().toISOString().slice(0, 19).replace('T', ' ');
 
             // Create new user in database
-            result = await db.query(`
+            const newUserRes = await db.query(`
                 INSERT INTO users(email, username, password, dateCreated, lastLoggedIn, authenticated)
                 VALUES('${username}', '${hashedPassword}', '${datetime}', '${datetime}', 1) 
             `);
-            if (result.error) {
+            if (newUserRes.error) {
                 // Handle duplicate entry errors with an error message
-                if (result.error.code === 'ER_DUP_ENTRY') {
-                    return result.error.sqlMessage.split('.')[1] === `username'`
+                if (newUserRes.error.code === 'ER_DUP_ENTRY') {
+                    return newUserRes.error.sqlMessage.split('.')[1] === `username'`
                         ? res.json({ error: 'This username is already registered.' })
                         : res.json({ error: 'This email is already registered.' });
                 }
                 // If that's not the error, handle it like any other
-                throw new Error(result.error);
+                throw new Error(newUserRes.error);
             }
 
             // Create access token
@@ -74,11 +78,11 @@ export default async (req, res) => {
             );
 
             // Save token in db
-            result = await db.query(`
+            const saveTokenRes = await db.query(`
                 INSERT INTO tokens(accessToken, userId)
                 VALUES('${accessToken}', ${userId}) 
             `);
-            if (result.error) throw new Error(result.error);
+            if (saveTokenRes.error) throw new Error(saveTokenRes.error);
 
             // Set new cookie in browser
             cookies.set('accessToken', accessToken, { httpOnly: true });

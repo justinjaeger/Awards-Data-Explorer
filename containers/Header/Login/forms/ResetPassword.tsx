@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { setUser } from '../../../../context/auth';
 
 function ResetPassword(props) {
-    const { setNotification, email, login } = props;
+    const { changeForm, login } = props;
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
 
@@ -16,8 +17,8 @@ function ResetPassword(props) {
             password,
             confirmPassword,
         };
-        axios
-            .post('/api/login/resetPassword', payload)
+        // Type this response
+        axios.post('/api/login/resetPassword', payload)
             .then((res) => {
                 if (res.data.error) return setNotification(res.data.error);
                 login(res.data); // log user in & send user data
@@ -29,7 +30,7 @@ function ResetPassword(props) {
                 );
             });
 
-        event.preventDefault(); /* prevents it from refreshing */
+        event.preventDefault();
     }
 
     return (

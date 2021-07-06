@@ -4,19 +4,22 @@ import SignUp from './forms/SignUp';
 import EnterEmail from './forms/EnterEmail';
 import ForgotPassword from './forms/ForgotPassword';
 import ResetPassword from './forms/ResetPassword';
+import { IUser, ILoginRoute} from '../../../types';
 
 type ILoginContainerProps = {
-    form: string,
-    redirect: (route: string) => void,
-    reset: () => void,
+    form: ILoginRoute;
+    changeForm: (route: string) => void;
+    reset: () => void;
+    login: (user: IUser) => void;
 }
 
 export default function LoginContainer(props: ILoginContainerProps) {
 
     const {
         form,
-        redirect,
+        changeForm,
         reset,
+        login,
     } = props;
 
     // RESEND VERIFICATION EMAIL
@@ -38,28 +41,25 @@ export default function LoginContainer(props: ILoginContainerProps) {
     //         });
     // }
 
-    function RenderInside(): JSX.Element {
+    function Form(): JSX.Element {
         switch(form) {
             case 'login':
                 return <Login
-                    redirect={redirect}
-                    reset={reset}
+                    changeForm={changeForm}
+                    login={login}
                 />;
+            // Later, once we get rid of SignUP, let's name this Signup
             case 'email':
                 return <EnterEmail />
-            case 'signup':
-                return <SignUp />
             case 'forgotPassword':
                 return <ForgotPassword
-                    redirect={redirect}
+                    reset={reset}
                 />
             case 'resetPassword':
                 return <ResetPassword
-                    redirect={redirect}
-                    reset={reset}
+                    changeForm={changeForm}
+                    login={login}
                 />
-            default:
-                return <></>;
         }
     }
 
@@ -68,7 +68,7 @@ export default function LoginContainer(props: ILoginContainerProps) {
     // not positive this way of calling the functiono is going to work
     return (
         <div id='login-container' className={`container-${form}`}>
-            <RenderInside />
+            <Form />
         </div>
     );
 };

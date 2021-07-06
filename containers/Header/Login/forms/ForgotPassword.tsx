@@ -1,8 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { setNotification } from '../../../../context/app';
 
-function ForgotPassword(props) {
-    const { setRoute, setNotification, setReEnterEmailLink } = props;
+type IForgotPasswordProps = {
+    reset: () => void;
+}
+
+function ForgotPassword(props: IForgotPasswordProps) {
+    const { reset } = props;
 
     const [email, setEmail] = useState('');
 
@@ -13,22 +18,22 @@ function ForgotPassword(props) {
     function handleSubmit(event) {
         const payload = { email };
 
-        /* NOTE: The /signup POST request will send the user a verification email, so it won't return anything back except a message */
-
-        axios
-            .post('/api/login/sendPassResetEmail', payload)
+        // Request will send the user a verification email, so it won't return anything back except a message
+        // That's all it needs to do
+        // Needs a typed axios response
+        axios.post('/api/v2/login/sendPassResetEmail', payload)
             .then((res) => {
-                // console.log('res data', res.data)
-                if (res.data.error) return setNotification(res.data.error);
-                setRoute('/blank');
-                setReEnterEmailLink(true);
+                if (res.data.error) {
+                    return setNotification(res.data.error)
+                };
+                reset();
                 setNotification(res.data.message);
             })
             .catch((err) => {
                 console.log('err', err.response);
             });
 
-        event.preventDefault(); /* prevents it from refreshing */
+        event.preventDefault();
     }
 
     return (

@@ -3,7 +3,7 @@ import axios, { AxiosResponse } from 'axios';
 import LoginContainer from './Login';
 import Modal from '../../components/Modal';
 import Notification from '../../components/Notification';
-import { ILoginRoute } from '../../types';
+import { ILoginRoute, IUser } from '../../types';
 import { IGenericResponse } from '../../types/responses';
 import { 
     url, 
@@ -41,8 +41,13 @@ export default function Header() {
         setNotification(undefined);
     };
 
-    // Displays login modal and sets route
-    function redirect(route) {
+    function login(user: IUser): void { 
+        reset();
+        setUser(user);
+        window.location.reload();
+    };
+
+    function changeForm(route) {
         setLoginModal(true);
         setForm(route);
     }
@@ -63,13 +68,13 @@ export default function Header() {
                         <>
                             <div id='left-header-margin'></div>
                             <button
-                                onClick={() => redirect('login')}
+                                onClick={() => changeForm('login')}
                                 className='header-button'
                             >
                                 Log In
                             </button>
                             <button
-                                onClick={() => redirect('/email')}
+                                onClick={() => changeForm('/email')}
                                 className='header-button'
                             >
                                 Sign Up
@@ -130,8 +135,9 @@ export default function Header() {
                     >
                         <LoginContainer
                             form={form}
-                            redirect={redirect}
+                            changeForm={changeForm}
                             reset={reset}
+                            login={login}
                         />
                     </Modal>
                 )}

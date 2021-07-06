@@ -10,17 +10,19 @@ export default function EnterEmail() {
     const [confirm, setConfirm] = useState<boolean>(false);
     const [displayResend, setDisplayResend] = useState<boolean>(true);
 
-    function validateForm() { 
+    function validateForm() {
         return email.length > 0 
     };
 
     function handleSubmit(event) {
-        // If success, display confirmation message
         axios.post('/api/v2/login/signup/step1', { email })
             .then((res: AxiosResponse<ISignupStepOneResponse>) => {
-                if (['rejected', 'error'].includes(res.data.status)) {
+                if (res.data.status === 'rejected') {
                     return setNotification(res.data.message);
-                };
+                }
+                if (res.data.status === 'error') {
+                    return setNotification('error');
+                }
                 setConfirm(true);
                 setUserId(res.data.userId);
             })
@@ -44,6 +46,9 @@ export default function EnterEmail() {
             console.log('error2 in signup', err.data.message); // DATE Wonder if this names sense that it woudl be the same structure response
         });
     };
+
+    // IDK if I want the resend to work in the same way aka deleting the user
+    // should just reset the code and delete the old one
 
     return (
         <>

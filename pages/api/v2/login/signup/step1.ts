@@ -1,13 +1,13 @@
-import db from '../../../../lib/db';
-import { verificationEmail, verificationCode } from '../utils/mailHelper';
+import db from '../../../../../lib/db';
+import { verificationEmail, createVerificationCodeEmail } from '../../../../../utils/mailHelper';
+import { ISignupStepOneResponse } from '../../../../../types/responses';
 
 /**
  * User submits email and gets a confirmation link sent to them
+ * Also returns userId?
  */
 
-export default async (req, res) => {
-
-    let result;
+export default async (req, res): Promise<ISignupStepOneResponse> => {
 
     const {
         method,
@@ -27,39 +27,40 @@ export default async (req, res) => {
             }
 
             // Create new user in database
-            result = await db.query(`
+            const newUserRes = await db.query(`
                 INSERT INTO users(email)
                 VALUES('${email}') 
             `);
-            if (result.error) {
+            if (newUserRes.error) {
                 // Handle duplicate entry errors with an error message
-                if (result.error.code === 'ER_DUP_ENTRY') {
+                if (newUserRes.error.code === 'ER_DUP_ENTRY') {
                     return res.json({
                         status: 'rejected',
                         message: 'This email is already registered.'
                     });
                 }
                 // If that's not the error, handle it like any other
-                throw new Error(result.error);
+                throw new Error(newUserRes.error);
             }
 
             // Get new user's userId
-            result = await db.query(`
+            const newUserId = await db.query(`
                 SELECT userId FROM users
                 WHERE email='${email}'
             `)
-            if (result.error) throw new Error(result.error);
-            const { userId } = result[0];
+            if (newUserId.error) throw new Error(newUserId.error);
+            const { userId } = newUserId[0];
 
             // Generate verification code
             const verificationCode = Math.floor(100000 + Math.random() * 900000);
 
             // Utilize the helper function to create e-mail
-            const { transport, options } = verificationCode(email, verificationCode);
+            // Creates the link to send them to signup/:code
+            const { transport, options } = createVerificationCodeEmail(email, verificationCode);
 
             // Actually sends the email
-            result = transport.sendMail(options);
-            if (result.error) throw new Error(result.error);
+            const emailRes = transport.sendMail(options);
+            if (emailRes.error) throw new Error(emailRes.error);
 
             // Get expiration time (now + 30 minutes)
             const dt = new Date();
@@ -67,11 +68,11 @@ export default async (req, res) => {
             const expiration = dt.toISOString().slice(0, 19).replace("T", " ");
 
             // Sets verification code in database
-            result = await db.query(`
+            const verifCodeRes = await db.query(`
                 INSERT INTO codes(verificationCode, userId, expiration)
                 VALUES('${verificationCode}', ${userId}, '${expiration}')
             `)
-            if (result.error) throw new Error(result.error);
+            if (verifCodeRes.error) throw new Error(verifCodeRes.error);
 
             // Send a 200 status back, where it will display a confirmation message to check email
             return res.status(200).json({ status: 'success' });

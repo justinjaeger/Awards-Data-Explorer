@@ -1,4 +1,5 @@
-import { IUser, IFollowers } from './';
+import { IUser } from './';
+
 /**
  * status: 'rejected' is a controlled error
  * ex: 'username not long enough'
@@ -14,22 +15,26 @@ export interface ILoginResponse extends IGenericResponse {
 }
 
 export interface ISignupStepOneResponse extends IGenericResponse {
-    userId: number;
+    userId?: number;
 }
 
 export interface IProfileUserResponse extends IGenericResponse {
-    userId: number;
-    image: string;
+    userId?: number;
+    image?: string;
 }
 
 export interface IFollowerCountResponse extends IGenericResponse {
-    count: number;
+    count?: number;
 }
 
 export interface IDetermineFollowingResponse extends IGenericResponse {
-    following: boolean;
+    following?: boolean;
 }
 
+export interface IVerifyCodeResponse extends IGenericResponse {
+    userId?: number;
+    email?: string;
+}
 export interface IUploadImageResponse extends IGenericResponse {
 
 }
