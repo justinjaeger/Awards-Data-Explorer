@@ -1,10 +1,6 @@
 import db from '../../../../lib/db';
 import { verificationEmail, verificationCode } from '../utils/mailHelper';
 
-/**
- * User submits email and gets a confirmation link sent to them
- */
-
 export default async (req, res) => {
 
     let result;

@@ -69,7 +69,7 @@ export default async (req, res): Promise<ISignupStepOneResponse> => {
 
             // Sets verification code in database
             const verifCodeRes = await db.query(`
-                INSERT INTO codes(verificationCode, userId, expiration)
+                INSERT INTO codes(code, userId, expiration)
                 VALUES('${verificationCode}', ${userId}, '${expiration}')
             `)
             if (verifCodeRes.error) throw new Error(verifCodeRes.error);

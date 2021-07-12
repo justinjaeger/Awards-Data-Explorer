@@ -4,17 +4,17 @@ import jwt from "jsonwebtoken";
 import Cookies from 'cookies';
 import profanityFilter from '../../../../../utils/profanityFilter';
 import usernameFilter from '../../../../../utils/usernameFilter';
-import { encrypt } from '../../../utils/encrypt';
-import { verificationEmail, verificationCode } from '../../../utils/mailHelper';
+import { ILoginResponse } from '../../../../../types/responses';
 
 /**
- * User submits SignUp info. Account is created, and they redirect to dashboard
- * Once you create your account, you are verified with the email this came from AND authenticated. But do not authenticate before that
+ * User has already been partially created (see step1.ts)
+ * User has just submitted SignUp info (username, password)
+ * This checks their username + password, sets them, and validates the account
+ * Must send back all relevant user info for login (see IUser) in types/indes.tsx
+ * Request made from [code].tsx
  */
 
-// Overall, this needs to verify the user and create them in the database
-
-export default async (req, res) => {
+export default async (req, res): Promise<ILoginResponse> => {
 
     const {
         method,
@@ -28,23 +28,23 @@ export default async (req, res) => {
         if (method === 'POST') {
             // Check that username is properly formatted
             const filterResult = usernameFilter(username);
-            if (filterResult.status === false) {
-                return res.json({ error: filterResult.message });
+            if (!filterResult) {
+                return res.json({ status: 'rejected', message: filterResult.message });
             }
             // Check that no profanity
-            if (profanityFilter(username) === true) {
-                return res.json({ error: 'Profanity is not allowed in your username' });
+            if (profanityFilter(username)) {
+                return res.json({ status: 'rejected', message: 'Profanity is not allowed in your username' });
             }
             // Check that passwords match
             if (password !== confirmPassword) {
-                return res.json({ error: 'Passwords do not match.' });
+                return res.json({ status: 'rejected', message: 'Passwords do not match.' });
             }
             // Check that password is proper length
             if (password.length < 8) {
-                return res.json({ error: 'Password must be more than 8 characters.' });
+                return res.json({ status: 'rejected', message: 'Password must be more than 8 characters.' });
             }
             if (password.length > 20) {
-                return res.json({ error: 'Password must be less than 20 characters.' });
+                return res.json({ status: 'rejected', message: 'Password must be less than 20 characters.' });
             }
 
             // Hash password using bcrypt
@@ -54,17 +54,15 @@ export default async (req, res) => {
             // Get the datetime
             const datetime = new Date().toISOString().slice(0, 19).replace('T', ' ');
 
-            // Create new user in database
+            // Update user info
             const newUserRes = await db.query(`
-                INSERT INTO users(email, username, password, dateCreated, lastLoggedIn, authenticated)
+                INSERT INTO users(username, password, dateCreated, lastLoggedIn, authenticated)
                 VALUES('${username}', '${hashedPassword}', '${datetime}', '${datetime}', 1) 
             `);
             if (newUserRes.error) {
                 // Handle duplicate entry errors with an error message
                 if (newUserRes.error.code === 'ER_DUP_ENTRY') {
-                    return newUserRes.error.sqlMessage.split('.')[1] === `username'`
-                        ? res.json({ error: 'This username is already registered.' })
-                        : res.json({ error: 'This email is already registered.' });
+                    return res.json({ status: 'rejected', message: 'This username is already registered.' });
                 }
                 // If that's not the error, handle it like any other
                 throw new Error(newUserRes.error);
@@ -73,7 +71,7 @@ export default async (req, res) => {
             // Create access token
             const accessToken = jwt.sign(
                 { userId }, // payload
-                process.env.ACCESS_TOKEN_SECRET,
+                process.env.ACCESS_TOKEN_SECRET, // secret
                 { expiresIn: '10m' } // options
             );
 
@@ -87,12 +85,31 @@ export default async (req, res) => {
             // Set new cookie in browser
             cookies.set('accessToken', accessToken, { httpOnly: true });
 
-            // Redirect to user dashboard (login data will be obtained from access token there)
-            return res.redirect(`user/${username}`);
+            // Get remaining user info for login
+            const getUserInfo = await db.query(`
+                SELECT email, admin
+                FROM users
+                WHERE userId=${userId}
+            `);
+            if (getUserInfo.error) throw new Error(getUserInfo.error);
+            const { email, admin } = getUserInfo[0];
+
+            return res.status(200).send({
+                status: 'success',
+                user: {
+                    userId,
+                    username,
+                    email,
+                    admin,
+                }
+            });
         };
 
     } catch(e) {
         console.log('error: ', e.message);
-        return res.status(500).send(e.message);
+        return res.status(500).json({ 
+            status: 'error', 
+            message: e.message,
+        });
     }
 };

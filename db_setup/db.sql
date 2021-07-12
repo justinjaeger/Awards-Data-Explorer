@@ -16,7 +16,7 @@ CREATE TABLE `tokens` (
 );
 
 CREATE TABLE `codes` (
-  `verificationCode` INT PRIMARY KEY NOT NULL,
+  `code` INT PRIMARY KEY NOT NULL,
   `userId` INT NOT NULL
 );
 

@@ -33,8 +33,8 @@ export interface IDetermineFollowingResponse extends IGenericResponse {
 
 export interface IVerifyCodeResponse extends IGenericResponse {
     userId?: number;
-    email?: string;
 }
+
 export interface IUploadImageResponse extends IGenericResponse {
 
 }

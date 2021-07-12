@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { useRouter } from 'next/router';
 import { user, setUser } from '../../../../context/auth';
 
 function SignUp() {
 
+    // SEE [code].tsx
     // This is after the user enters their email and is redirected here
     // Actually, we're going to make this its OWN PAGE
     // /signup/:secretCode
@@ -11,6 +13,7 @@ function SignUp() {
     // it will redirect back to '/' at the end
     // Basically, this page shouldn't exist the way it does
     // we can do that later
+    const router = useRouter();
 
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
@@ -22,7 +25,7 @@ function SignUp() {
 
     function handleSubmit(event) {
         const payload = {
-            userId,
+            userId: user.userId,
             username,
             password,
             confirmPassword,
@@ -33,7 +36,7 @@ function SignUp() {
                 if (res.data.error) return setNotification(res.data.error);
                 console.log('signup successful, redirecting');
                 // Redirect to dashboard
-                return res.redirect(`/user/${username}`);
+                router.push(`/user/${username}`);
             })
             .catch((err) => {
                 console.log('error in signup', err.response);
