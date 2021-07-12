@@ -1,7 +1,8 @@
 import db from '../../../../../../lib/db';
-import { IFollowers } from '../../../../../../types';
+import { IFollower } from '../../../../../../types';
+import { IFollowerResponse } from '../../../../../../types/responses';
 
-export default async (req, res) => {
+export default async (req, res): Promise<IFollowerResponse> => {
 
     const {
         method,
@@ -16,12 +17,12 @@ export default async (req, res) => {
                 FROM users
                 WHERE userId IN (
                     SELECT follower FROM followers
-                    WHERE userId='${id}'
+                    WHERE userId=${id}
                 )
             `);
             if (result.error) throw new Error(result.error);
             
-            const followers: IFollowers = result.map(user => {
+            const followers: IFollower[] = result.map(user => {
                 const image = user.image ? user.image : '/PROFILE.png';
                 return {
                     userId: user.userId,

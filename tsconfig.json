@@ -23,7 +23,7 @@
     "**/*.ts",
     "**/*.tsx", 
     "pages/_document.js"
-  ],
+, "components/FileDrop.jsx"  ],
   "exclude": [
     "node_modules"
   ]

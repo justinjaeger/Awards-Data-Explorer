@@ -2,13 +2,12 @@ import React, { useContext, useState } from "react";
 import axios, { AxiosResponse } from "axios";
 import FollowerList from "./components/FollowerList";
 import Modal from "../../components/Modal";
-import Notification from "../../components/Notification";
-import Context from '../../context/auth';
+import { user, setUser } from '../../context/auth';
+import { setNotification } from '../../context/app';
 import { IProfileUser } from '../../types';
 import { 
     IGenericResponse,
     IUploadImageResponse,
-    ISaveImageResponse,
 } from '../../types/responses';
 
 type IDashboardProps = {
@@ -23,39 +22,38 @@ export default function Dashboard(props: IDashboardProps) {
         following: _following,
     } = props;
 
-    const { user } = useContext(Context.Auth);
-
-    const [notification, setNotification] = useState(false); // wrong type -- isn't this supposed to bubble to the top or no?
-    const [dashboardModal, setModal] = useState<boolean>(false);
+    const [dashboardModal, setDashboardModal] = useState<boolean>(false);
+    const [modalType, setModalType] = useState<'follower' | 'following' | undefined>(undefined);
+    // Need below in state because we could choose to unfollow
     const [following, setFollowing] = useState<boolean>(_following);
     const [followersCount, setFollowersCount] = useState<number>(profileUser.followers);
 
     // Determine if page is YOUR profile or someone else's
     const isMyProfile = user.username === profileUser.username ? true : false;
 
+    function setModal(_modalType: 'follower' | 'following' | undefined) {
+        setDashboardModal(true);
+        setModalType(_modalType);
+    }
+
     // FOLLOW USER
     function followUser() {
-        axios.post(`/api/users/${user.userId}/following`, { 
+        axios.post(`/api/v2/users/${user.userId}/following`, { 
             profileUserId: profileUser.userId,
         }).then((res: AxiosResponse<IGenericResponse>) => {
                 setFollowing(true);
                 // update the following number
                 setFollowersCount(followersCount + 1);
             })
-            .catch((err) => {
-                if (err)
-                    console.log("something went wrong fetching followers", err);
+            .catch((e) => {
+                console.log('error following user: ', e.message);
             });
     }
 
     // UNFOLLOW USER
     function unfollowUser() {
-        console.log("clicked unfollow user");
-        axios.delete(`/api/users/${user.userId}/following/${profileUser.userId}`, { 
-            headers: {
-                Authorization: authorizationToken, // SHOULD I HAVE THIS
-            }
-        }).then((res: AxiosResponse<IGenericResponse>) => {
+        axios.delete(`/api/v2/users/${user.userId}/following/${profileUser.userId}`)
+            .then((res: AxiosResponse<IGenericResponse>) => {
                 setFollowing(false);
                 // update the following number
                 setFollowersCount(followersCount - 1);
@@ -66,7 +64,7 @@ export default function Dashboard(props: IDashboardProps) {
             });
     }
 
-    // Upload Profile Image
+    // UPLOAD PROFILE IMAGE
     async function handleProfileImageUpload(e) {
         // Get the uploaded file
         const file = e.target.files[0];
@@ -80,37 +78,41 @@ export default function Dashboard(props: IDashboardProps) {
         validTypes.forEach((type) => {
             if (file.type === type) valid = true;
         });
-        if (!valid)
+        if (!valid) {
             return setNotification(
-                "Not a valid image type. Accepts .jpeg / .jpg / .png"
+                'Not a valid image type. Accepts .jpeg / .jpg / .png'
             );
+        }
 
         // Get the previous user image key
-        const previousKey =
-            user.image === "/PROFILE.png" ? null : user.image.slice(52);
+        // Not ssure why never used but uncommenting for now
+        // const previousKey =
+        //     user.image === "/PROFILE.png" ? null : user.image.slice(52);
 
         // generate unique new file name
         let randomNumber = Math.floor(Math.random() * 10000);
         const fileName = user.username + randomNumber + file.name;
 
-        // save the image to DO Spaces & get edge url
-        // NOTE: Changed from commented fetch below if no work
-        let newUrl;
-        await axios.post(`/api/image/uploadProfileImage?key=${fileName}`, {
+        // save the image to DO Spaces & save the new url in database. Update user
+        // NOTE: Changed from commented fetch below (in case isn't working)
+        await axios.post(`/api/v2/users/${user.userId}/image/?key=${fileName}`, {
             data: { formData },
             headers: {
                 'Content-Type': 'image/jpg',
             }
-        })
-            .then((res: AxiosResponse<IUploadImageResponse>) => {
+        }).then((res: AxiosResponse<IUploadImageResponse>) => {
                 // convert url to edge url
-                newUrl = res.url.slice(0, 24) + ".cdn" + res.url.slice(24);
-                setProfileImage(newUrl);
-                // Should update the root state context when updating user aka global data - current authenticated user is a great use case for this
+                const image = res.data.url.slice(0, 24) + ".cdn" + res.data.url.slice(24);
+                // setProfileImage(edgeUrl);
+                setUser({
+                    ...user,
+                    image,
+                });
             })
-            .catch((err) =>
-                console.log("error uplßoading image to Spaces", err)
+            .catch((e) =>
+                console.log('error uploading image to Spaces: ', e.message)
             );
+
         // await fetch(`/api/image/uploadProfileImage?key=${fileName}`, {
         //     method: "POST",
         //     body: formData,
@@ -126,44 +128,37 @@ export default function Dashboard(props: IDashboardProps) {
         //         console.log("error uplßoading image to Spaces", err)
         //     );
 
-        // If upload was successful...
-        if (newUrl) {
-            // Write image to database
-            await axios.post('/api/image/saveProfileImage', {
-                username, 
-                newUrl,
-            }).then((res: AxiosResponse<ISaveImageResponse>) => console.log("success saving url"))
-                .catch((err) => console.log("err saving url", err));
-            // Delete previous image from Spaces if there is one
-            if (previousKey) {
-                await axios
-                    .post("/api/image/deleteProfileImage", { previousKey })
-                    .then((data) =>
-                        console.log("success deleting previous image")
-                    )
-                    .catch((err) =>
-                        console.log("err deleting previous image", err)
-                    );
-            }
-        }
+        // // If upload was successful...
+        // if (edgeUrl) {
+        //     // Write image to database
+        //     await axios.post('/api/image/saveProfileImage', {
+        //         username: user.username, 
+        //         edgeUrl,
+        //     }).then((res) => console.log("success saving url"))
+        //         .catch((err) => console.log("err saving url", err));
+        //     // Delete previous image from Spaces if there is one
+        //     if (previousKey) {
+        //         await axios
+        //             .post("/api/image/deleteProfileImage", { previousKey })
+        //             .then((data) =>
+        //                 console.log("success deleting previous image")
+        //             )
+        //             .catch((err) =>
+        //                 console.log("err deleting previous image", err)
+        //             );
+        //     }
+        // }
     }
 
     // Load the skeleton until the data has been fetched
     return (
         <div id="dashboard-content">
-            {notification && (
-                <Notification setNotification={setNotification}>
-                    {notification}
-                </Notification>
-            )}
-
             {isMyProfile
-                ? [
-                      // If IS my profile:
+                ? <>
                       <label htmlFor="file-upload">
                           <div>
                               <img
-                                  src={profileImage}
+                                  src={profileUser.image}
                                   className="profile-image-lg dashboard-profile-image"
                               />
                               <div id="dashboard-image-hover">Upload Image</div>
@@ -174,75 +169,64 @@ export default function Dashboard(props: IDashboardProps) {
                           type="file"
                           onChange={handleProfileImageUpload}
                       />,
-                  ]
-                : [
-                      // If NOT my profile:
-                      <label htmlFor="file-upload">
-                          <img
-                              src={profileImage}
-                              className="profile-image-lg dashboard-profile-image-logout"
-                          />
-                      </label>,
-                  ]}
+                  </>
+                : <label htmlFor="file-upload">
+                    <img
+                        src={profileUser.image}
+                        className="profile-image-lg dashboard-profile-image-logout"
+                    />
+                </label>
+                }
 
             <div id="dashboard-info">
-                {!isMyProfile && <div id="profile-name">{profileUsername}</div>}
-
-                {isMyProfile && <div id="profile-name">{profileUsername}</div>}
-
-                {!isMyProfile &&
-                    loggedIn && [
-                        // If someone else's profile AND logged in:
-                        following && (
+                <div id="profile-name">{profileUser.username}</div>
+                {!isMyProfile && user &&
+                    // If someone else's profile AND logged in, display follow/unfollow buttons
+                    following ? (
                             <button
                                 id="follow-button"
-                                onClick={() =>
-                                    unfollowUser(profileUsername, username)
-                                }
+                                onClick={unfollowUser}
                             >
                                 Unfollow
                             </button>
-                        ),
-                        !following && (
+                        ) : (
                             <button
                                 id="follow-button"
-                                onClick={() =>
-                                    followUser(profileUsername, username)
-                                }
+                                onClick={followUser}
                             >
                                 Follow
                             </button>
-                        ),
-                    ]}
+                        )
+                }
 
                 <div id="dashboard-follower-buttons">
                     <button
-                        onClick={() => setModal("follower")}
+                        onClick={() => setModal('follower')}
                         id="follower-button"
                     >
-                        {numFollowers} followers
+                        {profileUser.followers} followers
                     </button>
                     <button
-                        onClick={() => setModal("following")}
+                        onClick={() => setModal('following')}
                         id="follower-button"
                     >
-                        {numFollowing} following
+                        {profileUser.following} following
                     </button>
                 </div>
             </div>
 
             {dashboardModal && (
-                <Modal setModal={setModal}>
+                <Modal setModal={setDashboardModal}>
                     <div id="follower-list-container">
-                        {dashboardModal === "follower" && (
+                        {modalType === 'follower' && (
                             <div id="follower-title">Followers:</div>
                         )}
-                        {dashboardModal === "following" && (
+                        {modalType === 'following' && (
                             <div id="follower-title">Following:</div>
                         )}
                         <FollowerList
-                            title={dashboardModal}
-                            profileUsername={profileUsername}
+                            modalType={modalType}
+                            profileUser={profileUser}
                         />
                     </div>
                 </Modal>

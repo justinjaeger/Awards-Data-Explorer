@@ -1,39 +1,34 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import React, { useState } from 'react';
+import axios, { AxiosResponse } from 'axios';
 import { setNotification } from '../../../../context/app';
+import { IGenericResponse } from '../../../../types/responses';
 
 type IForgotPasswordProps = {
-    reset: () => void;
+    reset: (notification?: string) => void;
 }
 
 function ForgotPassword(props: IForgotPasswordProps) {
-    const { reset } = props;
 
-    const [email, setEmail] = useState('');
+    const [email, setEmail] = useState<string>('');
 
     function validateForm() {
         return email.length > 0;
-    }
+    } 
 
-    function handleSubmit(event) {
-        const payload = { email };
-
-        // Request will send the user a verification email, so it won't return anything back except a message
-        // That's all it needs to do
-        // Needs a typed axios response
-        axios.post('/api/v2/login/sendPassResetEmail', payload)
-            .then((res) => {
-                if (res.data.error) {
-                    return setNotification(res.data.error)
+    function handleSubmit(e) {
+        axios.post('/api/v2/login/password/reset1', {
+            email,
+        }).then((res: AxiosResponse<IGenericResponse>) => {
+                if (['error', 'rejected'].includes(res.data.status)) {
+                    return setNotification(res.data.message);
                 };
-                reset();
-                setNotification(res.data.message);
+                props.reset(`Success! An email was sent to ${email}`);
             })
             .catch((err) => {
-                console.log('err', err.response);
+                console.log('error in ForgotPassword.tsx', err.response);
             });
 
-        event.preventDefault();
+        e.preventDefault();
     }
 
     return (

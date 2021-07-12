@@ -2,14 +2,9 @@ import React, { useState } from 'react';
 import axios, { AxiosResponse } from 'axios';
 import LoginContainer from './Login';
 import Modal from '../../components/Modal';
-import Notification from '../../components/Notification';
 import { ILoginRoute, IUser } from '../../types';
 import { IGenericResponse } from '../../types/responses';
-import { 
-    url, 
-    notification, 
-    setNotification 
-} from '../../context/app';
+import { url, setNotification } from '../../context/app';
 import { user, setUser } from '../../context/auth';
 
 export default function Header() {
@@ -18,9 +13,18 @@ export default function Header() {
     const [loginModal, setLoginModal] = useState<boolean>(false);
     const [form, setForm] = useState<ILoginRoute>(undefined);
 
+    // RESET VARIOUS COMPONENTS
+    function reset(notification?: string): void {
+        setLoginModal(false);
+        setForm(undefined);
+        notification 
+            ? setNotification(notification) 
+            : setNotification(undefined);
+    };
+
     // LOG OUT
-    function logout() {
-        axios.get('/api/v2/login/logout')
+    function logout(): void {
+        axios.delete('/api/v2/login')
             .then((res: AxiosResponse<IGenericResponse>) => {
                 if (res.data.status === 'error') {
                     return setNotification(res.data.message!)
@@ -34,28 +38,20 @@ export default function Header() {
             });
     }
 
-    // RESET VARIOUS COMPONENTS
-    function reset(): void {
-        setLoginModal(false);
-        setForm(undefined);
-        setNotification(undefined);
-    };
-
+    // LOG IN
     function login(user: IUser): void { 
         reset();
         setUser(user);
         window.location.reload();
     };
 
-    function changeForm(route) {
+    function changeForm(route: ILoginRoute): void {
         setLoginModal(true);
         setForm(route);
     }
 
     return (
         <>
-            {notification && <Notification />}
-
             <div id='Header'>
                 <div id='header-left'>
                     <a href={url} className='home-button'>
@@ -74,7 +70,7 @@ export default function Header() {
                                 Log In
                             </button>
                             <button
-                                onClick={() => changeForm('/email')}
+                                onClick={() => changeForm('email')}
                                 className='header-button'
                             >
                                 Sign Up

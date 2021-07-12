@@ -1,6 +1,7 @@
 import db from '../../../../../../lib/db';
+import { IDetermineFollowingResponse } from '../../../../../../types/responses';
 
-export default async (req, res) => {
+export default async (req, res): Promise<IDetermineFollowingResponse> => {
 
     const {
         method,

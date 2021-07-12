@@ -1,7 +1,13 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { SetStateAction } from "react";
 import ListenForOutsideClicks from "./ListenForOutsideClicks";
 
-export default function Modal(props) {
+type IModalProps = {
+    setModal: React.Dispatch<SetStateAction<boolean>>;
+    children?: JSX.Element;
+    size?: number;
+    disableOutsideClick?: boolean;
+}
+export default function Modal(props: IModalProps) {
     const { children, setModal, size, disableOutsideClick } = props;
 
     return (

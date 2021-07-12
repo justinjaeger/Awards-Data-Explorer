@@ -40,11 +40,11 @@ export type IProfileUser = {
     following: number | undefined;
 };
 
-export type IFollowers = {
+export type IFollower = {
     userId: number,
     username: string,
     image: string,
-}[];
+};
 
 export type ILoginRoute = 
     'login' | 

@@ -5,12 +5,11 @@ import { IVerifyCodeResponse, ILoginResponse } from '../../types/responses';
 import { setNotification } from '../../context/app';
 import { setUser } from "../../context/auth";
 
-// At this point, there is a user in DB with userId and email
+// This opens when user clicks their password reset link in their email
 // We use the code to get the userId
 // If code is validated, show them the form to create their account
 // If account creaftion successful, log them in
     // to log them in, we just setUser(user) and redirect home
-    // as well as insert access token and such (I think that's already wired up)
 
 export default function Home() {
 
@@ -19,7 +18,6 @@ export default function Home() {
 
     const [userId, setUserId] = useState<number | undefined>(undefined);
 
-    const [username, setUsername] = useState<string>('');
     const [password, setPassword] = useState<string>('');
     const [confirmPassword, setConfirmPassword] = useState<string>('');
 
@@ -43,27 +41,24 @@ export default function Home() {
     }, [userId])
 
     function validateForm() {
-        return username.length > 0 
-            && password.length > 0 
-            && confirmPassword.length > 0;
+        return password.length > 0 && confirmPassword.length > 0;
     }
 
     function handleSubmit(event) {
-        axios.post('/api/v2/signup/step2', {
+        axios.post('/api/v2/password/reset2', {
             userId,
-            username,
             password,
             confirmPassword,
         }).then((res: AxiosResponse<ILoginResponse>) => {
                 if (['rejected', 'error'].includes(res.data.status)) {
                     return setNotification(res.data.message);
                 };
-                console.log('signup successful');
+                console.log('password reset successful');
                 // Log user in
                 setNotification(undefined);
                 setUser(res.data.user);
                 // Redirect to user dashboard
-                router.push(`user/${username}`);
+                router.push(`user/${res.data.user.username}`);
             })
             .catch((err) => {
                 console.log('error in signup', err.response);
@@ -78,15 +73,7 @@ export default function Home() {
             ?
             <form onSubmit={handleSubmit} className='login-form'>
 
-                <div className='login-form-label'>Username</div>
-                <input
-                    className='login-form-input'
-                    type='text'
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                />
-
-                <div className='login-form-label'>Password</div>
+                <div className='login-form-label'>New Password</div>
                 <input
                     className='login-form-input'
                     type='password'
@@ -103,7 +90,7 @@ export default function Home() {
                 />
 
                 <button disabled={!validateForm()} className='submit-button'>
-                    Create Account
+                    Submit
                 </button>
             </form>
             : <div>Loading</div>}

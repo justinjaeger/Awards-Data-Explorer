@@ -3,6 +3,7 @@ import AWS from 'aws-sdk';
 import formidable from 'formidable-serverless';
 import fs from 'fs';
 import sharp from 'sharp';
+import { IUploadImageResponse } from '../../../../../types/responses';
 
 export const config = { // idk if this shit is going to give me hell
     api: {
@@ -10,7 +11,7 @@ export const config = { // idk if this shit is going to give me hell
     },
 };
 
-export default async (req, res) => {
+export default async (req, res): Promise<IUploadImageResponse> => {
 
     const {
         method,
@@ -39,7 +40,7 @@ export default async (req, res) => {
             const form = new formidable.IncomingForm();
             form.parse(req, async (err, fields, files) => {
                 // Account for parsing errors
-                if (err) return res.status(500);
+                if (err) throw new Error(err);
                 // Convert to binary string
                 const file = fs.readFileSync(files.file.path);
         
@@ -66,9 +67,9 @@ export default async (req, res) => {
                     });
         
                 // Upload and send the file
-                await s3.upload(params).send((err, data) => {
+                await s3.upload(params).send(async (err, data) => {
                     if (err) {
-                        throw new Error(err);
+                        throw new Error(err.message);
                     }
                     if (data) {
                         console.log('s3 upload data', data);
@@ -78,10 +79,13 @@ export default async (req, res) => {
                         let result = await db.query(`
                             UPDATE users
                             SET image='${url}'
-                            WHERE userId='${id}' 
+                            WHERE userId=${id} 
                         `);
                         if (result.error) throw new Error(result.error);
-                        return res.sendStatus(200);
+                        return res.send(200).json({
+                            status: 'success',
+                            url,
+                        });
                     }
                 });
             });
@@ -103,17 +107,21 @@ export default async (req, res) => {
             };
             s3.deleteObject(params, (err, data) => {
                 if (err) {
-                    console.log('err deleting profile image from Spaces', err);
-                    return res.status(500);
+                    throw new Error(err.message);
                 }
                 if (data) {
-                    return res.json({});
+                    return res.json({
+                        status: 'success',
+                    });
                 }
             });
         }
 
     } catch(e) {
-        console.log('error: ', e.message);
-        return res.status(500).send(e.message);
+        console.log('error in image.ts: ', e.message);
+        return res.status(500).send({
+            status: 'error',
+            message: e.message,
+        });
     }
 };

@@ -8,13 +8,7 @@ import verifyToken, { IVerifyTokenResponse } from '../controllers/verifyToken';
 import Header from '../containers/Header';
 import { IInitialProps } from '../types';
 import Context from '../context';
-
-/**
- * NOTE:
- *  I shsould probably render <Notifications /> here
- * but then I would have to call setNotification and pass that down which is annoyingg
- * Alt, I could just have <Notifications notification={''} /> render in eacah page that calls a notification, at the bottom or something. That would prob be easier
- */
+import Notification from '../components/Notification';
 
 /**
  * Component is the your page eg /index
@@ -26,6 +20,7 @@ function MyApp({ Component, pageProps, initialProps }) {
     return (<>
         <Context.App.Provider value={initialProps.app}>
             <Context.Auth.Provider value={initialProps.user}>
+                <Notification />
                 <Header />
                 <Component {...pageProps} {...initialProps} />
             </Context.Auth.Provider>

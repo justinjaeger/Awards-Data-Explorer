@@ -1,5 +1,5 @@
 import db from '../../../../../lib/db';
-import { verificationEmail, createVerificationCodeEmail } from '../../../../../utils/mailHelper';
+import { createVerificationCodeEmail } from '../../../../../utils/mailHelper';
 import { ISignupStepOneResponse } from '../../../../../types/responses';
 
 /**
@@ -74,12 +74,11 @@ export default async (req, res): Promise<ISignupStepOneResponse> => {
             `)
             if (verifCodeRes.error) throw new Error(verifCodeRes.error);
 
-            // Send a 200 status back, where it will display a confirmation message to check email
             return res.status(200).json({ status: 'success' });
         };
 
     } catch(e) {
-        console.log('error in step1: ', e.message);
+        console.log('error in step1.ts: ', e.message);
         return res.status(500).json({
             status: 'error',
             message: e.message,

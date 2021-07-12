@@ -2,10 +2,10 @@ import React, { useState } from 'react';
 import axios, { AxiosResponse } from 'axios';
 import { ILoginResponse } from '../../../../types/responses';
 import { setNotification } from '../../../../context/app';
-import { IUser } from '../../../../types';
+import { IUser, ILoginRoute } from '../../../../types';
 
 type ILoginProps = {
-    changeForm: (form: string) => void;
+    changeForm: (form: ILoginRoute) => void;
     login: (user: IUser) => void;
 }
 
@@ -20,7 +20,7 @@ export default function Login(props: ILoginProps) {
         return emailOrUsername.length > 0 && password.length > 0;
     };
 
-    function handleSubmit(event) {
+    function handleSubmit(e) {
         axios.post('/api/v2/login', {
             emailOrUsername,
             password,
@@ -30,14 +30,10 @@ export default function Login(props: ILoginProps) {
                 };
                 return login(res.data.user);
             })
-            .catch((err) => {
-                if (err)
-                    console.log(
-                        'something went wrong trying to log user in',
-                        err
-                    );
+            .catch((e) => {
+                console.log('error logging user in', e.message);
             });
-        event.preventDefault(); // prevents it from refreshing
+        e.preventDefault(); // prevents it from refreshing
     };
 
     return (

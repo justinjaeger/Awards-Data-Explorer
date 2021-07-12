@@ -1,4 +1,4 @@
-import { IUser } from './';
+import { IUser, IFollower } from './';
 
 /**
  * status: 'rejected' is a controlled error
@@ -27,6 +27,10 @@ export interface IFollowerCountResponse extends IGenericResponse {
     count?: number;
 }
 
+export interface IFollowerResponse extends IGenericResponse {
+    followers?: IFollower[];
+}
+
 export interface IDetermineFollowingResponse extends IGenericResponse {
     following?: boolean;
 }
@@ -36,9 +40,5 @@ export interface IVerifyCodeResponse extends IGenericResponse {
 }
 
 export interface IUploadImageResponse extends IGenericResponse {
-
-}
-
-export interface ISaveImageResponse extends IGenericResponse {
-
+    url?: string;
 }
