@@ -1,6 +1,6 @@
-import wrapper from "../../../utils/wrapper";
-import userController from "../../../controllers/userController";
-import followerController from "../../../controllers/followerController";
+import wrapper from '../../../utils/wrapper';
+import userController from '../../../controllers/userController';
+import followerController from '../../../controllers/followerController';
 
 /**
  * user
@@ -30,7 +30,7 @@ const handler = async (req, res, next) => {
 
         /* All the below functions modify the data object */
         switch (action) {
-            case "dashboard":
+            case 'dashboard':
                 await next(
                     userController.getProfileImage,
                     followerController.getNumFollowers,
@@ -52,7 +52,7 @@ const handler = async (req, res, next) => {
 
         return res.json(data);
     } catch (e) {
-        console.log("error in /user/...slug", e);
+        console.log('error in /user/...slug', e);
         return res.status(500).send(e.message);
     }
 };

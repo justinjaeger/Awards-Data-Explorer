@@ -1,8 +1,8 @@
-import wrapper from "../../../utils/wrapper";
-const { decrypt } = require("../../../utils/encrypt");
+import wrapper from '../../../utils/wrapper';
+import { decrypt } from '../../../utils/encrypt';
 
 /**
- * When the user clicks "forgot password?"
+ * When the user clicks 'forgot password?'
  *
  * - Decodes the email from the url
  * - sets a cookie that, when the browser sees it,
@@ -18,13 +18,13 @@ const handler = async (req, res) => {
         const decryptedEmail = decrypt(decoded);
 
         /* set a cookie in the browser so it loads the reset password screen */
-        res.cookie("authenticated"); // clears it
-        res.cookie("reset_password", decryptedEmail);
+        res.cookie('authenticated'); // clears it
+        res.cookie('reset_password', decryptedEmail);
 
         res.sendCookies();
-        return res.redirect("/");
+        return res.redirect('/');
     } catch (e) {
-        console.log("error ", e);
+        console.log('error ', e);
         return res.status(500).send(e.message);
     }
 };

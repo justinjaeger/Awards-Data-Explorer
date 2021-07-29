@@ -1,5 +1,5 @@
 CREATE TABLE `users` (
-  `user_id` INT PRIMARY KEY NOT NULL AUTO_INCREMENT,
+  `userId` INT PRIMARY KEY NOT NULL AUTO_INCREMENT,
   `email` VARCHAR(100) UNIQUE NOT NULL,
   `username` VARCHAR(20) UNIQUE NOT NULL,
   `password` VARCHAR(100) NOT NULL,
@@ -11,33 +11,38 @@ CREATE TABLE `users` (
 );
 
 CREATE TABLE `tokens` (
-  `access_token` VARCHAR(250) PRIMARY KEY NOT NULL,
-  `user_id` INT NOT NULL
+  `accessToken` VARCHAR(250) PRIMARY KEY NOT NULL,
+  `userId` INT NOT NULL
+);
+
+CREATE TABLE `codes` (
+  `code` INT PRIMARY KEY NOT NULL,
+  `userId` INT NOT NULL
 );
 
 CREATE TABLE `followers` (
-  `username` VARCHAR(20) NOT NULL,
-  `follower` VARCHAR(20) NOT NULL,
+  `userId` INT NOT NULL,
+  `follower` INT NOT NULL,
   `dateCreated` DATETIME,
-  PRIMARY KEY (`username`, `follower`)
+  PRIMARY KEY (`userId`, `follower`)
 );
 
-CREATE TABLE `rank_movie` (
-  `rank_movie_id` INT PRIMARY KEY NOT NULL AUTO_INCREMENT,
-  `rank_category_id` INT NOT NULL,
+CREATE TABLE `rankMovie` (
+  `rankMovieId` INT PRIMARY KEY NOT NULL AUTO_INCREMENT,
+  `rankCategoryId` INT NOT NULL,
   `name` VARCHAR(250) UNIQUE NOT NULL,
   `score` INT NOT NULL DEFAULT 0
 );
 
-CREATE TABLE `rank_user` (
-  `user_id` INT NOT NULL,
-  `rank_movie_id` INT NOT NULL,
+CREATE TABLE `rankUser` (
+  `userId` INT NOT NULL,
+  `rankMovieId` INT NOT NULL,
   `score` INT NOT NULL DEFAULT 0,
-  PRIMARY KEY (`user_id`, `rank_movie_id`)
+  PRIMARY KEY (`userId`, `rankMovieId`)
 );
 
-CREATE TABLE `rank_category` (
-  `rank_category_id` INT PRIMARY KEY NOT NULL AUTO_INCREMENT,
+CREATE TABLE `rankCategory` (
+  `rankCategoryId` INT PRIMARY KEY NOT NULL AUTO_INCREMENT,
   `year` VARCHAR(4) NOT NULL,
   `category` VARCHAR(250) NOT NULL,
   `awardsShow` VARCHAR(100) NOT NULL,
@@ -45,37 +50,37 @@ CREATE TABLE `rank_category` (
 );
 
 CREATE TABLE `awardsShows` (
-  `awardsShow_id` INT PRIMARY KEY NOT NULL AUTO_INCREMENT,
+  `awardsShowId` INT PRIMARY KEY NOT NULL AUTO_INCREMENT,
   `name` VARCHAR(100) UNIQUE NOT NULL,
   `year` INT NOT NULL,
   `open` BIT(1) DEFAULT 0,
   `dateCloses` DATETIME
 );
 
-CREATE TABLE `users_awardsShows` (
-  `user_id` INT NOT NULL,
-  `awardsShow_id` INT NOT NULL,
+CREATE TABLE `usersAwardsShows` (
+  `userId` INT NOT NULL,
+  `awardsShowId` INT NOT NULL,
   `dateCreated` DATETIME,
-  PRIMARY KEY (`user_id`, `awardsShow_id`)
+  PRIMARY KEY (`userId`, `awardsShowId`)
 );
 
 CREATE TABLE `awardsCategories` (
-  `awardsCategory_id` INT PRIMARY KEY NOT NULL AUTO_INCREMENT,
-  `awardsShow_id` INT NOT NULL,
+  `awardsCategoryId` INT PRIMARY KEY NOT NULL AUTO_INCREMENT,
+  `awardsShowId` INT NOT NULL,
   `name` VARCHAR(100) NOT NULL
 );
 
 CREATE TABLE `awardsContenders` (
-  `awardsContender_id` INT PRIMARY KEY NOT NULL AUTO_INCREMENT,
-  `awardsCategory_id` INT NOT NULL,
-  `movie_id` INT NOT NULL,
+  `awardsContenderId` INT PRIMARY KEY NOT NULL AUTO_INCREMENT,
+  `awardsCategoryId` INT NOT NULL,
+  `movieId` INT NOT NULL,
   `person` VARCHAR(100),
   `personImage` VARCHAR(10000),
   `nomOrWin` BIT(1) DEFAULT 0
 );
 
 CREATE TABLE `movies` (
-  `movie_id` INT PRIMARY KEY NOT NULL AUTO_INCREMENT,
+  `movieId` INT PRIMARY KEY NOT NULL AUTO_INCREMENT,
   `title` VARCHAR(100) NOT NULL,
   `director` VARCHAR(100),
   `starring` VARCHAR(1000),
@@ -84,42 +89,46 @@ CREATE TABLE `movies` (
 );
 
 CREATE TABLE `userPredictions` (
-  `userPrediction_id` INT PRIMARY KEY NOT NULL AUTO_INCREMENT,
-  `user_id` INT NOT NULL,
-  `awardsContender_id` INT NOT NULL,
+  `userPredictionId` INT PRIMARY KEY NOT NULL AUTO_INCREMENT,
+  `userId` INT NOT NULL,
+  `awardsContenderId` INT NOT NULL,
   `place` INT
 );
 
-ALTER TABLE `tokens` ADD FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`);
+ALTER TABLE `tokens` ADD FOREIGN KEY (`userId`) REFERENCES `users` (`userId`);
 
-ALTER TABLE `followers` ADD FOREIGN KEY (`username`) REFERENCES `users` (`username`);
+ALTER TABLE `usersAwardsShows` ADD FOREIGN KEY (`userId`) REFERENCES `users` (`userId`);
 
-ALTER TABLE `users_awardsShows` ADD FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`);
+ALTER TABLE `usersAwardsShows` ADD FOREIGN KEY (`awardsShowId`) REFERENCES `awardsShows` (`awardsShowId`);
 
-ALTER TABLE `users_awardsShows` ADD FOREIGN KEY (`awardsShow_id`) REFERENCES `awardsShows` (`awardsShow_id`);
+ALTER TABLE `awardsCategories` ADD FOREIGN KEY (`awardsShowId`) REFERENCES `awardsShows` (`awardsShowId`);
 
-ALTER TABLE `awardsCategories` ADD FOREIGN KEY (`awardsShow_id`) REFERENCES `awardsShows` (`awardsShow_id`);
+ALTER TABLE `awardsContenders` ADD FOREIGN KEY (`awardsCategoryId`) REFERENCES `awardsCategories` (`awardsCategoryId`);
 
-ALTER TABLE `awardsContenders` ADD FOREIGN KEY (`awardsCategory_id`) REFERENCES `awardsCategories` (`awardsCategory_id`);
+ALTER TABLE `awardsContenders` ADD FOREIGN KEY (`movieId`) REFERENCES `movies` (`movieId`);
 
-ALTER TABLE `awardsContenders` ADD FOREIGN KEY (`movie_id`) REFERENCES `movies` (`movie_id`);
+ALTER TABLE `userPredictions` ADD FOREIGN KEY (`userId`) REFERENCES `users` (`userId`);
 
-ALTER TABLE `userPredictions` ADD FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`);
+ALTER TABLE `userPredictions` ADD FOREIGN KEY (`awardsContenderId`) REFERENCES `awardsContenders` (`awardsContenderId`);
 
-ALTER TABLE `userPredictions` ADD FOREIGN KEY (`awardsContender_id`) REFERENCES `awardsContenders` (`awardsContender_id`);
+ALTER TABLE `rankUser` ADD FOREIGN KEY (`rankMovieId`) REFERENCES `rankMovie` (`rankMovieId`);
 
-ALTER TABLE `followers` ADD FOREIGN KEY (`follower`) REFERENCES `users` (`username`);
+ALTER TABLE `rankUser` ADD FOREIGN KEY (`userId`) REFERENCES `users` (`userId`);
 
-ALTER TABLE `rank_user` ADD FOREIGN KEY (`rank_movie_id`) REFERENCES `rank_movie` (`rank_movie_id`);
+ALTER TABLE `rankMovie` ADD FOREIGN KEY (`rankCategoryId`) REFERENCES `rankCategory` (`rankCategoryId`);
 
-ALTER TABLE `rank_user` ADD FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`);
+ALTER TABLE `users` ADD FOREIGN KEY (`userId`) REFERENCES `users` (`username`);
 
-ALTER TABLE `rank_movie` ADD FOREIGN KEY (`rank_category_id`) REFERENCES `rank_category` (`rank_category_id`);
+ALTER TABLE `followers` ADD FOREIGN KEY (`userId`) REFERENCES `users` (`userId`);
 
-CREATE UNIQUE INDEX `followers_index_0` ON `followers` (`username`, `follower`);
+ALTER TABLE `followers` ADD FOREIGN KEY (`follower`) REFERENCES `users` (`userId`);
 
-CREATE UNIQUE INDEX `rank_user_index_1` ON `rank_user` (`user_id`, `rank_movie_id`);
+ALTER TABLE `codes` ADD FOREIGN KEY (`userId`) REFERENCES `users` (`userId`);
 
-CREATE UNIQUE INDEX `rank_category_index_2` ON `rank_category` (`year`, `category`, `awardsShow`);
+CREATE UNIQUE INDEX `followers_index_0` ON `followers` (`userId`, `follower`);
 
-CREATE UNIQUE INDEX `users_awardsShows_index_3` ON `users_awardsShows` (`user_id`, `awardsShow_id`);
+CREATE UNIQUE INDEX `rankUser_index_1` ON `rankUser` (`userId`, `rankMovieId`);
+
+CREATE UNIQUE INDEX `rankCategory_index_2` ON `rankCategory` (`year`, `category`, `awardsShow`);
+
+CREATE UNIQUE INDEX `usersAwardsShows_index_3` ON `usersAwardsShows` (`userId`, `awardsShowId`);

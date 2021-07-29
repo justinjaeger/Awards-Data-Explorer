@@ -1,4 +1,4 @@
-import db from "../../../../lib/db";
+import db from '../../../../lib/db';
 
 /**
  * Admin actions on rank_category
@@ -14,7 +14,7 @@ export default async (req, res) => {
 
     try {
         // POST: Create new category
-        if (method === "POST") {
+        if (method === 'POST') {
             result = await db.query(`
         INSERT INTO rank_category (year, category, awardsShow)
         VALUES ('${year}','${category}','${awardsShow}')
@@ -22,11 +22,11 @@ export default async (req, res) => {
             if (result.error) {
                 throw result.error;
             }
-            return res.status(200).send("Success creating category");
+            return res.status(200).send('Success creating category');
         }
 
         // PUT: Archive/unarchive category
-        if (method === "PUT") {
+        if (method === 'PUT') {
             result = await db.query(`
         UPDATE rank_category
         SET archived = archived ^ 1
@@ -37,15 +37,15 @@ export default async (req, res) => {
             if (result.error) {
                 throw result.error;
             }
-            return res.status(200).send("Success archiving category");
+            return res.status(200).send('Success archiving category');
         }
 
         // DELETE: remove category
-        if (method === "DELETE") {
+        if (method === 'DELETE') {
             // TBC
         }
     } catch (e) {
-        console.log("error ", e);
+        console.log('error ', e);
         return res.status(500).send(e.message);
     }
 };

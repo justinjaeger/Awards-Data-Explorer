@@ -1,8 +1,8 @@
-import wrapper from "../../../utils/wrapper";
-import emailController from "../../../controllers/emailController";
+import wrapper from '../../../utils/wrapper';
+import emailController from '../../../controllers/emailController';
 
 /**
- * When user clicks "resend verification email"
+ * When user clicks 'resend verification email'
  */
 
 const handler = async (req, res, next) => {
@@ -23,7 +23,7 @@ const handler = async (req, res, next) => {
             message: `Please verify the email sent to ${res.locals.email}.`,
         });
     } catch (e) {
-        console.log("error ", e);
+        console.log('error ', e);
         return res.status(500).send(e.message);
     }
 };

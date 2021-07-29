@@ -7,7 +7,7 @@ import testController from "controllers/testController";
 const username = process.env.TEST_USERNAME;
 const email = process.env.TEST_EMAIL;
 const password = process.env.TEST_PASSWORD;
-let hashedPass, user_id, access_token;
+let hashedPass, userId, accessToken;
 
 describe("/login/index", () => {
     let req, res, r;
@@ -35,13 +35,13 @@ describe("/login/index", () => {
         if (db.isTestingDb === true) {
             /* Delete all users from db */
             r = await db.query(`
-        DELETE FROM users WHERE user_id>0
+        DELETE FROM users WHERE userId>0
       `);
             if (r.error) console.log(r.error);
 
             /* Delete token from db */
             r = await db.query(`
-        DELETE FROM tokens WHERE user_id>0
+        DELETE FROM tokens WHERE userId>0
       `);
             if (r.error) console.log(r.error);
         }

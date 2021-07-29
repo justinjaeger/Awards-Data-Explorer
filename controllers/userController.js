@@ -8,12 +8,12 @@ let result;
 userController.getUsername = async (req, res) => {
     console.log("getUsername");
 
-    const { user_id } = res.locals;
+    const { userId } = res.locals;
 
     result = await db.query(`
     SELECT username 
     FROM users 
-    WHERE user_id=${user_id} 
+    WHERE userId=${userId} 
   `);
     res.handleErrors(result);
     // res.handleEmptyResult(result);
@@ -26,13 +26,13 @@ userController.getUsername = async (req, res) => {
 userController.header = async (req, res) => {
     console.log("userController.header");
 
-    const { user_id } = res.locals;
+    const { userId } = res.locals;
 
     /* Get the username and image */
     result = await db.query(`
     SELECT username, image, admin
     FROM users 
-    WHERE user_id=${user_id} 
+    WHERE userId=${userId} 
   `);
     res.handleErrors(result);
     // res.handleEmptyResult(result);
@@ -85,7 +85,7 @@ userController.checkUserExists = async (req, res) => {
     const { profileUsername } = res.locals;
 
     result = await db.query(`
-    SELECT user_id FROM users 
+    SELECT userId FROM users 
     WHERE username='${profileUsername}' 
   `);
     res.handleErrors(result);

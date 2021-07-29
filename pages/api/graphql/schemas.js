@@ -1,4 +1,4 @@
-import { gql } from "apollo-server-micro";
+import { gql } from 'apollo-server-micro';
 
 /* SCHEMAS */
 
@@ -8,7 +8,7 @@ export const typeDefs = gql`
     scalar Void
 
     type User {
-        user_id: ID!
+        userId: ID!
         email: String!
         username: String!
         password: String!
@@ -20,8 +20,8 @@ export const typeDefs = gql`
     }
 
     type Token {
-        access_token: String!
-        user_id: Int!
+        accessToken: String!
+        userId: Int!
     }
 
     type Follower {
@@ -36,7 +36,7 @@ export const typeDefs = gql`
 
     type Query {
         getUsers: [User]
-        getUser(user_id: ID!): User!
+        getUser(userId: ID!): User!
         getUserByUsername(username: String!): User!
         getFollowers(username: String!): [User]
         getFollowing(follower: String!): [User]

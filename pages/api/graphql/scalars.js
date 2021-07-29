@@ -1,10 +1,10 @@
-import { GraphQLScalarType, Kind } from "graphql";
+import { GraphQLScalarType, Kind } from 'graphql';
 
 /* SCALARS */
 
 const Datetime = new GraphQLScalarType({
-    name: "Datetime",
-    description: "Datetime custom scalar type",
+    name: 'Datetime',
+    description: 'Datetime custom scalar type',
     serialize(value) {
         // Convert to JSON
         // For output i.e. response for graphql
@@ -13,7 +13,7 @@ const Datetime = new GraphQLScalarType({
             return valueAsString;
         }
         throw new Error(
-            "serializeISO8601: DateTime cannot represent an invalid ISO-8601 Date string"
+            'serializeISO8601: DateTime cannot represent an invalid ISO-8601 Date string'
         );
     },
     parseValue(value) {
@@ -22,7 +22,7 @@ const Datetime = new GraphQLScalarType({
             return new Date(value);
         }
         throw new Error(
-            "parseISO8601: DateTime cannot represent an invalid ISO-8601 Date string"
+            'parseISO8601: DateTime cannot represent an invalid ISO-8601 Date string'
         );
     },
     parseLiteral(ast) {
@@ -32,14 +32,14 @@ const Datetime = new GraphQLScalarType({
             return new Date(ast.value);
         }
         throw new Error(
-            "parseLiteralISO8601: DateTime cannot represent an invalid ISO-8601 Date string"
+            'parseLiteralISO8601: DateTime cannot represent an invalid ISO-8601 Date string'
         );
     },
 });
 
 const Bit = new GraphQLScalarType({
-    name: "Bit",
-    description: "Bit custom scalar type",
+    name: 'Bit',
+    description: 'Bit custom scalar type',
     serialize(value) {
         // Convert to something JSON friendly
         return value[0];
@@ -55,8 +55,8 @@ const Bit = new GraphQLScalarType({
 });
 
 const Void = new GraphQLScalarType({
-    name: "Void",
-    description: "Represents NULL values",
+    name: 'Void',
+    description: 'Represents NULL values',
     serialize() {
         return null;
     },

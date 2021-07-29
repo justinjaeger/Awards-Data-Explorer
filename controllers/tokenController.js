@@ -10,15 +10,15 @@ const tokenExpireTime = "10m";
 tokenController.verifyToken = async (req, res) => {
     console.log("inside verifyToken");
 
-    const { access_token } = res.locals;
+    const { accessToken } = res.locals;
 
-    /* Get the expiration and user_id from the token */
-    result = await jwt.verify(access_token, process.env.ACCESS_TOKEN_SECRET, {
+    /* Get the expiration and userId from the token */
+    result = await jwt.verify(accessToken, process.env.ACCESS_TOKEN_SECRET, {
         ignoreExpiration: true,
     });
     res.handleErrors(result);
-    const { user_id, exp: expiration } = result;
-    res.locals.user_id = user_id;
+    const { userId, exp: expiration } = result;
+    res.locals.userId = userId;
 
     /* get the current time */
     const currentTime = Math.ceil(Date.now() / 1000);
@@ -44,18 +44,18 @@ tokenController.verifyToken = async (req, res) => {
 tokenController.createAccessToken = async (req, res) => {
     console.log("inside createAccessToken");
 
-    const { user_id } = res.locals;
+    const { userId } = res.locals;
 
     /* Delete cookies in browser if exist */
     res.cookie("authenticated");
     res.cookie("reset_password");
 
     /* CREATE ACCESS TOKEN */
-    const accessPayload = { user_id };
+    const accessPayload = { userId };
     const accessOptions = {
         expiresIn: tokenExpireTime,
     }; /* change the expiration here */
-    const access_token = jwt.sign(
+    const accessToken = jwt.sign(
         accessPayload,
         process.env.ACCESS_TOKEN_SECRET,
         accessOptions
@@ -63,8 +63,8 @@ tokenController.createAccessToken = async (req, res) => {
 
     /* SAVE TOKEN IN DB */
     result = await db.query(`
-    INSERT INTO tokens(access_token, user_id)
-    VALUES('${access_token}', ${user_id}) 
+    INSERT INTO tokens(accessToken, userId)
+    VALUES('${accessToken}', ${userId}) 
   `);
     res.handleErrors(result);
     // res.handleEmptyResult(result);
@@ -76,7 +76,7 @@ tokenController.createAccessToken = async (req, res) => {
     result = await db.query(`
     UPDATE users
     SET lastLoggedIn = '${datetime}'
-    WHERE user_id = ${user_id} 
+    WHERE userId = ${userId} 
   `);
     res.handleErrors(result);
     // res.handleEmptyResult(result);
@@ -84,9 +84,9 @@ tokenController.createAccessToken = async (req, res) => {
     console.log("2");
 
     /* Set new cookie in browser */
-    res.cookie("access_token", access_token, { httpOnly: true });
+    res.cookie("accessToken", accessToken, { httpOnly: true });
 
-    res.locals.access_token = access_token;
+    res.locals.accessToken = accessToken;
 };
 
 /*************************************/
@@ -94,12 +94,12 @@ tokenController.createAccessToken = async (req, res) => {
 tokenController.deleteAccessToken = async (req, res) => {
     console.log("inside deleteAccessToken");
 
-    const { access_token, user_id } = res.locals;
+    const { accessToken, userId } = res.locals;
 
     /* Delete the access token in db */
     result = await db.query(`
     DELETE FROM tokens
-    WHERE access_token='${access_token}' 
+    WHERE accessToken='${accessToken}' 
   `);
     res.handleErrors(result);
 
@@ -112,11 +112,11 @@ tokenController.deleteAccessToken = async (req, res) => {
         /* Delete all tokens associated with user */
         result = await db.query(`
       DELETE FROM tokens
-      WHERE user_id=${user_id}`);
+      WHERE userId=${userId}`);
         res.handleErrors(result);
 
         /* Delete cookie from browser */
-        res.cookie("access_token");
+        res.cookie("accessToken");
 
         /* Return to stop everything */
         res.sendCookies(); // just for postman but otherwise ineffective
@@ -129,14 +129,14 @@ tokenController.deleteAccessToken = async (req, res) => {
 tokenController.getTokenData = async (req, res) => {
     console.log("inside getTokenData");
 
-    const { access_token } = res.locals;
+    const { accessToken } = res.locals;
 
-    /* Get the user_id from the JWT */
-    result = await jwt.verify(access_token, process.env.ACCESS_TOKEN_SECRET, {
+    /* Get the userId from the JWT */
+    result = await jwt.verify(accessToken, process.env.ACCESS_TOKEN_SECRET, {
         ignoreExpiration: true,
     });
     res.handleErrors(result);
-    res.locals.user_id = result.user_id;
+    res.locals.userId = result.userId;
 };
 
 /*************************************/

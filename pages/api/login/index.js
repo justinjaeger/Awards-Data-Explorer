@@ -1,6 +1,6 @@
-import wrapper from "../../../utils/wrapper";
-import tokenController from "../../../controllers/tokenController";
-import loginController from "../../../controllers/loginController";
+import wrapper from '../../../utils/wrapper';
+import tokenController from '../../../controllers/tokenController';
+import loginController from '../../../controllers/loginController';
 
 /**
  * When the user clicks Log In
@@ -9,12 +9,12 @@ import loginController from "../../../controllers/loginController";
 const handler = async (req, res, next) => {
     res.locals.emailOrUsername = req.body.emailOrUsername;
     res.locals.password = req.body.password;
-    res.locals.entryType = res.locals.emailOrUsername.includes("@")
-        ? "email"
-        : "username";
+    res.locals.entryType = res.locals.emailOrUsername.includes('@')
+        ? 'email'
+        : 'username';
     /* ^^^ Determine entry type - email or username */
 
-    console.log("locals", res.locals);
+    console.log('locals', res.locals);
 
     await next(
         loginController.returnUserData,

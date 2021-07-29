@@ -1,4 +1,4 @@
-import db from "../../../../lib/db";
+import db from '../../../../lib/db';
 
 /**
  * All non-user-specific actions for RANK game
@@ -14,7 +14,7 @@ export default async (req, res) => {
 
     try {
         // DELETE: Remove the list item
-        if (method === "DELETE") {
+        if (method === 'DELETE') {
             // Delete all rank_user entries first, or else conflict
             result = await db.query(`
         DELETE FROM rank_user
@@ -31,14 +31,14 @@ export default async (req, res) => {
             if (result.error) {
                 throw result.error;
             }
-            console.log("delete ", result);
+            console.log('delete ', result);
             if (!result.affectedRows) {
-                return res.status(500).send("Nothing was deleted");
+                return res.status(500).send('Nothing was deleted');
             }
-            return res.status(200).send("Success");
+            return res.status(200).send('Success');
         }
     } catch (e) {
-        console.log("error ", e);
+        console.log('error ', e);
         return res.status(500).send(e.message);
     }
 };

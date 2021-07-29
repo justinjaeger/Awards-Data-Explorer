@@ -17,8 +17,8 @@ export default function Rank(props) {
         <>
             <Header
                 loggedIn={props.loggedIn}
-                loginDropdown={props.loginDropdown}
-                loginRoute={props.loginRoute}
+                loginModal={props.loginModal}
+                form={props.form}
                 notification={props.notification}
                 username={props.username}
                 email={props.email}
@@ -31,7 +31,7 @@ export default function Rank(props) {
             ) : (
                 <RankGame
                     loggedIn={props.loggedIn}
-                    user_id={props.user_id}
+                    userId={props.userId}
                     admin={props.admin}
                     year={props.year}
                     awardsShow={props.awardsShow}
@@ -55,7 +55,7 @@ export async function getServerSideProps(context) {
     const URL = (() => {
         switch (process.env.NODE_ENV) {
             case "development":
-                return "http://localhost:3000";
+                return "http://localhost:3003";
             case "production":
                 return "https://oscarexpert.com";
         }
@@ -67,11 +67,11 @@ export async function getServerSideProps(context) {
     /* Default values for all props */
     const props = {
         loggedIn: false,
-        loginDropdown: false,
-        loginRoute: "/",
+        loginModal: false,
+        form: "/",
         notification: "",
         username: "",
-        user_id: null,
+        userId: null,
         admin: false,
         send404: false,
         URL,
@@ -98,8 +98,8 @@ export async function getServerSideProps(context) {
     if (c.authenticated) {
         // cookie exists after you authenticate email
         const username = c.authenticated;
-        props.loginRoute = "/login";
-        props.loginDropdown = true;
+        props.form = "/login";
+        props.loginModal = true;
         props.username = username;
         props.notification = "Email verified. Please enter your password.";
     }
@@ -107,8 +107,8 @@ export async function getServerSideProps(context) {
     if (c.reset_password) {
         // cookie exists after you reset password
         const email = c.reset_password;
-        props.loginRoute = "/resetPassword";
-        props.loginDropdown = true;
+        props.form = "/resetPassword";
+        props.loginModal = true;
         props.email = email;
         props.notification = `Please enter a new password for ${email}.`;
     }
@@ -119,9 +119,9 @@ export async function getServerSideProps(context) {
      * If verified, populate the page with appropriate user data
      */
 
-    if (c.access_token) {
+    if (c.accessToken) {
         // cookie exists when you are logged in
-        const payload = { access_token: c.access_token };
+        const payload = { accessToken: c.accessToken };
         /* Request to verify token and get data no the user */
         await axios
             .post(`${URL}/api/auth`, payload)
@@ -129,7 +129,7 @@ export async function getServerSideProps(context) {
                 /* If token is verified, set props accordingly */
                 if (res.data.loggedIn) {
                     props.loggedIn = true;
-                    props.user_id = res.data.user_id;
+                    props.userId = res.data.userId;
                     props.username = res.data.username;
                     props.admin = res.data.admin;
                     if (res.data.image) props.image = res.data.image;

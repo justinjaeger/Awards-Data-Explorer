@@ -125,16 +125,16 @@ signupController.getUserIdByUsername = async (req, res) => {
 
     const { username } = res.locals;
 
-    /* get the user_id from the username */
+    /* get the userId from the username */
     result = await db.query(`
-    SELECT user_id
+    SELECT userId
     FROM users
     WHERE username='${username}' 
   `);
     res.handleErrors(result);
     // res.handleEmptyResult(result);
 
-    res.locals.user_id = result[0];
+    res.locals.userId = result[0];
 };
 
 /*************************************/
@@ -149,10 +149,10 @@ signupController.markDateCreated = async (req, res) => {
 
     /* update the 'dateCreated' field with current datetime */
     result = await db.query(`
-    UPDATE users
-    SET dateCreated = '${datetime}'
-    WHERE username = '${username}' 
-  `);
+        UPDATE users
+        SET dateCreated = '${datetime}'
+        WHERE username = '${username}' 
+    `);
     res.handleErrors(result);
     // res.handleEmptyResult(result, 'could not mark date created');
 };
@@ -167,9 +167,9 @@ signupController.deleteUser = async (req, res) => {
 
     /* delete the user from database */
     result = await db.query(`
-    DELETE FROM users
-    WHERE email='${email}' 
-  `);
+        DELETE FROM users
+        WHERE email='${email}' 
+    `);
     console.log("result", result);
     res.handleErrors(result);
     // res.handleEmptyResult(result, 'did not delete user');

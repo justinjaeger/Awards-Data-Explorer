@@ -35,7 +35,7 @@ async function migrate() {
         console.log("attempting migration...");
         await query(`
     CREATE TABLE IF NOT EXISTS "users" (
-      "user_id" INT PRIMARY KEY NOT NULL AUTO_INCREMENT,
+      "userId" INT PRIMARY KEY NOT NULL AUTO_INCREMENT,
       "email" VARCHAR(100) UNIQUE NOT NULL,
       "username" VARCHAR(20) UNIQUE NOT NULL,
       "password" VARCHAR(100) NOT NULL,
@@ -47,8 +47,8 @@ async function migrate() {
     );
 
     CREATE TABLE IF NOT EXISTS "tokens" (
-      "access_token" VARCHAR(250) PRIMARY KEY NOT NULL,
-      "user_id" INT NOT NULL
+      "accessToken" VARCHAR(250) PRIMARY KEY NOT NULL,
+      "userId" INT NOT NULL
     );
     
     CREATE TABLE IF NOT EXISTS "followers" (
@@ -67,10 +67,10 @@ async function migrate() {
     );
     
     CREATE TABLE IF NOT EXISTS "users_awardsShows" (
-      "user_id" INT NOT NULL,
+      "userId" INT NOT NULL,
       "awardsShow_id" INT NOT NULL,
       "dateCreated" DATETIME,
-      PRIMARY KEY ("user_id", "awardsShow_id")
+      PRIMARY KEY ("userId", "awardsShow_id")
     );
     
     CREATE TABLE IF NOT EXISTS "awardsCategories" (
@@ -99,16 +99,16 @@ async function migrate() {
     
     CREATE TABLE IF NOT EXISTS "userPredictions" (
       "userPrediction_id" INT PRIMARY KEY NOT NULL AUTO_INCREMENT,
-      "user_id" INT NOT NULL,
+      "userId" INT NOT NULL,
       "awardsContender_id" INT NOT NULL,
       "place" INT
     );
     
-    ALTER TABLE "tokens" ADD FOREIGN KEY ("user_id") REFERENCES "users" ("user_id");
+    ALTER TABLE "tokens" ADD FOREIGN KEY ("userId") REFERENCES "users" ("userId");
     
     ALTER TABLE "followers" ADD FOREIGN KEY ("username") REFERENCES "users" ("username");
     
-    ALTER TABLE "users_awardsShows" ADD FOREIGN KEY ("user_id") REFERENCES "users" ("user_id");
+    ALTER TABLE "users_awardsShows" ADD FOREIGN KEY ("userId") REFERENCES "users" ("userId");
     
     ALTER TABLE "users_awardsShows" ADD FOREIGN KEY ("awardsShow_id") REFERENCES "awardsShows" ("awardsShow_id");
     
@@ -118,7 +118,7 @@ async function migrate() {
     
     ALTER TABLE "awardsContenders" ADD FOREIGN KEY ("movie_id") REFERENCES "movies" ("movie_id");
     
-    ALTER TABLE "userPredictions" ADD FOREIGN KEY ("user_id") REFERENCES "users" ("user_id");
+    ALTER TABLE "userPredictions" ADD FOREIGN KEY ("userId") REFERENCES "users" ("userId");
     
     ALTER TABLE "userPredictions" ADD FOREIGN KEY ("awardsContender_id") REFERENCES "awardsContenders" ("awardsContender_id");
     
@@ -126,7 +126,7 @@ async function migrate() {
     
     CREATE UNIQUE INDEX "followers_index_0" ON "followers" ("username", "follower");
     
-    CREATE UNIQUE INDEX "users_awardsShows_index_1" ON "users_awardsShows" ("user_id", "awardsShow_id");
+    CREATE UNIQUE INDEX "users_awardsShows_index_1" ON "users_awardsShows" ("userId", "awardsShow_id");
     
     `);
         console.log("migration ran successfully");

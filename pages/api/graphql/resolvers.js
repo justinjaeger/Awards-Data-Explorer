@@ -1,5 +1,5 @@
-import db from "../../../lib/db";
-import { Datetime, Bit } from "./scalars";
+import db from '../../../lib/db';
+import { Datetime, Bit } from './scalars';
 
 /* RESOLVERS */
 
@@ -10,10 +10,10 @@ export const resolvers = {
             try {
                 const user = await db.query(`
           SELECT * FROM users
-          WHERE user_id='${args.user_id}'
+          WHERE userId='${args.userId}'
         `);
                 return {
-                    user_id: user[0].user_id,
+                    userId: user[0].userId,
                     email: user[0].email,
                     username: user[0].username,
                     password: user[0].password,
@@ -34,7 +34,7 @@ export const resolvers = {
           WHERE username='${args.username}'
         `);
                 return {
-                    user_id: user[0].user_id,
+                    userId: user[0].userId,
                     email: user[0].email,
                     username: user[0].username,
                     password: user[0].password,
@@ -59,7 +59,7 @@ export const resolvers = {
         `);
                 return users.map(
                     ({
-                        user_id,
+                        userId,
                         email,
                         username,
                         password,
@@ -69,7 +69,7 @@ export const resolvers = {
                         dateCreated,
                         lastLoggedIn,
                     }) => ({
-                        user_id,
+                        userId,
                         email,
                         username,
                         password,
@@ -95,7 +95,7 @@ export const resolvers = {
         `);
                 return users.map(
                     ({
-                        user_id,
+                        userId,
                         email,
                         username,
                         password,
@@ -105,7 +105,7 @@ export const resolvers = {
                         dateCreated,
                         lastLoggedIn,
                     }) => ({
-                        user_id,
+                        userId,
                         email,
                         username,
                         password,
@@ -127,7 +127,7 @@ export const resolvers = {
                 const datetime = new Date()
                     .toISOString()
                     .slice(0, 19)
-                    .replace("T", " ");
+                    .replace('T', ' ');
                 const users = await db.query(`
           INSERT INTO followers(username, follower, dateCreated)
           VALUES('${args.username}', '${args.follower}', '${datetime}')
@@ -144,7 +144,7 @@ export const resolvers = {
                 const datetime = new Date()
                     .toISOString()
                     .slice(0, 19)
-                    .replace("T", " ");
+                    .replace('T', ' ');
                 const users = await db.query(`
         DELETE FROM followers 
         WHERE username='${args.username}' AND follower='${args.follower}'
