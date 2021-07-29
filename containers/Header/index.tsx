@@ -127,7 +127,7 @@ export default function Header() {
                 {loginModal && (
                     <Modal
                         setModal={setLoginModal}
-                        size={form === 'login' ? '200px' : '350px'}
+                        size={form === 'login' ? 200 : 350}
                     >
                         <LoginContainer
                             form={form}
