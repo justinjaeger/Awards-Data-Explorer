@@ -25,6 +25,8 @@ const db = (() => {
     }
 })();
 
+// We can typecast this as "any" in order to not get 1000 unknown type errors when accessing this
+// But let's take that out later when we have Prisma set up
 export default {
     query: async (query) => {
         try {
@@ -35,7 +37,7 @@ export default {
             return { error };
         }
     }
-}
+} as any
 
 // switch (process.env.APP_ENV) {
 //     case "local":
