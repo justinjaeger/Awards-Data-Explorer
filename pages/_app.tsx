@@ -4,7 +4,7 @@ import App from 'next/app'
 import db from '../lib/db';
 import cookies from 'next-cookies';
 import { useCookie } from 'next-cookie';
-import verifyToken, { IVerifyTokenResponse } from '../controllers/verifyToken';
+import verifyToken, { IVerifyTokenResponse } from '../utils/verifyToken';
 import Header from '../containers/Header';
 import { IInitialProps } from '../types';
 import Context from '../context';

@@ -6,7 +6,7 @@ import cookies from "next-cookies";
 import parseCookies from "../../utils/parseCookies";
 import Header from "../../containers/Header";
 import RankGame from "../../containers/RankGame/Game";
-import Four0Four from "../../containers/Four0Four";
+import NotFound from "../../containers/NotFound";
 
 /**
  * /rank/2022-AMPAS-picture
