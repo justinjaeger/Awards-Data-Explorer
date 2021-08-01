@@ -1,5 +1,4 @@
-import db from '../../../../lib/db';
-import { verificationEmail, verificationCode } from '../utils/mailHelper';
+import db from '../../../../../../lib/db';
 
 export default async (req, res) => {
 
@@ -13,7 +12,6 @@ export default async (req, res) => {
     try {
          // DELETE: delete user by userId
          if (method === 'DELETE') {
-            const userId = slug[0];
             // Delete user from database
             result = await db.query(`
                 DELETE FROM users

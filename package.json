@@ -8,6 +8,7 @@
         "build": "next build",
         "start": "next start",
         "migrate": "node scripts/migrate-db.js",
+        "typescript": "tsc --noEmit --skipLibCheck",
         "test": "jest --runInBand"
     },
     "dependencies": {

@@ -8,7 +8,7 @@ import { ILoginResponse } from '../../../../../types/responses';
 
 /**
  * User has already been partially created (see step1.ts)
- * User has just submitted SignUp info (username, password)
+ * User has just submitted Signup info (username, password)
  * This checks their username + password, sets them, and validates the account
  * Must send back all relevant user info for login (see IUser) in types/indes.tsx
  * Request made from [code].tsx
