@@ -12,4 +12,45 @@ generator client {
   provider = "prisma-client-js"
 }
 
-model User
+model User {
+    id Int @id @default(autoincrement())
+    email String @unique
+    username String? @unique
+    password String?
+    role Role @default(USER)
+    authenticated Boolean @default(false)
+    image String @default("/PROFILE.png")
+    dateCreated DateTime @default(now())
+    lastLoggedIn DateTime?
+
+    followers Follower[] @relation("user")
+    following Follower[] @relation("follower")
+    tokens Token[]
+    codes Code[]
+}
+
+model Token {
+    accessToken String @id
+    user User @relation(fields: [userId], references: [id])
+    userId Int // relation scalar field  (used in the `@relation` attribute above)
+}
+
+model Code {
+    code Int @id
+    user User @relation(fields: [userId], references: [id])
+    userId Int
+    expiration DateTime
+}
+
+model Follower {
+    user User @relation("user", fields: [userId], references: [id])
+    userId Int
+    follower User @relation("follower", fields: [followerId], references: [id])
+    followerId Int
+    @@id([userId, followerId])
+}
+
+enum Role {
+  USER
+  ADMIN
+}

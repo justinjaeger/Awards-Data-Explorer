@@ -22,7 +22,7 @@ export default async (req, res): Promise<IFollowerResponse> => {
                 )
             `);
             const followers: IFollower[] = result.map(user => {
-                const image = user.image ? user.image : '/PROFILE.png';
+                const image = user.image ? user.image : '/PROFILE.png';  // obsolete since this is set by default in mysql
                 return {
                     userId: user.userId,
                     username: user.username,

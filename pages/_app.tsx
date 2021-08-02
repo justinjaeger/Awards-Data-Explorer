@@ -96,7 +96,7 @@ MyApp.getInitialProps = async (context) => {
                             username,
                             email,
                             admin,
-                            image: image ? image : '/PROFILE.png',
+                            image: image ? image : '/PROFILE.png', // obsolete since this is set by default in mysql
                         }
                     },
                 }
