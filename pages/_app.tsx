@@ -45,10 +45,12 @@ interface IMyAppProps extends AppProps {
 MyApp.getInitialProps = async (context: AppContext) => {
     const appProps = await App.getInitialProps(context);
 
+    // This feels like you shouldn't have to do this
     const url: string = (process.env.NODE_ENV === "development") 
         ? "http://localhost:3003" 
-        : "https://oscarexpert.com";
+        : "https://www.oscarexpert.com";
     
+    // Returning ...appProps is standard Next.js practice
     const initialProps: IInitialProps = {
         app: {
             ...initialState.app, 
@@ -57,7 +59,7 @@ MyApp.getInitialProps = async (context: AppContext) => {
         auth: { 
             ...initialState.auth,
         },
-        ...appProps
+        ...appProps,
     };
 
     const c = cookies(context.ctx); // for getting cookies
@@ -111,12 +113,11 @@ MyApp.getInitialProps = async (context: AppContext) => {
             };
         } catch(e) {
             console.log("error in _app.tsx: ", e.message);
-            throw new Error(e.message)
+            throw new Error(e.message);
         }
     }
 
     // If no accessToken, return initial props
-    // Returning ...appProps is standard Next stuff
     return { initialProps };
 }
 

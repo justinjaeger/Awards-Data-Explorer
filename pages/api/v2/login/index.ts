@@ -2,9 +2,14 @@ import prisma from '../../../../lib/prisma';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import Cookies from 'cookies';
-import { ILoginResponse } from '../../../../types/responses';
+import { IApiResponse, IUser } from '../../../../types';
+import { NextApiRequest, NextApiResponse } from 'next';
 
-export default async (req, res): Promise<ILoginResponse> => {
+interface ILoginResponse extends IApiResponse {
+    user?: IUser;
+}
+
+export default async (req: NextApiRequest, res: NextApiResponse<ILoginResponse>) => {
 
     const cookies = new Cookies(req, res);
 

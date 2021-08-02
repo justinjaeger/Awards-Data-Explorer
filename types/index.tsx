@@ -28,3 +28,8 @@ export type ILoginRoute =
     'forgotPassword' |
     'resetPassword' |
     undefined;
+
+export interface IApiResponse {
+    status: 'success' | 'rejected' | 'error';
+    message?: string;
+}

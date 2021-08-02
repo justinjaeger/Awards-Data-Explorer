@@ -1,6 +1,7 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import prisma from '../../../../../lib/prisma';
 import { createVerificationCodeEmail } from '../../../../../utils/mailHelper';
+import { IApiResponse } from '../../../../../types';
 
 /**
  * Step 1 in reset password preocess
@@ -8,7 +9,7 @@ import { createVerificationCodeEmail } from '../../../../../utils/mailHelper';
  * that leads to reset/[code].tsx
  */
 
- export default async (req: NextApiRequest, res: NextApiResponse) => {
+ export default async (req: NextApiRequest, res: NextApiResponse<IApiResponse>) => {
 
     const {
         method,
@@ -51,14 +52,18 @@ import { createVerificationCodeEmail } from '../../../../../utils/mailHelper';
             dt.setMinutes( dt.getMinutes() + 30 );
             const expiration = dt.toISOString().slice(0, 19).replace("T", " ");
 
-            // Sets verification code in database
-            const verifCodeRes = await db.query(`
-                INSERT INTO codes(code, userId, expiration)
-                VALUES('${verificationCode}', ${userId}, '${expiration}')
-            `)
-            if (verifCodeRes.error) throw new Error(verifCodeRes.error);
+            // Se verification code in database
+            await prisma.code.create({
+                data: {
+                    code: verificationCode,
+                    userId: id,
+                    expiration,
+                }
+            });
 
-            return res.send(200).json({ status: 'success' });
+            return res.status(200).json({ 
+                status: 'success',
+            });
         }
     } catch (e) {
         console.log('error in reset.ts ', e.message);

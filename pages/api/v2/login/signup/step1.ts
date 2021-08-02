@@ -1,13 +1,14 @@
 import prisma from '../../../../../lib/prisma';
 import { createVerificationCodeEmail } from '../../../../../utils/mailHelper';
-import { ISignupStepOneResponse } from '../../../../../types/responses';
+import { IApiResponse } from '../../../../../types';
+import { NextApiRequest, NextApiResponse } from 'next';
+
 
 /**
  * User submits email and gets a confirmation link sent to them
- * Also returns userId?
  */
 
-export default async (req, res): Promise<ISignupStepOneResponse> => {
+export default async (req: NextApiRequest, res: NextApiResponse<IApiResponse>) => {
 
     const {
         method,
@@ -74,7 +75,9 @@ export default async (req, res): Promise<ISignupStepOneResponse> => {
             `)
             if (verifCodeRes.error) throw new Error(verifCodeRes.error);
 
-            return res.status(200).json({ status: 'success' });
+            return res.status(200).json({ 
+                status: 'success',
+            });
         };
 
     } catch(e) {

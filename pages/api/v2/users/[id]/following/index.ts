@@ -1,8 +1,13 @@
 import prisma from '../../../../../../lib/prisma';
 import { IFollower } from '../../../../../../types';
-import { IFollowerResponse } from '../../../../../../types/responses';
+import { IApiResponse } from '../../../../../../types';
+import { NextApiRequest, NextApiResponse } from 'next';
 
-export default async (req, res): Promise<IFollowerResponse> => {
+interface IFollowerResponse extends IApiResponse {
+    followers?: IFollower[];
+}
+
+export default async (req: NextApiRequest, res: NextApiResponse<IFollowerResponse>) => {
 
     const {
         method,

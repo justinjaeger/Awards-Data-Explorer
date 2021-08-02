@@ -3,7 +3,12 @@ import AWS from 'aws-sdk';
 import formidable from 'formidable-serverless';
 import fs from 'fs';
 import sharp from 'sharp';
-import { IUploadImageResponse } from '../../../../../types/responses';
+import { IApiResponse } from '../../../../../types';
+import { NextApiRequest, NextApiResponse } from 'next';
+
+interface IUploadImageResponse extends IApiResponse {
+    url?: string;
+}
 
 export const config = { // idk if this shit is going to give me hell
     api: {
@@ -11,7 +16,7 @@ export const config = { // idk if this shit is going to give me hell
     },
 };
 
-export default async (req, res): Promise<IUploadImageResponse> => {
+export default async (req: NextApiRequest, res: NextApiResponse<IUploadImageResponse>) => {
 
     const {
         method,

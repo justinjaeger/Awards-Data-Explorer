@@ -1,7 +1,12 @@
 import prisma from '../../../../../../lib/prisma';
-import { IDetermineFollowingResponse } from '../../../../../../types/responses';
+import { IApiResponse } from '../../../../../../types';
+import { NextApiRequest, NextApiResponse } from 'next';
 
-export default async (req, res): Promise<IDetermineFollowingResponse> => {
+interface IDetermineFollowingResponse extends IApiResponse {
+    following?: boolean;
+}
+
+export default async (req: NextApiRequest, res: NextApiResponse<IDetermineFollowingResponse>) => {
 
     const {
         method,

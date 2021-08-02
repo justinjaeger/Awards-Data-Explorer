@@ -1,7 +1,12 @@
 import prisma from '../../../../../lib/prisma';
-import { IVerifyCodeResponse } from '../../../../../types/responses';
+import { IApiResponse } from '../../../../../types';
+import { NextApiRequest, NextApiResponse } from 'next';
 
-export default async (req, res): Promise<IVerifyCodeResponse> => {
+interface IVerifyCodeResponse extends IApiResponse {
+    id?: number;
+}
+
+export default async (req: NextApiRequest, res: NextApiResponse<IVerifyCodeResponse>) => {
 
     const {
         method,
@@ -35,7 +40,7 @@ export default async (req, res): Promise<IVerifyCodeResponse> => {
 
             return res.status(200).json({ 
                 status: 'success',
-                userId,
+                id: userId,
             });
          }
 

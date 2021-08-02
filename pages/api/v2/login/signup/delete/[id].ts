@@ -1,6 +1,8 @@
 import prisma from '../../../../../../lib/prisma';
+import { NextApiRequest, NextApiResponse } from 'next';
+import { IApiResponse } from '../../../../../../types';
 
-export default async (req, res) => {
+export default async (req: NextApiRequest, res: NextApiResponse<IApiResponse>) => {
 
     let result;
 
@@ -10,8 +12,8 @@ export default async (req, res) => {
     } = req;
     
     try {
-         // DELETE: delete user by userId
-         if (method === 'DELETE') {
+        // DELETE: delete user by userId
+        if (method === 'DELETE') {
             // Delete user from database
             result = await db.query(`
                 DELETE FROM users
@@ -25,8 +27,10 @@ export default async (req, res) => {
             `);
             if (result.error) throw new Error(result.error);
 
-            return res.status(200).json({ status: 'success' });
-         }
+            return res.status(200).json({ 
+                status: 'success',
+            });
+        }
 
     } catch(e) {
         console.log('error in [userId]: ', e.message);

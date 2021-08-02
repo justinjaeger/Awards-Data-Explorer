@@ -4,7 +4,12 @@ import jwt from "jsonwebtoken";
 import Cookies from 'cookies';
 import profanityFilter from '../../../../../utils/profanityFilter';
 import usernameFilter from '../../../../../utils/usernameFilter';
-import { ILoginResponse } from '../../../../../types/responses';
+import { IApiResponse, IUser } from '../../../../../types';
+import { NextApiRequest, NextApiResponse } from 'next';
+
+interface ILoginResponse extends IApiResponse {
+    user?: IUser;
+}
 
 /**
  * User has already been partially created (see step1.ts)
@@ -14,7 +19,7 @@ import { ILoginResponse } from '../../../../../types/responses';
  * Request made from [code].tsx
  */
 
-export default async (req, res): Promise<ILoginResponse> => {
+export default async (req: NextApiRequest, res: NextApiResponse<ILoginResponse>) => {
 
     const {
         method,
@@ -92,15 +97,16 @@ export default async (req, res): Promise<ILoginResponse> => {
                 WHERE userId=${userId}
             `);
             if (getUserInfo.error) throw new Error(getUserInfo.error);
-            const { email, admin } = getUserInfo[0];
+            const { email, role, image } = getUserInfo[0];
 
             return res.status(200).send({
                 status: 'success',
                 user: {
-                    userId,
+                    id: userId,
                     username,
                     email,
-                    admin,
+                    role,
+                    image,
                 }
             });
         };

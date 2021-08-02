@@ -1,7 +1,12 @@
 import prisma from '../../../../../../lib/prisma';
-import { IFollowerCountResponse } from '../../../../../../types/responses';
+import { IApiResponse } from '../../../../../../types';
+import { NextApiRequest, NextApiResponse } from 'next';
 
-export default async (req, res): Promise<IFollowerCountResponse> => {
+interface IFollowerCountResponse extends IApiResponse {
+    count?: number;
+}
+
+export default async (req: NextApiRequest, res: NextApiResponse<IFollowerCountResponse>) => {
 
     const {
         method,

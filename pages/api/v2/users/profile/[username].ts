@@ -1,7 +1,13 @@
 import prisma from '../../../../../lib/prisma';
-import { IProfileUserResponse } from '../../../../../types/responses';
+import { IApiResponse } from '../../../../../types';
+import { NextApiRequest, NextApiResponse } from 'next';
 
-export default async (req, res): Promise<IProfileUserResponse> => {
+interface IProfileUserResponse extends IApiResponse {
+    userId?: number;
+    image?: string;
+}
+
+export default async (req: NextApiRequest, res: NextApiResponse<IProfileUserResponse>) => {
 
     const {
         method,
