@@ -1,4 +1,4 @@
-import db from '../../../../../lib/db';
+import prisma from '../../../../../lib/prisma';
 import bcrypt from 'bcrypt';
 import jwt from "jsonwebtoken";
 import Cookies from 'cookies';

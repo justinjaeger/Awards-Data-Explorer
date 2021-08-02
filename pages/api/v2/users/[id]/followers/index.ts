@@ -1,4 +1,4 @@
-import db from '../../../../../../lib/db';
+import prisma from '../../../../../../lib/prisma';
 import { IFollower } from '../../../../../../types';
 import { IFollowerResponse } from '../../../../../../types/responses';
 

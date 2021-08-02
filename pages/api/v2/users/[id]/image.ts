@@ -1,4 +1,4 @@
-import db from '../../../../../lib/db';
+import prisma from '../../../../../lib/prisma';
 import AWS from 'aws-sdk';
 import formidable from 'formidable-serverless';
 import fs from 'fs';

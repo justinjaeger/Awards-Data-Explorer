@@ -1,4 +1,4 @@
-import db from '../../../../../../lib/db';
+import prisma from '../../../../../../lib/prisma';
 
 export default async (req, res) => {
 

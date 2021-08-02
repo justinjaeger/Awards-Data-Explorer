@@ -1,4 +1,4 @@
-import db from "../lib/db";
+import prisma from "../lib/prisma";
 import jwt from "jsonwebtoken";
 
 export type IVerifyTokenResponse = {

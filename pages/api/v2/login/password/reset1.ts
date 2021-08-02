@@ -1,5 +1,5 @@
-import db from '../../../../../lib/db';
-import { IGenericResponse } from '../../../../../types/responses';
+import { NextApiRequest, NextApiResponse } from 'next';
+import prisma from '../../../../../lib/prisma';
 import { createVerificationCodeEmail } from '../../../../../utils/mailHelper';
 
 /**
@@ -8,7 +8,7 @@ import { createVerificationCodeEmail } from '../../../../../utils/mailHelper';
  * that leads to reset/[code].tsx
  */
 
- export default async (req, res): Promise<IGenericResponse> => {
+ export default async (req: NextApiRequest, res: NextApiResponse) => {
 
     const {
         method,
@@ -26,19 +26,17 @@ import { createVerificationCodeEmail } from '../../../../../utils/mailHelper';
             }
 
             // Ensure email is registered already / get userId
-            const validateEmailRes = await db.query(`
-                SELECT userId 
-                FROM users
-                WHERE email='${email}' 
-            `);
-            if (validateEmailRes.error) throw new Error(validateEmailRes.error);
-            if (!validateEmailRes[0]) {
+            const { id } = await prisma.user.findUnique({
+                where: {
+                    email: email,
+                }
+            });
+            if (!id) {
                 return res.json({
                     status: 'rejected',
                     message: 'This email is not registered',
                 });
             }
-            const { userId } = validateEmailRes[0];
 
             // Generate verification code
             const verificationCode = Math.floor(100000 + Math.random() * 900000);

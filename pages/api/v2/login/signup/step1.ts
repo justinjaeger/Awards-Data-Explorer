@@ -1,4 +1,4 @@
-import db from '../../../../../lib/db';
+import prisma from '../../../../../lib/prisma';
 import { createVerificationCodeEmail } from '../../../../../utils/mailHelper';
 import { ISignupStepOneResponse } from '../../../../../types/responses';
 

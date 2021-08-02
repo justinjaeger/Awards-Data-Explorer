@@ -1,4 +1,4 @@
-import db from '../../../../../lib/db';
+import prisma from '../../../../../lib/prisma';
 import { IVerifyCodeResponse } from '../../../../../types/responses';
 
 export default async (req, res): Promise<IVerifyCodeResponse> => {

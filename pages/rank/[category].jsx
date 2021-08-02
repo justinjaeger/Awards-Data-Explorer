@@ -1,4 +1,4 @@
-import db from "../../lib/db";
+import prisma from "../../lib/prisma";
 import React from "react";
 import axios from "axios";
 import cookies from "next-cookies";
