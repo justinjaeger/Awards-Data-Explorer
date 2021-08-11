@@ -140,7 +140,7 @@ export default async (req: NextApiRequest, res: NextApiResponse<ILoginResponse>)
         };
 
     } catch(e) {
-        console.log('error: ', e.message);
+        console.log('error: ', e.code, e.message);
         return res.status(500).json({ 
             status: 'error',
             message: e.message

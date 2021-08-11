@@ -66,7 +66,7 @@ import { IApiResponse } from '../../../../../types';
             });
         }
     } catch (e) {
-        console.log('error in reset.ts ', e.message);
+        console.log('error in reset.ts ', e.code, e.message);
         return res.status(500).json({
             status: 'error',
             message: e.message,

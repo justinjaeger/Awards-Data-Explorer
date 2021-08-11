@@ -6,6 +6,7 @@ import profanityFilter from '../../../../../utils/profanityFilter';
 import usernameFilter from '../../../../../utils/usernameFilter';
 import { IApiResponse, IUser } from '../../../../../types';
 import { NextApiRequest, NextApiResponse } from 'next';
+import { Prisma } from '@prisma/client';
 
 interface ILoginResponse extends IApiResponse {
     user?: IUser;
@@ -23,7 +24,7 @@ export default async (req: NextApiRequest, res: NextApiResponse<ILoginResponse>)
 
     const {
         method,
-        body: { userId, username, password, confirmPassword },
+        body: { id, username, password, confirmPassword },
     } = req;
 
     const cookies = new Cookies(req, res);
@@ -59,50 +60,45 @@ export default async (req: NextApiRequest, res: NextApiResponse<ILoginResponse>)
             // Get the datetime
             const datetime = new Date().toISOString().slice(0, 19).replace('T', ' ');
 
-            // Update user info
-            const newUserRes = await db.query(`
-                INSERT INTO users(username, password, dateCreated, lastLoggedIn, authenticated)
-                VALUES('${username}', '${hashedPassword}', '${datetime}', '${datetime}', 1) 
-            `);
-            if (newUserRes.error) {
-                // Handle duplicate entry errors with an error message
-                if (newUserRes.error.code === 'ER_DUP_ENTRY') {
-                    return res.json({ status: 'rejected', message: 'This username is already registered.' });
-                }
-                // If that's not the error, handle it like any other
-                throw new Error(newUserRes.error);
-            }
+            // Update user info and get remaining fields
+            const { email, role, image } = await prisma.user.update({
+                data: {
+                    username,
+                    password: hashedPassword,
+                    lastLoggedIn: datetime,
+                },
+                where: {
+                    id: id as number, // ts flag because again it would be nice to be able to type the body of the incoming request (do a wrapper for this later)
+                },
+                select: {
+                    email: true,
+                    role: true,
+                    image: true,
+                },
+            });
 
             // Create access token
-            const accessToken = jwt.sign(
-                { userId }, // payload
+            const accessToken: string = jwt.sign(
+                { id }, // payload
                 process.env.ACCESS_TOKEN_SECRET, // secret
                 { expiresIn: '10m' } // options
             );
 
             // Save token in db
-            const saveTokenRes = await db.query(`
-                INSERT INTO tokens(accessToken, userId)
-                VALUES('${accessToken}', ${userId}) 
-            `);
-            if (saveTokenRes.error) throw new Error(saveTokenRes.error);
+            await prisma.token.create({
+                data: {
+                    accessToken,
+                    userId: id,
+                }
+            });
 
             // Set new cookie in browser
             cookies.set('accessToken', accessToken, { httpOnly: true });
 
-            // Get remaining user info for login
-            const getUserInfo = await db.query(`
-                SELECT email, admin
-                FROM users
-                WHERE userId=${userId}
-            `);
-            if (getUserInfo.error) throw new Error(getUserInfo.error);
-            const { email, role, image } = getUserInfo[0];
-
-            return res.status(200).send({
+            return res.status(200).json({
                 status: 'success',
                 user: {
-                    id: userId,
+                    id,
                     username,
                     email,
                     role,
@@ -112,7 +108,15 @@ export default async (req: NextApiRequest, res: NextApiResponse<ILoginResponse>)
         };
 
     } catch(e) {
-        console.log('error: ', e.message);
+        if (e instanceof Prisma.PrismaClientKnownRequestError) {
+            if (e.code === 'P2002') {
+                return res.json({
+                    status: 'rejected',
+                    message: 'This email is already registered.'
+                });
+            }
+        }
+        console.log('error in step2.ts: ', e.code, e.message);
         return res.status(500).json({ 
             status: 'error', 
             message: e.message,

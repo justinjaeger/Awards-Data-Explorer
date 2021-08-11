@@ -16,7 +16,7 @@ export type IProfileUser = {
 };
 
 export type IFollower = {
-    userId: number,
+    id: number,
     username: string,
     image: string,
 };

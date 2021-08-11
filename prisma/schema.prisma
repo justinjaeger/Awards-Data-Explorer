@@ -47,6 +47,7 @@ model Follower {
     userId Int
     follower User @relation("follower", fields: [followerId], references: [id])
     followerId Int
+    createdAt DateTime @default(now())
     @@id([userId, followerId])
 }
 

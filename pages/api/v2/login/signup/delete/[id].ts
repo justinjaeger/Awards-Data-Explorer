@@ -8,32 +8,31 @@ export default async (req: NextApiRequest, res: NextApiResponse<IApiResponse>) =
 
     const {
         method,
-        query: { userId },
+        query: { id },
     } = req;
     
     try {
         // DELETE: delete user by userId
         if (method === 'DELETE') {
             // Delete user from database
-            result = await db.query(`
-                DELETE FROM users
-                WHERE userId=${userId}
-            `);
-            if (result.error) throw new Error(result.error);
+            await prisma.user.delete({
+                where: {
+                    id: parseInt(id as string),
+                }
+            });
             // Delete outstanding verification code
-            result = await db.query(`
-                DELETE FROM codes
-                WHERE userId=${userId}
-            `);
-            if (result.error) throw new Error(result.error);
-
+            await prisma.code.deleteMany({
+                where: {
+                    userId: parseInt(id as string),
+                },
+            });
             return res.status(200).json({ 
                 status: 'success',
             });
         }
 
     } catch(e) {
-        console.log('error in [userId]: ', e.message);
+        console.log('error in [userId]: ', e.code, e.message);
         return res.status(500).json({
             status: 'error',
             message: e.message,

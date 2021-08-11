@@ -4,7 +4,7 @@ import { IApiResponse } from '../../../../../../types';
 import { NextApiRequest, NextApiResponse } from 'next';
 
 interface IFollowerResponse extends IApiResponse {
-    followers?: IFollower[];
+    following?: IFollower[];
 }
 
 export default async (req: NextApiRequest, res: NextApiResponse<IFollowerResponse>) => {
@@ -18,43 +18,54 @@ export default async (req: NextApiRequest, res: NextApiResponse<IFollowerRespons
     try {
         // Get array of user's followers
         if (method === 'GET') {
-            const result = await db.query(`
-                SELECT userId, username, image
-                FROM users
-                WHERE userId IN (
-                    SELECT userId FROM followers
-                    WHERE userId=${id}
-                )
-            `);
-            const followers: IFollower[] = result.map(user => {
-                const image = user.image ? user.image : '/PROFILE.png';  // obsolete since this is set by default in mysql
-                return {
-                    userId: user.userId,
-                    username: user.username,
-                    image,
-                };
+            // get user's "following" (first request)
+            // Second request, get list of those users by the IDs just received
+            const { following: followingIds } = await prisma.user.findUnique({
+                where: {
+                    id: parseInt(id as string)
+                },
+                select: {
+                    following: {
+                        select: {
+                            userId: true,
+                        },
+                    },
+                },
+            });
+            // https://www.prisma.io/docs/guides/performance-and-optimization/query-optimization-performance#solving-n1-with-in
+            const following = await prisma.user.findMany({
+                where: {
+                    id: {
+                        in: [...followingIds.map((f) => f.userId)]
+                    },
+                },
+                select: {
+                    id: true,
+                    username: true,
+                    image: true,
+                }
             });
             return res.status(200).json({
                 status: 'success',
-                followers,
+                following,
             });
         }
 
         // Follow a target user
         if (method === 'POST') {
-            const datetime = new Date().toISOString().slice(0, 19).replace('T', ' ');
-            const result = await db.query(`
-                INSERT INTO followers(userId, follower, dateCreated)
-                VALUES(${targetUserId}, ${id}, '${datetime}')
-            `);
-            if (result.error) throw new Error(result.error);
+            prisma.follower.create({
+                data: {
+                    userId: parseInt(targetUserId as string),
+                    followerId: parseInt(id as string),
+                }
+            })
             return res.status(200).json({
                 status: 'success'
             });
         };
 
     } catch(e) {
-        console.log('error: ', e.message);
+        console.log('error: ', e.code, e.message);
         return res.status(500).send({
             status: 'error',
             message: e.message

@@ -81,13 +81,15 @@ export default async (req: NextApiRequest, res: NextApiResponse<IUploadImageResp
 
                         const url = data.Location;
                         // save URL in database
-                        let result = await db.query(`
-                            UPDATE users
-                            SET image='${url}'
-                            WHERE userId=${id} 
-                        `);
-                        if (result.error) throw new Error(result.error);
-                        return res.send(200).json({
+                        await prisma.user.update({
+                            where: {
+                                id: parseInt(id as string),
+                            },
+                            data: {
+                                image: url,
+                            },
+                        });
+                        return res.status(200).json({
                             status: 'success',
                             url,
                         });
@@ -123,7 +125,7 @@ export default async (req: NextApiRequest, res: NextApiResponse<IUploadImageResp
         }
 
     } catch(e) {
-        console.log('error in image.ts: ', e.message);
+        console.log('error in image.ts: ', e.code, e.message);
         return res.status(500).send({
             status: 'error',
             message: e.message,

@@ -6,7 +6,7 @@ interface IFollowerCountResponse extends IApiResponse {
     count?: number;
 }
 
-export default async (req: NextApiRequest, res: NextApiResponse<IFollowerCountResponse) => {
+export default async (req: NextApiRequest, res: NextApiResponse<IFollowerCountResponse>) => {
 
     const {
         method,
@@ -16,18 +16,18 @@ export default async (req: NextApiRequest, res: NextApiResponse<IFollowerCountRe
     try {
         // count how many users are following id
         if (method === 'GET') {
-            const result = await db.query(`
-                SELECT COUNT(*) AS sum FROM followers 
-                WHERE follower=${id}
-            `)
-            if (result.error) throw new Error(result.error);
+            const count = await prisma.follower.count({
+                where: {
+                    followerId: parseInt(id as string),
+                }
+            })
             return res.json({ 
                 status: 'success',
-                count: result[0].sum,
+                count,
             });
         };
     } catch(e) {
-        console.log('error: ', e.message);
+        console.log('error: ', e.code, e.message);
         return res.status(500).json({
             status: 'error',
             message: e.message,

@@ -3,7 +3,7 @@ import { IApiResponse } from '../../../../../types';
 import { NextApiRequest, NextApiResponse } from 'next';
 
 interface IProfileUserResponse extends IApiResponse {
-    userId?: number;
+    id?: number;
     image?: string;
 }
 
@@ -25,26 +25,25 @@ export default async (req: NextApiRequest, res: NextApiResponse<IProfileUserResp
          * if not, throw a 404 page
          */
         if (method === 'GET') {
-            let result = await db.query(`
-                SELECT userId, image
-                FROM users
-                WHERE username='${username}'
-            `);
-            if (result.error) throw new Error(result.error);
-            if (!result.length) return res.json({ 
+            const user = await prisma.user.findUnique({ // typing here should be User | null I think?
+                where: {
+                    username: username as string,
+                },
+            })
+            if (user === null) return res.json({ 
                 status: 'rejected',
                 message: '404',
             });
-            const { userId, image } = result[0];
+            const { id, image } = user; // wonder if I can deconstruct oon the call. But if it comes back null it might throow an error
             return res.status(200).json({
                 status: 'success',
-                userId,
+                id,
                 image,
             });
         }
 
     } catch(e) {
-        console.log('error: ', e.message);
+        console.log('error: ', e.code, e.message);
         return res.status(500).json({
             status: 'error',
             message: e.message,

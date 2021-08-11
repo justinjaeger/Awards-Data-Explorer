@@ -17,12 +17,11 @@ export default async (req: NextApiRequest, res: NextApiResponse<IVerifyCodeRespo
          // GET: retrieve user info based on query code
          if (method === 'GET') {
             // Delete user from database
-            const codeResult = await db.query(`
-                SELECT * FROM codes
-                WHERE code=${code}
-            `);
-            if (codeResult.error) throw new Error(codeResult.error);
-            const { userId, expiration } = codeResult.data[0];
+            const { userId, expiration } = await prisma.code.findUnique({
+                where: {
+                    code: parseInt(code as string),
+                },
+            })
             // Check if expired
             const currentTime = Math.ceil(Date.now() / 1000);
             if (currentTime - expiration > 0) {
@@ -32,11 +31,11 @@ export default async (req: NextApiRequest, res: NextApiResponse<IVerifyCodeRespo
                 })
             }
             // Delete outstanding verification code
-            const deleteResult = await db.query(`
-                DELETE FROM codes
-                WHERE code=${code}
-            `);
-            if (deleteResult.error) throw new Error(deleteResult.error);
+            await prisma.code.delete({
+                where: {
+                    code: parseInt(code as string),
+                }
+            });
 
             return res.status(200).json({ 
                 status: 'success',
@@ -45,7 +44,7 @@ export default async (req: NextApiRequest, res: NextApiResponse<IVerifyCodeRespo
          }
 
     } catch(e) {
-        console.log('error in [code].ts: ', e.message);
+        console.log('error in [code].ts: ', e.code, e.message);
         return res.status(500).json({
             status: 'error',
             message: e.message,
