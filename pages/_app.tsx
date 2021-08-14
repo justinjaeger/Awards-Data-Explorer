@@ -1,14 +1,23 @@
 import '../styles/index.scss';
 import React from 'react';
-import App from 'next/app'
-import db from '../lib/db';
+import App, { AppContext, AppProps } from 'next/app';
 import cookies from 'next-cookies';
 import { useCookie } from 'next-cookie';
-import verifyToken, { IVerifyTokenResponse } from '../controllers/verifyToken';
+import prisma from '../lib/prisma';
+import verifyToken, { IVerifyTokenResponse } from '../utils/verifyToken';
 import Header from '../containers/Header';
-import { IInitialProps } from '../types';
-import Context from '../context';
+import { IAppContext, IAuthContext } from '../context/types';
+import Context, { initialState } from '../context';
 import Notification from '../components/Notification';
+
+export interface IInitialProps {
+    app: IAppContext;
+    auth: IAuthContext;
+}
+
+interface IMyAppProps extends AppProps {
+    initialProps: IInitialProps;
+}
 
 /**
  * Component is the your page eg /index
@@ -16,16 +25,14 @@ import Notification from '../components/Notification';
  * initialProps injects props from getInitialProps
  */
 
-function MyApp({ Component, pageProps, initialProps }) {
-    return (<>
-        <Context.App.Provider value={initialProps.app}>
-            <Context.Auth.Provider value={initialProps.user}>
-                <Notification />
-                <Header />
-                <Component {...pageProps} {...initialProps} />
-            </Context.Auth.Provider>
-        </Context.App.Provider>
-    </>);
+function MyApp({ Component, pageProps, initialProps }: IMyAppProps) {
+    <Context.App.Provider value={initialProps.app}>
+        <Context.Auth.Provider value={initialProps.auth}>
+            <Notification />
+            <Header />
+            <Component {...pageProps} {...initialProps} />
+        </Context.Auth.Provider>
+    </Context.App.Provider>;
 }
 
 /**
@@ -34,35 +41,40 @@ function MyApp({ Component, pageProps, initialProps }) {
  * If verified, populate page with user data
  */
 
-MyApp.getInitialProps = async (context) => {
+MyApp.getInitialProps = async (context: AppContext) => {
     const appProps = await App.getInitialProps(context);
 
-    const url = (process.env.NODE_ENV === "development") 
-        ? "http://localhost:3003" 
-        : "https://oscarexpert.com";
-    
-    const emptyProps: IInitialProps = {
-        app: { url, notification: undefined },
-        auth: { 
-            token: undefined,
-            user: undefined
+    // This feels like you shouldn't have to do this
+    const url: string =
+        process.env.NODE_ENV === 'development'
+            ? 'http://localhost:3003'
+            : 'https://www.oscarexpert.com';
+
+    // Returning ...appProps is standard Next.js practice
+    const initialProps: IInitialProps = {
+        app: {
+            ...initialState.app,
+            url,
         },
+        auth: {
+            ...initialState.auth,
+        },
+        ...appProps,
     };
 
-    const c = cookies(context); // for getting cookies
-    const cookie = useCookie(context); // for setting cookies
+    const c = cookies(context.ctx); // for getting cookies
+    const cookie = useCookie(context.ctx); // for setting cookies
 
     if (c.accessToken) {
-        console.log('access token found')
+        console.log('access token found');
         try {
-            const verifyTokenResponse: IVerifyTokenResponse = await verifyToken(c.accessToken);
-            const { 
-                status, 
-                message, 
-                data: { 
-                    userId, 
-                    updatedAccessToken 
-                } 
+            const verifyTokenResponse: IVerifyTokenResponse = await verifyToken(
+                c.accessToken
+            );
+            const {
+                status,
+                message,
+                data: { id, updatedAccessToken },
             } = verifyTokenResponse;
 
             switch (status) {
@@ -70,45 +82,41 @@ MyApp.getInitialProps = async (context) => {
                     throw new Error(message);
                 case 'delete':
                     cookie.set('accessToken', undefined); // deletes token
-                    return { initialProps: emptyProps };
+                    return { initialProps };
                 case 'update':
                     cookie.set('accessToken', updatedAccessToken);
-            };
-
-            // Get verified user's info
-            const result = await db.query(`
-                SELECT username, email, image, admin
-                FROM users 
-                WHERE userId=${userId} 
-            `);
-            if (result.error) throw new Error(result.error);
-            const { username, email, image, admin } = result[0];
-            // Return the final props object
-            return { 
-                initialProps: {
-                    app: emptyProps.app,
-                    auth: {
-                        token: updatedAccessToken 
-                            ? updatedAccessToken 
-                            : c.accessToken,
-                        user: {
-                            userId,
-                            username,
-                            email,
-                            admin,
-                            image: image ? image : '/PROFILE.png',
-                        }
-                    },
-                }
             }
-        } catch(e) {
-            console.log("error in _app.tsx: ", e.message);
+
+            const { username, email, image, role } =
+                await prisma.user.findUnique({
+                    where: {
+                        id,
+                    },
+                });
+
+            // Return the final props object
+            return {
+                ...initialProps,
+                auth: {
+                    ...initialProps.auth,
+                    token: updatedAccessToken || c.accessToken,
+                    user: {
+                        id,
+                        username,
+                        email,
+                        role,
+                        image,
+                    },
+                },
+            };
+        } catch (e) {
+            console.log('error in _app.tsx: ', e.message);
+            throw new Error(e.message);
         }
     }
 
-    // If no accessToken, return empty props
-    // Returning ...appProps is standard Next stuff
-    return { initialProps: emptyProps, ...appProps };
-}
+    // If no accessToken, return initial props
+    return { initialProps };
+};
 
 export default MyApp;

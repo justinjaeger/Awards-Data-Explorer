@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from "react";
-import axios from "axios";
-import Modal from "../../components/Modal";
-import { awardsCategoryNames, awardsShowNames } from "../../utils/shorthand";
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
+import Modal from '../../components/Modal';
+import { awardsCategoryNames, awardsShowNames } from '../../utils/shorthand';
 
 export default function RankGame({
     loggedIn,
@@ -16,7 +16,7 @@ export default function RankGame({
     const [rankList, setRankList] = useState([]);
 
     // For a new entry
-    const [name, setName] = useState("");
+    const [name, setName] = useState('');
     const [entryModal, setEntryModal] = useState(false);
 
     useEffect(() => {
@@ -24,13 +24,13 @@ export default function RankGame({
         axios
             .get(`/api/rank/list?rank_category_id=${rank_category_id}`)
             .then((res) => {
-                console.log("status", res);
-                console.log("LIST:", res.data.list);
+                console.log('status', res);
+                console.log('LIST:', res.data.list);
                 setRankList(res.data.list);
                 setLoading(false);
             })
             .catch((err) => {
-                console.log("err", err);
+                console.log('err', err);
             });
     }, []);
 
@@ -44,7 +44,7 @@ export default function RankGame({
                 name,
             })
             .then((res) => {
-                const rank_movie_id = res.data.rank_movie_id;
+                const { rank_movie_id } = res.data;
                 // Sort and update state
                 const newRankList = rankList.map((obj) => ({ ...obj }));
                 newRankList.push({
@@ -56,10 +56,10 @@ export default function RankGame({
                 newRankList.sort((a, b) => (a.score < b.score ? 1 : -1));
                 setRankList(newRankList);
                 setEntryModal(false);
-                setName("");
+                setName('');
             })
             .catch((err) => {
-                console.log("err", err.status);
+                console.log('err', err.status);
             });
         // e.preventDefault(); /* prevents it from refreshing */
     }
@@ -70,7 +70,7 @@ export default function RankGame({
         <>
             <div id="rank-game">
                 <div>
-                    {year} {awardsShowNames[awardsShow]}s -{" "}
+                    {year} {awardsShowNames[awardsShow]}s -{' '}
                     {awardsCategoryNames[category]}
                 </div>
 
@@ -88,7 +88,7 @@ export default function RankGame({
                         ))}
 
                         {entryModal && (
-                            <Modal setModal={setEntryModal} size={"200px"}>
+                            <Modal setModal={setEntryModal} size="200px">
                                 <input
                                     className="login-form-input"
                                     autoFocus
@@ -116,20 +116,20 @@ export default function RankGame({
     );
 }
 
-/****************************************************************/
-/****************************************************************/
-/****************************************************************/
+/** ************************************************************* */
+/** ************************************************************* */
+/** ************************************************************* */
 
 function RankGameItem({ item, loggedIn, userId }) {
     // This is where you add the + and - on each list item
     // Needs to have + and - buttons be conditional on whether you're logged in
 
-    if (item.name === "batman")
-        console.log("INITIAL SCORE", item.name, item.score);
+    if (item.name === 'batman')
+        console.log('INITIAL SCORE', item.name, item.score);
 
-    const [userScore, setUserScore] = useState("...");
+    const [userScore, setUserScore] = useState('...');
     const [overallScore, setOverallScore] = useState(item.score);
-    const [color, setColor] = useState(""); // marks deleted items as red (only admin can see this)
+    const [color, setColor] = useState(''); // marks deleted items as red (only admin can see this)
 
     const { rank_movie_id } = item;
 
@@ -140,16 +140,16 @@ function RankGameItem({ item, loggedIn, userId }) {
             .then((res) => {
                 setUserScore(res.data.score);
             })
-            .catch((err) => console.log("err", err));
+            .catch((err) => console.log('err', err));
     }, []);
 
     function vote(operator) {
-        console.log("vote cast", userScore, overallScore, operator);
-        if (userScore >= 3 && operator === "+") return;
-        if (userScore <= -3 && operator === "-") return;
+        console.log('vote cast', userScore, overallScore, operator);
+        if (userScore >= 3 && operator === '+') return;
+        if (userScore <= -3 && operator === '-') return;
         // Set notification that user can only cast between -3 and 3 points
         // Make vote appear in browser
-        operator === "+"
+        operator === '+'
             ? [setUserScore(userScore + 1), setOverallScore(overallScore + 1)]
             : [setUserScore(userScore - 1), setOverallScore(overallScore - 1)];
         // Save vote in database
@@ -157,8 +157,7 @@ function RankGameItem({ item, loggedIn, userId }) {
             .post(`/api/rank/${userId}?rank_movie_id=${rank_movie_id}`, {
                 operator,
             })
-            .then((res) => {})
-            .catch((err) => console.log("err", err));
+            .catch((err) => console.log('err', err));
         // Would be cool if this got debounced so a few seconds after you're done
         // toying with the numbers, it calls a function that bubbles up to above component
         // that performs a sort operation on the current array
@@ -167,20 +166,20 @@ function RankGameItem({ item, loggedIn, userId }) {
     function deleteItem() {
         axios
             .delete(`/api/rank/admin/movie?rank_movie_id=${rank_movie_id}`)
-            .then((res) => {
-                setColor("red");
+            .then(() => {
+                setColor('red');
             })
-            .catch((err) => console.log("err", err));
+            .catch((err) => console.log('err', err));
     }
 
     // Make deleteItem an admin-only action
     return (
         <div>
-            <div style={{ color: color }}>
+            <div style={{ color }}>
                 {item.name} : User: {userScore}, Overall: {overallScore}
             </div>
-            <button onClick={() => vote("+")}>++++++</button>
-            <button onClick={() => vote("-")}>------</button>
+            <button onClick={() => vote('+')}>++++++</button>
+            <button onClick={() => vote('-')}>------</button>
             <button onClick={() => deleteItem()}>DELETE</button>
         </div>
     );

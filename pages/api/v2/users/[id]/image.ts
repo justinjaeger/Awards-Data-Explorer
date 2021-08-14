@@ -1,18 +1,26 @@
-import db from '../../../../../lib/db';
+import fs from 'fs';
 import AWS from 'aws-sdk';
 import formidable from 'formidable-serverless';
-import fs from 'fs';
 import sharp from 'sharp';
-import { IUploadImageResponse } from '../../../../../types/responses';
+import { NextApiRequest, NextApiResponse } from 'next';
+import { IApiResponse } from '../../../../../types';
+import prisma from '../../../../../lib/prisma';
 
-export const config = { // idk if this shit is going to give me hell
+interface IUploadImageResponse extends IApiResponse {
+    url?: string;
+}
+
+export const config = {
+    // idk if this shit is going to give me hell
     api: {
         bodyParser: false,
     },
 };
 
-export default async (req, res): Promise<IUploadImageResponse> => {
-
+export default async (
+    req: NextApiRequest,
+    res: NextApiResponse<IUploadImageResponse>
+) => {
     const {
         method,
         query: { id }, // key used to be passed here but now is not
@@ -43,9 +51,9 @@ export default async (req, res): Promise<IUploadImageResponse> => {
                 if (err) throw new Error(err);
                 // Convert to binary string
                 const file = fs.readFileSync(files.file.path);
-        
+
                 console.log('file', file);
-        
+
                 const params = {
                     Bucket: process.env.SPACES_BUCKET,
                     ACL: 'public-read',
@@ -53,7 +61,7 @@ export default async (req, res): Promise<IUploadImageResponse> => {
                     Body: file,
                     ContentType: 'image/jpeg',
                 };
-        
+
                 // Downsize the image
                 await sharp(file)
                     .resize(200, 200) // width, height
@@ -65,7 +73,7 @@ export default async (req, res): Promise<IUploadImageResponse> => {
                     .catch((err) => {
                         throw new Error(err);
                     });
-        
+
                 // Upload and send the file
                 await s3.upload(params).send(async (err, data) => {
                     if (err) {
@@ -76,20 +84,22 @@ export default async (req, res): Promise<IUploadImageResponse> => {
 
                         const url = data.Location;
                         // save URL in database
-                        let result = await db.query(`
-                            UPDATE users
-                            SET image='${url}'
-                            WHERE userId=${id} 
-                        `);
-                        if (result.error) throw new Error(result.error);
-                        return res.send(200).json({
+                        await prisma.user.update({
+                            where: {
+                                id: parseInt(id as string),
+                            },
+                            data: {
+                                image: url,
+                            },
+                        });
+                        return res.status(200).json({
                             status: 'success',
                             url,
                         });
                     }
                 });
             });
-        };
+        }
 
         // DELETE: delete profile image from DO Spaces
         // Can call this after user uploads new profile picture
@@ -116,9 +126,8 @@ export default async (req, res): Promise<IUploadImageResponse> => {
                 }
             });
         }
-
-    } catch(e) {
-        console.log('error in image.ts: ', e.message);
+    } catch (e) {
+        console.log('error in image.ts: ', e.code, e.message);
         return res.status(500).send({
             status: 'error',
             message: e.message,

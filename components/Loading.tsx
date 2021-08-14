@@ -1,12 +1,11 @@
-import React from "react";
+import React from 'react';
 
 export default function Loading() {
-
     return (
-       <>
-        LOADING...
+        <>
+            LOADING...
             {/* Some Lottie animation or something */}
-        LOADING...
-       </>
+            LOADING...
+        </>
     );
 }

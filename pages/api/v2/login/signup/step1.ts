@@ -1,62 +1,54 @@
-import db from '../../../../../lib/db';
+import { NextApiRequest, NextApiResponse } from 'next';
+import { Prisma } from '@prisma/client';
+import prisma from '../../../../../lib/prisma';
 import { createVerificationCodeEmail } from '../../../../../utils/mailHelper';
-import { ISignupStepOneResponse } from '../../../../../types/responses';
+import { IApiResponse } from '../../../../../types';
 
 /**
  * User submits email and gets a confirmation link sent to them
- * Also returns userId?
  */
 
-export default async (req, res): Promise<ISignupStepOneResponse> => {
-
+export default async (
+    req: NextApiRequest,
+    res: NextApiResponse<IApiResponse>
+) => {
     const {
         method,
         body: { email },
     } = req;
-    
+
     try {
         // POST: signup / create new user
         if (method === 'POST') {
-
             // Check that email is properly formatted
             if (!email.includes('@') || !email.includes('.')) {
                 return res.json({
                     status: 'rejected',
-                    message: 'This email is not properly formatted.'
+                    message: 'This email is not properly formatted.',
                 });
             }
 
             // Create new user in database
-            const newUserRes = await db.query(`
-                INSERT INTO users(email)
-                VALUES('${email}') 
-            `);
-            if (newUserRes.error) {
-                // Handle duplicate entry errors with an error message
-                if (newUserRes.error.code === 'ER_DUP_ENTRY') {
-                    return res.json({
-                        status: 'rejected',
-                        message: 'This email is already registered.'
-                    });
-                }
-                // If that's not the error, handle it like any other
-                throw new Error(newUserRes.error);
-            }
-
-            // Get new user's userId
-            const newUserId = await db.query(`
-                SELECT userId FROM users
-                WHERE email='${email}'
-            `)
-            if (newUserId.error) throw new Error(newUserId.error);
-            const { userId } = newUserId[0];
+            const { id } = await prisma.user.create({
+                data: {
+                    email,
+                },
+                select: {
+                    id: true,
+                },
+            });
 
             // Generate verification code
-            const verificationCode = Math.floor(100000 + Math.random() * 900000);
+            const verificationCode = Math.floor(
+                100000 + Math.random() * 900000
+            );
 
             // Utilize the helper function to create e-mail
             // Creates the link to send them to signup/:code
-            const { transport, options } = createVerificationCodeEmail(email, verificationCode);
+            const { transport, options } = createVerificationCodeEmail(
+                email,
+                verificationCode
+            );
 
             // Actually sends the email
             const emailRes = transport.sendMail(options);
@@ -64,21 +56,32 @@ export default async (req, res): Promise<ISignupStepOneResponse> => {
 
             // Get expiration time (now + 30 minutes)
             const dt = new Date();
-            dt.setMinutes( dt.getMinutes() + 30 );
-            const expiration = dt.toISOString().slice(0, 19).replace("T", " ");
+            dt.setMinutes(dt.getMinutes() + 30);
+            const expiration = dt.toISOString().slice(0, 19).replace('T', ' ');
 
             // Sets verification code in database
-            const verifCodeRes = await db.query(`
-                INSERT INTO codes(code, userId, expiration)
-                VALUES('${verificationCode}', ${userId}, '${expiration}')
-            `)
-            if (verifCodeRes.error) throw new Error(verifCodeRes.error);
+            await prisma.code.create({
+                data: {
+                    code: verificationCode,
+                    userId: id,
+                    expiration,
+                },
+            });
 
-            return res.status(200).json({ status: 'success' });
-        };
-
-    } catch(e) {
-        console.log('error in step1.ts: ', e.message);
+            return res.status(200).json({
+                status: 'success',
+            });
+        }
+    } catch (e) {
+        if (e instanceof Prisma.PrismaClientKnownRequestError) {
+            if (e.code === 'P2002') {
+                return res.json({
+                    status: 'rejected',
+                    message: 'This email is already registered.',
+                });
+            }
+        }
+        console.log('error in step1.ts: ', e.code, e.message);
         return res.status(500).json({
             status: 'error',
             message: e.message,

@@ -1,8 +1,13 @@
-import db from '../../../../../lib/db';
 import bcrypt from 'bcrypt';
-import jwt from "jsonwebtoken";
+import jwt from 'jsonwebtoken';
 import Cookies from 'cookies';
-import { ILoginResponse } from '../../../../../types/responses';
+import { NextApiRequest, NextApiResponse } from 'next';
+import prisma from '../../../../../lib/prisma';
+import { IApiResponse, IUser } from '../../../../../types';
+
+interface IReset2Response extends IApiResponse {
+    user?: IUser;
+}
 
 /**
  * User has clicked the link in their email to reset password
@@ -10,28 +15,39 @@ import { ILoginResponse } from '../../../../../types/responses';
  * This checks password, updates it, and logs the user in
  */
 
-export default async (req, res): Promise<ILoginResponse> => {
-
+export default async (
+    req: NextApiRequest,
+    res: NextApiResponse<IReset2Response>
+) => {
     const {
         method,
-        body: { userId, password, confirmPassword },
+        body: { id, password, confirmPassword },
     } = req;
 
     const cookies = new Cookies(req, res);
-    
+
     try {
         // POST: update info for user and verify account
         if (method === 'POST') {
             // Check that passwords match
             if (password !== confirmPassword) {
-                return res.json({ status: 'rejected', message: 'Passwords do not match.' });
+                return res.json({
+                    status: 'rejected',
+                    message: 'Passwords do not match.',
+                });
             }
             // Check that password is proper length
             if (password.length < 8) {
-                return res.json({ status: 'rejected', message: 'Password must be more than 8 characters.' });
+                return res.json({
+                    status: 'rejected',
+                    message: 'Password must be more than 8 characters.',
+                });
             }
             if (password.length > 20) {
-                return res.json({ status: 'rejected', message: 'Password must be less than 20 characters.' });
+                return res.json({
+                    status: 'rejected',
+                    message: 'Password must be less than 20 characters.',
+                });
             }
 
             // Hash password using bcrypt
@@ -39,56 +55,63 @@ export default async (req, res): Promise<ILoginResponse> => {
             if (hashedPassword.error) throw new Error(hashedPassword.error);
 
             // Get the datetime
-            const datetime = new Date().toISOString().slice(0, 19).replace('T', ' ');
+            const datetime = new Date()
+                .toISOString()
+                .slice(0, 19)
+                .replace('T', ' ');
 
-            // Update password in db
-            const newUserRes = await db.query(`
-                INSERT INTO users(password, lastLoggedIn)
-                VALUES('${hashedPassword}', '${datetime}') 
-            `);
-            if (newUserRes.error) throw new Error(newUserRes.error);
+            // Update password
+            await prisma.user.update({
+                data: {
+                    password: hashedPassword,
+                    lastLoggedIn: datetime,
+                },
+                where: {
+                    id,
+                },
+            });
 
             // Create access token
             const accessToken = jwt.sign(
-                { userId }, // payload
+                { id }, // payload
                 process.env.ACCESS_TOKEN_SECRET, // secret
                 { expiresIn: '10m' } // options
             );
 
-            // Save token in db
-            const saveTokenRes = await db.query(`
-                INSERT INTO tokens(accessToken, userId)
-                VALUES('${accessToken}', ${userId}) 
-            `);
-            if (saveTokenRes.error) throw new Error(saveTokenRes.error);
+            // Save access token
+            await prisma.token.create({
+                data: {
+                    accessToken,
+                    userId: id,
+                },
+            });
 
             // Set new cookie in browser
             cookies.set('accessToken', accessToken, { httpOnly: true });
 
             // Get remaining user info for login
-            const getUserInfo = await db.query(`
-                SELECT username, email, admin
-                FROM users
-                WHERE userId=${userId}
-            `);
-            if (getUserInfo.error) throw new Error(getUserInfo.error);
-            const { username, email, admin } = getUserInfo[0];
+            const { username, email, role, image } =
+                await prisma.user.findUnique({
+                    where: {
+                        id,
+                    },
+                });
 
-            return res.status(200).send({
+            return res.status(200).json({
                 status: 'success',
                 user: {
-                    userId,
+                    id,
                     username,
                     email,
-                    admin,
-                }
+                    role,
+                    image,
+                },
             });
-        };
-
-    } catch(e) {
-        console.log('error: ', e.message);
-        return res.status(500).json({ 
-            status: 'error', 
+        }
+    } catch (e) {
+        console.log('error: ', e.code, e.message);
+        return res.status(500).json({
+            status: 'error',
             message: e.message,
         });
     }

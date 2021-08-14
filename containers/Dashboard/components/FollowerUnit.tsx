@@ -3,15 +3,11 @@ import { IFollower } from '../../../types';
 
 type IFollowerUnitProps = {
     follower: IFollower;
-}
+};
 
 export default function FollowerUnit(props: IFollowerUnitProps) {
-
-    const { 
-        follower: { 
-            username, 
-            image,
-        },
+    const {
+        follower: { username, image },
     } = props;
 
     return (

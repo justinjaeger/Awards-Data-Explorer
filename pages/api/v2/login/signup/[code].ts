@@ -1,46 +1,52 @@
-import db from '../../../../../lib/db';
-import { IVerifyCodeResponse } from '../../../../../types/responses';
+import { NextApiRequest, NextApiResponse } from 'next';
+import prisma from '../../../../../lib/prisma';
+import { IApiResponse } from '../../../../../types';
 
-export default async (req, res): Promise<IVerifyCodeResponse> => {
+interface IVerifyCodeResponse extends IApiResponse {
+    id?: number;
+}
 
+export default async (
+    req: NextApiRequest,
+    res: NextApiResponse<IVerifyCodeResponse>
+) => {
     const {
         method,
         query: { code },
     } = req;
-    
+
     try {
-         // GET: retrieve user info based on query code
-         if (method === 'GET') {
+        // GET: retrieve user info based on query code
+        if (method === 'GET') {
             // Delete user from database
-            const codeResult = await db.query(`
-                SELECT * FROM codes
-                WHERE code=${code}
-            `);
-            if (codeResult.error) throw new Error(codeResult.error);
-            const { userId, expiration } = codeResult.data[0];
+            const { userId, expiration } = await prisma.code.findUnique({
+                where: {
+                    code: parseInt(code as string),
+                },
+            });
             // Check if expired
-            const currentTime = Math.ceil(Date.now() / 1000);
-            if (currentTime - expiration > 0) {
+            const currentTime = new Date();
+            if (currentTime > expiration) {
                 return res.status(498).json({
                     status: 'rejected',
-                    message: 'Verification code has expired. Please attempt signup again.'
-                })
+                    message:
+                        'Verification code has expired. Please attempt signup again.',
+                });
             }
             // Delete outstanding verification code
-            const deleteResult = await db.query(`
-                DELETE FROM codes
-                WHERE code=${code}
-            `);
-            if (deleteResult.error) throw new Error(deleteResult.error);
-
-            return res.status(200).json({ 
-                status: 'success',
-                userId,
+            await prisma.code.delete({
+                where: {
+                    code: parseInt(code as string),
+                },
             });
-         }
 
-    } catch(e) {
-        console.log('error in [code].ts: ', e.message);
+            return res.status(200).json({
+                status: 'success',
+                id: userId,
+            });
+        }
+    } catch (e) {
+        console.log('error in [code].ts: ', e.code, e.message);
         return res.status(500).json({
             status: 'error',
             message: e.message,

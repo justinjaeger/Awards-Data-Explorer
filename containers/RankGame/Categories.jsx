@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from "react";
-import axios from "axios";
-import { awardsCategoryNames, awardsShowNames } from "../../utils/shorthand";
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
+import { awardsCategoryNames, awardsShowNames } from '../../utils/shorthand';
 
 export default function RankCategories({ URL }) {
     const [loading, setLoading] = useState(true);
@@ -11,12 +11,12 @@ export default function RankCategories({ URL }) {
         axios
             .get(`/api/rank/category`)
             .then((res) => {
-                console.log("LIST:", res.data.list);
+                console.log('LIST:', res.data.list);
                 setCategoryList(res.data.list);
                 setLoading(false);
             })
             .catch((err) => {
-                console.log("err", err);
+                console.log('err', err);
             });
     }, []);
 

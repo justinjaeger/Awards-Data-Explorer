@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react';
 
 /**
  * Component to handle file upload. Works for image
@@ -6,7 +6,7 @@ import React from "react";
  */
 function FileUpload() {
     // State to store uploaded file
-    const [file, setFile] = React.useState("");
+    const [file, setFile] = React.useState('');
 
     // Handles file upload event and updates state
     function handleUpload(event) {
@@ -30,9 +30,9 @@ function FileUpload() {
 /**
  * Component to display thumbnail of image.
  */
-const ImageThumb = ({ image }) => {
-    return <img src={URL.createObjectURL(image)} alt={image.name} />;
-};
+const ImageThumb = ({ image }) => (
+    <img src={URL.createObjectURL(image)} alt={image.name} />
+);
 
 export default function App() {
     return <FileUpload />;

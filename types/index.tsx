@@ -1,35 +1,10 @@
-export interface IInitialProps {
-    app: IAppState;
-    auth: IAuthState;
-}
-
-// CONTEXT
-export interface IAppState {
-    url: string;
-    notification: string | undefined;
-}
-
-export interface IAuthState {
-    token: string | undefined;
-    user: IUser | undefined;
-}
-
-export type IAppContext = IAppState & {
-    setNotification: (notification: string) => void;
-}
-
-export type IAuthContext = IAuthState & {
-    setUser: (user: IUser) => void;
-    setImage: (image: string) => void;
-}
-
 // TYPES
 export interface IUser {
-    userId: number;
+    id: number;
     username: string;
     email: string;
-    admin: boolean,
-    image?: string;
+    role: 'USER' | 'ADMIN';
+    image: string;
 }
 
 export type IProfileUser = {
@@ -41,15 +16,20 @@ export type IProfileUser = {
 };
 
 export type IFollower = {
-    userId: number,
-    username: string,
-    image: string,
+    id: number;
+    username: string;
+    image: string;
 };
 
-export type ILoginRoute = 
-    'login' | 
-    'email' | 
-    'signup' | 
-    'forgotPassword' |
-    'resetPassword' |
-    undefined;
+export type ILoginRoute =
+    | 'login'
+    | 'email'
+    | 'signup'
+    | 'forgotPassword'
+    | 'resetPassword'
+    | undefined;
+
+export interface IApiResponse {
+    status: 'success' | 'rejected' | 'error';
+    message?: string;
+}

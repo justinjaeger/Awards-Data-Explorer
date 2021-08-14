@@ -1,17 +1,16 @@
-import nodemailer from "nodemailer";
+import nodemailer from 'nodemailer';
 import { url } from '../context/app';
 
 /**
  * Exports an object with all the mail configurations we need
  */
 
-export const createVerificationCodeEmail = (email, verificationCode) => {
-
+export default (email, verificationCode) => {
     const obj = {};
 
-    if (process.env.NODE_ENV === "development") {
+    if (process.env.NODE_ENV === 'development') {
         obj.transport = nodemailer.createTransport({
-            host: "smtp.mailtrap.io",
+            host: 'smtp.mailtrap.io',
             port: 2525,
             auth: {
                 user: process.env.MAILTRAP_AUTH_USER,
@@ -19,15 +18,15 @@ export const createVerificationCodeEmail = (email, verificationCode) => {
             },
         });
     }
-    if (process.env.NODE_ENV === "production") {
+    if (process.env.NODE_ENV === 'production') {
         obj.transport = nodemailer.createTransport({
             // NOTE: This def does noot work so
-            host: "smtp.googlemail.com", // Gmail Host
+            host: 'smtp.googlemail.com', // Gmail Host
             port: 465, // Port
             secure: true,
             auth: {
-                type: "custom",
-                method: "MY-CUSTOM-METHOD", // forces Nodemailer to use your custom handler
+                type: 'custom',
+                method: 'MY-CUSTOM-METHOD', // forces Nodemailer to use your custom handler
                 user: process.env.EMAIL_USER, // need an actual email and password or something
                 pass: process.env.EMAIL_PASSWORD,
             },
@@ -37,7 +36,7 @@ export const createVerificationCodeEmail = (email, verificationCode) => {
     obj.options = {
         from: '"The Oscar Expert" <noreply@oscarexpert.com>',
         to: `${email}`,
-        subject: "Verify your email",
+        subject: 'Verify your email',
         text: `Please click the link to create your account.`,
         html: `
         <b>Create your account</b>
@@ -50,7 +49,7 @@ export const createVerificationCodeEmail = (email, verificationCode) => {
     obj.passwordResetOptions = {
         from: '"OscarExpert" <noreply@oscarexpert.com>',
         to: `${email}`,
-        subject: "Reset your password",
+        subject: 'Reset your password',
         text: `Please click the link to reset your password`,
         html: `
         <div>Click this link to reset your password</div>

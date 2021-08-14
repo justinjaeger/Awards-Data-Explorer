@@ -1,6 +1,7 @@
-import db from '../../../../../lib/db';
-import { IGenericResponse } from '../../../../../types/responses';
-import { createVerificationCodeEmail } from '../../../../../utils/mailHelper';
+import { NextApiRequest, NextApiResponse } from 'next';
+import prisma from '../../../../../lib/prisma';
+import createVerificationCodeEmail from '../../../../../utils/mailHelper';
+import { IApiResponse } from '../../../../../types';
 
 /**
  * Step 1 in reset password preocess
@@ -8,8 +9,10 @@ import { createVerificationCodeEmail } from '../../../../../utils/mailHelper';
  * that leads to reset/[code].tsx
  */
 
- export default async (req, res): Promise<IGenericResponse> => {
-
+export default async (
+    req: NextApiRequest,
+    res: NextApiResponse<IApiResponse>
+) => {
     const {
         method,
         body: { email },
@@ -19,30 +22,31 @@ import { createVerificationCodeEmail } from '../../../../../utils/mailHelper';
         if (method === 'POST') {
             // Check if email is valid input
             if (!email.includes('@') || !email.includes('.')) {
-                return res.json({ 
-                    status: 'rejected', 
-                    message: 'this email is not properly formatted' 
+                return res.json({
+                    status: 'rejected',
+                    message: 'this email is not properly formatted',
                 });
             }
 
             // Ensure email is registered already / get userId
-            const validateEmailRes = await db.query(`
-                SELECT userId 
-                FROM users
-                WHERE email='${email}' 
-            `);
-            if (validateEmailRes.error) throw new Error(validateEmailRes.error);
-            if (!validateEmailRes[0]) {
+            const { id } = await prisma.user.findUnique({
+                where: {
+                    email,
+                },
+            });
+            if (!id) {
                 return res.json({
                     status: 'rejected',
                     message: 'This email is not registered',
                 });
             }
-            const { userId } = validateEmailRes[0];
 
             // Generate verification code
-            const verificationCode = Math.floor(100000 + Math.random() * 900000);
-            const { transport, passwordResetOptions } = createVerificationCodeEmail(email, verificationCode);
+            const verificationCode = Math.floor(
+                100000 + Math.random() * 900000
+            );
+            const { transport, passwordResetOptions } =
+                createVerificationCodeEmail(email, verificationCode);
 
             // Actually sends the email
             const emailRes = transport.sendMail(passwordResetOptions);
@@ -50,20 +54,24 @@ import { createVerificationCodeEmail } from '../../../../../utils/mailHelper';
 
             // Get expiration time (now + 30 minutes)
             const dt = new Date();
-            dt.setMinutes( dt.getMinutes() + 30 );
-            const expiration = dt.toISOString().slice(0, 19).replace("T", " ");
+            dt.setMinutes(dt.getMinutes() + 30);
+            const expiration = dt.toISOString().slice(0, 19).replace('T', ' ');
 
-            // Sets verification code in database
-            const verifCodeRes = await db.query(`
-                INSERT INTO codes(code, userId, expiration)
-                VALUES('${verificationCode}', ${userId}, '${expiration}')
-            `)
-            if (verifCodeRes.error) throw new Error(verifCodeRes.error);
+            // Se verification code in database
+            await prisma.code.create({
+                data: {
+                    code: verificationCode,
+                    userId: id,
+                    expiration,
+                },
+            });
 
-            return res.send(200).json({ status: 'success' });
+            return res.status(200).json({
+                status: 'success',
+            });
         }
     } catch (e) {
-        console.log('error in reset.ts ', e.message);
+        console.log('error in reset.ts ', e.code, e.message);
         return res.status(500).json({
             status: 'error',
             message: e.message,
