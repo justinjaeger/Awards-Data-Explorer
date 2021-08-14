@@ -1,35 +1,31 @@
-import React, { useContext, useState } from "react";
-import axios, { AxiosResponse } from "axios";
-import FollowerList from "./components/FollowerList";
-import Modal from "../../components/Modal";
+import React, { useContext, useState } from 'react';
+import axios, { AxiosResponse } from 'axios';
+import Modal from '../../components/Modal';
 import { user, setUser } from '../../context/auth';
 import { setNotification } from '../../context/app';
 import { IProfileUser } from '../../types';
-import { 
-    IGenericResponse,
-    IUploadImageResponse,
-} from '../../types/responses';
+import FollowerList from './components/FollowerList';
 
 type IDashboardProps = {
     profileUser: IProfileUser;
     following: boolean;
-}
+};
 
 export default function Dashboard(props: IDashboardProps) {
-
-    const { 
-        profileUser, 
-        following: _following,
-    } = props;
+    const { profileUser, following: _following } = props;
 
     const [dashboardModal, setDashboardModal] = useState<boolean>(false);
-    const [modalType, setModalType] = useState<'follower' | 'following' | undefined>(undefined);
+    const [modalType, setModalType] = useState<
+        'follower' | 'following' | undefined
+    >(undefined);
     // Need below in state because we could choose to unfollow
     const [following, setFollowing] = useState<boolean>(_following);
-    const [followersCount, setFollowersCount] = useState<number>(profileUser.followers);
+    const [followersCount, setFollowersCount] = useState<number>(
+        profileUser.followers
+    );
 
     // Determine if page is YOUR profile or someone else's
-    const isMyProfile = user.username === profileUser.username ? true : false;
+    const isMyProfile = user.username === profileUser.username;
 
     function setModal(_modalType: 'follower' | 'following' | undefined) {
         setDashboardModal(true);
@@ -38,9 +34,11 @@ export default function Dashboard(props: IDashboardProps) {
 
     // FOLLOW USER
     function followUser() {
-        axios.post(`/api/v2/users/${user.userId}/following`, { 
-            profileUserId: profileUser.userId,
-        }).then((res: AxiosResponse<IGenericResponse>) => {
+        axios
+            .post(`/api/v2/users/${user.id}/following`, {
+                profileUserId: profileUser.userId,
+            })
+            .then(() => {
                 setFollowing(true);
                 // update the following number
                 setFollowersCount(followersCount + 1);
@@ -52,15 +50,16 @@ export default function Dashboard(props: IDashboardProps) {
 
     // UNFOLLOW USER
     function unfollowUser() {
-        axios.delete(`/api/v2/users/${user.userId}/following/${profileUser.userId}`)
-            .then((res: AxiosResponse<IGenericResponse>) => {
+        axios
+            .delete(`/api/v2/users/${user.id}/following/${profileUser.userId}`)
+            .then(() => {
                 setFollowing(false);
                 // update the following number
                 setFollowersCount(followersCount - 1);
             })
             .catch((err) => {
                 if (err)
-                    console.log("something went wrong fetching followers", err);
+                    console.log('something went wrong fetching followers', err);
             });
     }
 
@@ -70,10 +69,10 @@ export default function Dashboard(props: IDashboardProps) {
         const file = e.target.files[0];
         // Create a form with the file in it
         const formData = new FormData();
-        formData.append("file", file);
+        formData.append('file', file);
 
         // Check that file is valid type
-        const validTypes = ["image/jpeg", "image/jpg", "image/png"];
+        const validTypes = ['image/jpeg', 'image/jpg', 'image/png'];
         let valid = false;
         validTypes.forEach((type) => {
             if (file.type === type) valid = true;
@@ -90,19 +89,24 @@ export default function Dashboard(props: IDashboardProps) {
         //     user.image === "/PROFILE.png" ? null : user.image.slice(52);
 
         // generate unique new file name
-        let randomNumber = Math.floor(Math.random() * 10000);
+        const randomNumber = Math.floor(Math.random() * 10000);
         const fileName = user.username + randomNumber + file.name;
 
         // save the image to DO Spaces & save the new url in database. Update user
         // NOTE: Changed from commented fetch below (in case isn't working)
-        await axios.post(`/api/v2/users/${user.userId}/image/?key=${fileName}`, {
-            data: { formData },
-            headers: {
-                'Content-Type': 'image/jpg',
-            }
-        }).then((res: AxiosResponse<IUploadImageResponse>) => {
+        await axios
+            .post(`/api/v2/users/${user.id}/image/?key=${fileName}`, {
+                data: { formData },
+                headers: {
+                    'Content-Type': 'image/jpg',
+                },
+            })
+            .then((res) => {
                 // convert url to edge url
-                const image = res.data.url.slice(0, 24) + ".cdn" + res.data.url.slice(24);
+                const image = `${res.data.url.slice(
+                    0,
+                    24
+                )}.cdn${res.data.url.slice(24)}`;
                 // setProfileImage(edgeUrl);
                 setUser({
                     ...user,
@@ -132,7 +136,7 @@ export default function Dashboard(props: IDashboardProps) {
         // if (edgeUrl) {
         //     // Write image to database
         //     await axios.post('/api/image/saveProfileImage', {
-        //         username: user.username, 
+        //         username: user.username,
         //         edgeUrl,
         //     }).then((res) => console.log("success saving url"))
         //         .catch((err) => console.log("err saving url", err));
@@ -153,51 +157,48 @@ export default function Dashboard(props: IDashboardProps) {
     // Load the skeleton until the data has been fetched
     return (
         <div id="dashboard-content">
-            {isMyProfile
-                ? <>
-                      <label htmlFor="file-upload">
-                          <div>
-                              <img
-                                  src={profileUser.image}
-                                  className="profile-image-lg dashboard-profile-image"
-                              />
-                              <div id="dashboard-image-hover">Upload Image</div>
-                          </div>
-                      </label>,
-                      <input
-                          id="file-upload"
-                          type="file"
-                          onChange={handleProfileImageUpload}
-                      />,
-                  </>
-                : <label htmlFor="file-upload">
+            {isMyProfile ? (
+                <>
+                    <label htmlFor="file-upload">
+                        <div>
+                            <img
+                                src={profileUser.image}
+                                className="profile-image-lg dashboard-profile-image"
+                            />
+                            <div id="dashboard-image-hover">Upload Image</div>
+                        </div>
+                    </label>
+                    ,
+                    <input
+                        id="file-upload"
+                        type="file"
+                        onChange={handleProfileImageUpload}
+                    />
+                    ,
+                </>
+            ) : (
+                <label htmlFor="file-upload">
                     <img
                         src={profileUser.image}
                         className="profile-image-lg dashboard-profile-image-logout"
                     />
                 </label>
-                }
+            )}
 
             <div id="dashboard-info">
                 <div id="profile-name">{profileUser.username}</div>
-                {!isMyProfile && user &&
-                    // If someone else's profile AND logged in, display follow/unfollow buttons
-                    following ? (
-                            <button
-                                id="follow-button"
-                                onClick={unfollowUser}
-                            >
-                                Unfollow
-                            </button>
-                        ) : (
-                            <button
-                                id="follow-button"
-                                onClick={followUser}
-                            >
-                                Follow
-                            </button>
-                        )
-                }
+                {!isMyProfile &&
+                user &&
+                // If someone else's profile AND logged in, display follow/unfollow buttons
+                following ? (
+                    <button id="follow-button" onClick={unfollowUser}>
+                        Unfollow
+                    </button>
+                ) : (
+                    <button id="follow-button" onClick={followUser}>
+                        Follow
+                    </button>
+                )}
 
                 <div id="dashboard-follower-buttons">
                     <button

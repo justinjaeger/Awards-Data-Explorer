@@ -1,4 +1,3 @@
-
 import React, { useState, useContext } from 'react';
 import { IAppContext, IAppState } from './types';
 
@@ -7,13 +6,14 @@ const [s, setState] = useState<IAppState>({
     notification: undefined,
 });
 
-export const initialAppState: IAppContext = { 
+export const initialAppState: IAppContext = {
     url: '',
     notification: undefined,
-    setNotification: (notification: string) => setState({
-        ...s,
-        notification,
-    })
+    setNotification: (notification: string) =>
+        setState({
+            ...s,
+            notification,
+        }),
 };
 
 const AppContext = React.createContext<IAppContext>(initialAppState);

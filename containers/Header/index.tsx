@@ -1,14 +1,12 @@
 import React, { useState } from 'react';
 import axios, { AxiosResponse } from 'axios';
-import LoginContainer from './Login';
 import Modal from '../../components/Modal';
 import { ILoginRoute, IUser } from '../../types';
-import { IGenericResponse } from '../../types/responses';
 import { url, setNotification } from '../../context/app';
 import { user, setUser } from '../../context/auth';
+import LoginContainer from './Login';
 
 export default function Header() {
-
     const [profileDropdown, setProfileDropdown] = useState<boolean>(false);
     const [loginModal, setLoginModal] = useState<boolean>(false);
     const [form, setForm] = useState<ILoginRoute>(undefined);
@@ -17,18 +15,19 @@ export default function Header() {
     function reset(notification?: string): void {
         setLoginModal(false);
         setForm(undefined);
-        notification 
-            ? setNotification(notification) 
+        notification
+            ? setNotification(notification)
             : setNotification(undefined);
-    };
+    }
 
     // LOG OUT
     function logout(): void {
-        axios.delete('/api/v2/login')
-            .then((res: AxiosResponse<IGenericResponse>) => {
+        axios
+            .delete('/api/v2/login')
+            .then((res) => {
                 if (res.data.status === 'error') {
-                    return setNotification(res.data.message!)
-                };
+                    return setNotification(res.data.message!);
+                }
                 setUser(undefined);
                 reset();
                 window.location.reload();
@@ -39,11 +38,11 @@ export default function Header() {
     }
 
     // LOG IN
-    function login(user: IUser): void { 
+    function login(user: IUser): void {
         reset();
         setUser(user);
         window.location.reload();
-    };
+    }
 
     function changeForm(route: ILoginRoute): void {
         setLoginModal(true);
@@ -52,38 +51,38 @@ export default function Header() {
 
     return (
         <>
-            <div id='Header'>
-                <div id='header-left'>
-                    <a href={url} className='home-button'>
+            <div id="Header">
+                <div id="header-left">
+                    <a href={url} className="home-button">
                         Home
                     </a>
                 </div>
 
-                <div id='header-right'>
+                <div id="header-right">
                     {!user ? (
                         <>
-                            <div id='left-header-margin'></div>
+                            <div id="left-header-margin" />
                             <button
                                 onClick={() => changeForm('login')}
-                                className='header-button'
+                                className="header-button"
                             >
                                 Log In
                             </button>
                             <button
                                 onClick={() => changeForm('email')}
-                                className='header-button'
+                                className="header-button"
                             >
                                 Sign Up
                             </button>
-                            <div id='right-header-margin'></div>
+                            <div id="right-header-margin" />
                         </>
                     ) : (
                         <>
-                            <div id='header-message'>
+                            <div id="header-message">
                                 Welcome,{' '}
                                 <a
                                     href={`${url}/user/${user.username}`}
-                                    className='header-button'
+                                    className="header-button"
                                 >
                                     {user.username}
                                 </a>
@@ -93,27 +92,29 @@ export default function Header() {
                                     setProfileDropdown(!profileDropdown)
                                 }
                                 onClick={() => setProfileDropdown(true)}
-                                className='header-button'
+                                className="header-button"
                             >
                                 <img
-                                    className='profile-image-xsm header-profile-pic'
+                                    className="profile-image-xsm header-profile-pic"
                                     src={user.image}
-                                ></img>
+                                />
                             </button>
 
                             {profileDropdown && (
                                 <div
-                                    id='profile-dropdown'
-                                    onMouseLeave={() => setProfileDropdown(false)}
+                                    id="profile-dropdown"
+                                    onMouseLeave={() =>
+                                        setProfileDropdown(false)
+                                    }
                                 >
                                     <a
-                                        className='profile-dropdown-button no-underline'
+                                        className="profile-dropdown-button no-underline"
                                         href={`${url}/user/${user.username}`}
                                     >
                                         My Profile
                                     </a>
                                     <button
-                                        className='profile-dropdown-button'
+                                        className="profile-dropdown-button"
                                         onClick={logout}
                                     >
                                         Log Out

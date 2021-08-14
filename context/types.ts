@@ -12,9 +12,9 @@ export interface IAuthState {
 
 export type IAppContext = IAppState & {
     setNotification: (notification: string) => void;
-}
+};
 
 export type IAuthContext = IAuthState & {
     setUser: (user: IUser) => void;
     setImage: (image: string) => void;
-}
+};

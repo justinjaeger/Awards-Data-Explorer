@@ -1,16 +1,16 @@
 import '../styles/index.scss';
 import React from 'react';
-import App , { AppContext, AppProps } from 'next/app'
-import prisma from '../lib/prisma';
+import App, { AppContext, AppProps } from 'next/app';
 import cookies from 'next-cookies';
 import { useCookie } from 'next-cookie';
+import prisma from '../lib/prisma';
 import verifyToken, { IVerifyTokenResponse } from '../utils/verifyToken';
 import Header from '../containers/Header';
 import { IAppContext, IAuthContext } from '../context/types';
 import Context, { initialState } from '../context';
 import Notification from '../components/Notification';
 
-interface IInitialProps {
+export interface IInitialProps {
     app: IAppContext;
     auth: IAuthContext;
 }
@@ -25,16 +25,15 @@ interface IMyAppProps extends AppProps {
  * initialProps injects props from getInitialProps
  */
 
- function MyApp({ Component, pageProps, initialProps }: IMyAppProps) {(
+function MyApp({ Component, pageProps, initialProps }: IMyAppProps) {
     <Context.App.Provider value={initialProps.app}>
         <Context.Auth.Provider value={initialProps.auth}>
             <Notification />
             <Header />
             <Component {...pageProps} {...initialProps} />
         </Context.Auth.Provider>
-    </Context.App.Provider>
-)}
-
+    </Context.App.Provider>;
+}
 
 /**
  * Authenticates user
@@ -46,17 +45,18 @@ MyApp.getInitialProps = async (context: AppContext) => {
     const appProps = await App.getInitialProps(context);
 
     // This feels like you shouldn't have to do this
-    const url: string = (process.env.NODE_ENV === "development") 
-        ? "http://localhost:3003" 
-        : "https://www.oscarexpert.com";
-    
+    const url: string =
+        process.env.NODE_ENV === 'development'
+            ? 'http://localhost:3003'
+            : 'https://www.oscarexpert.com';
+
     // Returning ...appProps is standard Next.js practice
     const initialProps: IInitialProps = {
         app: {
-            ...initialState.app, 
-            url
+            ...initialState.app,
+            url,
         },
-        auth: { 
+        auth: {
             ...initialState.auth,
         },
         ...appProps,
@@ -66,16 +66,15 @@ MyApp.getInitialProps = async (context: AppContext) => {
     const cookie = useCookie(context.ctx); // for setting cookies
 
     if (c.accessToken) {
-        console.log('access token found')
+        console.log('access token found');
         try {
-            const verifyTokenResponse: IVerifyTokenResponse = await verifyToken(c.accessToken);
-            const { 
-                status, 
-                message, 
-                data: { 
-                    userId, 
-                    updatedAccessToken 
-                } 
+            const verifyTokenResponse: IVerifyTokenResponse = await verifyToken(
+                c.accessToken
+            );
+            const {
+                status,
+                message,
+                data: { id, updatedAccessToken },
             } = verifyTokenResponse;
 
             switch (status) {
@@ -86,39 +85,38 @@ MyApp.getInitialProps = async (context: AppContext) => {
                     return { initialProps };
                 case 'update':
                     cookie.set('accessToken', updatedAccessToken);
-            };
+            }
 
-            const { id, username, email, image, role } = await prisma.user.findUnique({
-                where: {
-                    id: userId,
-                },
-            });
+            const { username, email, image, role } =
+                await prisma.user.findUnique({
+                    where: {
+                        id,
+                    },
+                });
 
             // Return the final props object
             return {
                 ...initialProps,
                 auth: {
                     ...initialProps.auth,
-                    token: updatedAccessToken 
-                        ? updatedAccessToken 
-                        : c.accessToken,
+                    token: updatedAccessToken || c.accessToken,
                     user: {
                         id,
                         username,
                         email,
                         role,
                         image,
-                    }
+                    },
                 },
             };
-        } catch(e) {
-            console.log("error in _app.tsx: ", e.message);
+        } catch (e) {
+            console.log('error in _app.tsx: ', e.message);
             throw new Error(e.message);
         }
     }
 
     // If no accessToken, return initial props
     return { initialProps };
-}
+};
 
 export default MyApp;

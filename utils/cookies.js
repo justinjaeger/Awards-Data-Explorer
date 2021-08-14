@@ -1,4 +1,4 @@
-import { serialize } from "cookie";
+import { serialize } from 'cookie';
 
 /**
  * This sets `cookie` on `res` object
@@ -6,14 +6,14 @@ import { serialize } from "cookie";
 
 const cookie = (res, name, value, options) => {
     if (!options) options = {};
-    options.path = "/";
+    options.path = '/';
 
     const stringValue =
-        typeof value === "object"
-            ? "j:" + JSON.stringify(value)
+        typeof value === 'object'
+            ? `j:${JSON.stringify(value)}`
             : String(value);
 
-    if ("maxAge" in options) {
+    if ('maxAge' in options) {
         options.expires = new Date(Date.now() + options.maxAge);
         options.maxAge /= 1000;
     }
@@ -26,7 +26,7 @@ const cookie = (res, name, value, options) => {
     if (value) {
         res.cookieArray.push(serialize(name, String(stringValue), options));
     } else {
-        res.cookieArray.push(serialize(name, "", options));
+        res.cookieArray.push(serialize(name, '', options));
     }
 };
 

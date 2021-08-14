@@ -1,20 +1,21 @@
+import { NextApiRequest, NextApiResponse } from 'next';
 import prisma from '../../../../../lib/prisma';
 import { IApiResponse } from '../../../../../types';
-import { NextApiRequest, NextApiResponse } from 'next';
 
 interface IProfileUserResponse extends IApiResponse {
     id?: number;
     image?: string;
 }
 
-export default async (req: NextApiRequest, res: NextApiResponse<IProfileUserResponse>) => {
-
+export default async (
+    req: NextApiRequest,
+    res: NextApiResponse<IProfileUserResponse>
+) => {
     const {
         method,
         query: { username },
-        body: {},
     } = req;
-    
+
     /**
      * An "unprotected" route for getting data on other users
      */
@@ -25,15 +26,17 @@ export default async (req: NextApiRequest, res: NextApiResponse<IProfileUserResp
          * if not, throw a 404 page
          */
         if (method === 'GET') {
-            const user = await prisma.user.findUnique({ // typing here should be User | null I think?
+            const user = await prisma.user.findUnique({
+                // typing here should be User | null I think?
                 where: {
                     username: username as string,
                 },
-            })
-            if (user === null) return res.json({ 
-                status: 'rejected',
-                message: '404',
             });
+            if (user === null)
+                return res.json({
+                    status: 'rejected',
+                    message: '404',
+                });
             const { id, image } = user; // wonder if I can deconstruct oon the call. But if it comes back null it might throow an error
             return res.status(200).json({
                 status: 'success',
@@ -41,8 +44,7 @@ export default async (req: NextApiRequest, res: NextApiResponse<IProfileUserResp
                 image,
             });
         }
-
-    } catch(e) {
+    } catch (e) {
         console.log('error: ', e.code, e.message);
         return res.status(500).json({
             status: 'error',

@@ -1,6 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import prisma from '../../../../../lib/prisma';
-import { createVerificationCodeEmail } from '../../../../../utils/mailHelper';
+import createVerificationCodeEmail from '../../../../../utils/mailHelper';
 import { IApiResponse } from '../../../../../types';
 
 /**
@@ -9,8 +9,10 @@ import { IApiResponse } from '../../../../../types';
  * that leads to reset/[code].tsx
  */
 
- export default async (req: NextApiRequest, res: NextApiResponse<IApiResponse>) => {
-
+export default async (
+    req: NextApiRequest,
+    res: NextApiResponse<IApiResponse>
+) => {
     const {
         method,
         body: { email },
@@ -20,17 +22,17 @@ import { IApiResponse } from '../../../../../types';
         if (method === 'POST') {
             // Check if email is valid input
             if (!email.includes('@') || !email.includes('.')) {
-                return res.json({ 
-                    status: 'rejected', 
-                    message: 'this email is not properly formatted' 
+                return res.json({
+                    status: 'rejected',
+                    message: 'this email is not properly formatted',
                 });
             }
 
             // Ensure email is registered already / get userId
             const { id } = await prisma.user.findUnique({
                 where: {
-                    email: email,
-                }
+                    email,
+                },
             });
             if (!id) {
                 return res.json({
@@ -40,8 +42,11 @@ import { IApiResponse } from '../../../../../types';
             }
 
             // Generate verification code
-            const verificationCode = Math.floor(100000 + Math.random() * 900000);
-            const { transport, passwordResetOptions } = createVerificationCodeEmail(email, verificationCode);
+            const verificationCode = Math.floor(
+                100000 + Math.random() * 900000
+            );
+            const { transport, passwordResetOptions } =
+                createVerificationCodeEmail(email, verificationCode);
 
             // Actually sends the email
             const emailRes = transport.sendMail(passwordResetOptions);
@@ -49,8 +54,8 @@ import { IApiResponse } from '../../../../../types';
 
             // Get expiration time (now + 30 minutes)
             const dt = new Date();
-            dt.setMinutes( dt.getMinutes() + 30 );
-            const expiration = dt.toISOString().slice(0, 19).replace("T", " ");
+            dt.setMinutes(dt.getMinutes() + 30);
+            const expiration = dt.toISOString().slice(0, 19).replace('T', ' ');
 
             // Se verification code in database
             await prisma.code.create({
@@ -58,10 +63,10 @@ import { IApiResponse } from '../../../../../types';
                     code: verificationCode,
                     userId: id,
                     expiration,
-                }
+                },
             });
 
-            return res.status(200).json({ 
+            return res.status(200).json({
                 status: 'success',
             });
         }

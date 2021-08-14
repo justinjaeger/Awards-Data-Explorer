@@ -1,26 +1,25 @@
-import prisma from "../lib/prisma";
-import jwt from "jsonwebtoken";
+import jwt from 'jsonwebtoken';
+import prisma from '../lib/prisma';
 
 export type IVerifyTokenResponse = {
     status: 'verified' | 'update' | 'delete' | 'error';
     message?: string;
     data?: {
-        userId?: number;
+        id?: number;
         updatedAccessToken?: string;
     };
-}
+};
 
 export default async (accessToken: string): Promise<IVerifyTokenResponse> => {
-
     try {
         // Get the expiration and userId from the token / JWT
         const jwtData = await jwt.verify(
-            accessToken, 
+            accessToken,
             process.env.ACCESS_TOKEN_SECRET,
-            { ignoreExpiration: true }, // options
+            { ignoreExpiration: true } // options
         );
         if (jwtData.error) throw new Error(jwtData.error);
-        const { userId, exp: expiration } = jwtData;
+        const { id, exp: expiration } = jwtData;
 
         /**
          * If token is expired, delete access token from database.
@@ -34,69 +33,79 @@ export default async (accessToken: string): Promise<IVerifyTokenResponse> => {
         // CHECK IF TOKEN EXPIRED
         const currentTime = Math.ceil(Date.now() / 1000);
         if (currentTime - expiration > 0) {
-
-            console.log("TOKEN EXPIRED");
+            console.log('TOKEN EXPIRED');
 
             // DELETE TOKEN FROM DB
-            const deleteTokenResponse = await db.query(`
-                DELETE FROM tokens
-                WHERE accessToken='${accessToken}' 
-            `);
-            if (deleteTokenResponse.error) throw new Error(deleteTokenResponse.error);
-            
-            console.log("token deleted from db");
+            const deleteRes = await prisma.token.delete({
+                where: {
+                    accessToken,
+                },
+                select: {
+                    accessToken: true,
+                },
+            });
+
+            console.log('token deleted from db');
 
             // IF NO TOKEN DELETED, DELETE ALL TOKENS ASSOCIATED WITH USER
-            if (deleteTokenResponse.affectedRows === 0) {
-                console.log("deleting all user tokens");
-                const deleteAllTokensResponse = await db.query(`
-                    DELETE FROM tokens
-                    WHERE userId=${userId}`
-                );
-                if (deleteAllTokensResponse.error) throw new Error(deleteAllTokensResponse.error);
+            if (!deleteRes.accessToken) {
+                console.log('deleting all user tokens');
+
+                await prisma.token.deleteMany({
+                    where: {
+                        userId: id,
+                    },
+                });
+
                 return {
                     status: 'delete',
                 };
-            };
+            }
 
             // CREATE ACCESS TOKEN
             const updatedAccessToken = jwt.sign(
-                { userId },
+                { id },
                 process.env.ACCESS_TOKEN_SECRET,
                 { expiresIn: '10m' }
             );
 
             // SAVE TOKEN IN DB
-            const saveTokenResponse = await db.query(`
-                INSERT INTO tokens(accessToken, userId)
-                VALUES('${updatedAccessToken}', ${userId}) 
-            `);
-            if (saveTokenResponse.error) throw new Error(saveTokenResponse.error);
+            await prisma.token.create({
+                data: {
+                    userId: id,
+                    accessToken: updatedAccessToken,
+                },
+            });
 
             // UPDATE LAST LOGGED IN
-            const datetime = new Date().toISOString().slice(0, 19).replace("T", " ");
-            const lastLoggedInResponse = await db.query(`
-                UPDATE users
-                SET lastLoggedIn = '${datetime}'
-                WHERE userId = ${userId} 
-            `);
-            if (lastLoggedInResponse.error) throw new Error(lastLoggedInResponse.error);
+            const datetime = new Date()
+                .toISOString()
+                .slice(0, 19)
+                .replace('T', ' ');
+            await prisma.user.update({
+                where: {
+                    id,
+                },
+                data: {
+                    lastLoggedIn: datetime,
+                },
+            });
 
             // Set new cookie in browser
             return {
                 status: 'update',
                 data: {
-                    userId,
+                    id,
                     updatedAccessToken,
-                }
+                },
             };
-        };
+        }
         return {
             status: 'verified',
-            data: { userId },
+            data: { id },
         };
-    } catch(e) {
-        console.log("error in verifyToken: ", e.message);
+    } catch (e) {
+        console.log('error in verifyToken: ', e.message);
         return {
             status: 'error',
             message: e.message,

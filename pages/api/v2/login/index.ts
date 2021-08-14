@@ -1,66 +1,70 @@
-import prisma from '../../../../lib/prisma';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import Cookies from 'cookies';
-import { IApiResponse, IUser } from '../../../../types';
 import { NextApiRequest, NextApiResponse } from 'next';
+import { IApiResponse, IUser } from '../../../../types';
+import prisma from '../../../../lib/prisma';
 
 interface ILoginResponse extends IApiResponse {
     user?: IUser;
 }
 
-export default async (req: NextApiRequest, res: NextApiResponse<ILoginResponse>) => {
-
+export default async (
+    req: NextApiRequest,
+    res: NextApiResponse<ILoginResponse>
+) => {
     const cookies = new Cookies(req, res);
 
     const {
         method,
-        query: { },
         cookies: { accessToken },
         body: { emailOrUsername, password },
     } = req;
-    
+
     try {
         // POST: login
         if (method === 'POST') {
-
-            const entryType = emailOrUsername.includes('@') ? 'email' : 'username';
+            const entryType = emailOrUsername.includes('@')
+                ? 'email'
+                : 'username';
 
             // Get data based on emailOrUsername entry
-            const userData = await db.query(`
-                SELECT userId, username, email, admin, image, password
-                FROM users
-                WHERE ${entryType}='${emailOrUsername}'
-            `)
-            if (userData.error) throw new Error(userData.error);
-            if (userData[0] === undefined) {
-                return res.json({ 
-                    status: 'rejected', 
-                    message: `Credentials do not match` 
+            const userResult = await prisma.user.findUnique({
+                where: {
+                    [entryType]: emailOrUsername,
+                },
+            });
+
+            // If user not found, send back message
+            if (!userResult) {
+                return res.json({
+                    status: 'rejected',
+                    message: `Credentials do not match`,
                 });
             }
-            const { 
-                userId,
-                username, 
-                email, 
-                admin, 
-                image, 
+
+            const {
+                id,
+                username,
+                email,
+                role,
+                image,
                 password: hashedPassword,
-            } = userData[0];
-            const authenticated = userData[0].authenticated[0];
+                authenticated,
+            } = userResult;
 
             // Verify password with bcrypt
             const passCheck = await bcrypt.compare(password, hashedPassword);
             // If it returns false, set error on client
             if (passCheck === false) {
-                return res.json({ 
-                    status: 'rejected', 
-                    message: `Credentials do not match` 
+                return res.json({
+                    status: 'rejected',
+                    message: `Credentials do not match`,
                 });
             }
 
             // Check if authenticated
-            if (authenticated === 0) {
+            if (!authenticated) {
                 console.log('not authenticated');
                 return res.json({
                     status: 'rejected',
@@ -70,26 +74,32 @@ export default async (req: NextApiRequest, res: NextApiResponse<ILoginResponse>)
 
             // CREATE ACCESS TOKEN
             const accessToken = jwt.sign(
-                { userId }, // payload
+                { id }, // payload
                 process.env.ACCESS_TOKEN_SECRET,
-                { expiresIn: '10m' } // ptions
+                { expiresIn: '10m' } // options
             );
 
             // SAVE TOKEN IN DB
-            const tokenResponse = await db.query(`
-                INSERT INTO tokens(accessToken, userId)
-                VALUES('${accessToken}', ${userId}) 
-            `);
-            if (tokenResponse.error) throw new Error(tokenResponse.error);
+            await prisma.token.create({
+                data: {
+                    accessToken,
+                    userId: id,
+                },
+            });
 
             // UPDATE LAST LOGGED IN
-            const datetime = new Date().toISOString().slice(0, 19).replace('T', ' ');
-            const lastLogRes = await db.query(`
-                UPDATE users
-                SET lastLoggedIn = '${datetime}'
-                WHERE userId = ${userId} 
-            `);
-            if (lastLogRes.error) throw new Error(lastLogRes.error);
+            const datetime = new Date()
+                .toISOString()
+                .slice(0, 19)
+                .replace('T', ' ');
+            await prisma.user.update({
+                where: {
+                    id,
+                },
+                data: {
+                    lastLoggedIn: datetime,
+                },
+            });
 
             // Set new cookie in browser
             cookies.set('accessToken', accessToken, { httpOnly: true });
@@ -97,53 +107,61 @@ export default async (req: NextApiRequest, res: NextApiResponse<ILoginResponse>)
             return res.status(200).json({
                 status: 'success',
                 user: {
-                    userId,
-                    username,
+                    id,
                     email,
+                    username,
+                    role,
                     image,
-                    admin,
                 },
-            })
-        };
+            });
+        }
 
         // DELETE: logout
         if (method === 'DELETE') {
             // DELETE TOKEN FROM DB
-            const logoutRes = await db.query(`
-                DELETE FROM tokens
-                WHERE accessToken='${accessToken}' 
-            `);
-            if (logoutRes.error) throw new Error(logoutRes.error);
-            
+            const deleteRes = await prisma.token.delete({
+                where: {
+                    accessToken,
+                },
+                select: {
+                    accessToken: true,
+                },
+            });
+
             console.log('token deleted from db');
 
             // IF NO TOKEN DELETED, DELETE ALL TOKENS ASSOCIATED WITH USER
-            if (logoutRes.affectedRows === 0) {
+            if (!deleteRes.accessToken) {
                 console.log('deleting all user tokens');
 
                 // First, get the userId from accessToken
                 const { accessToken } = req.cookies;
-                const tokenRes = await jwt.verify(accessToken, process.env.ACCESS_TOKEN_SECRET, {
-                    ignoreExpiration: true,
-                });
-                const { userId } = tokenRes;
+                const tokenRes = await jwt.verify(
+                    accessToken,
+                    process.env.ACCESS_TOKEN_SECRET,
+                    {
+                        ignoreExpiration: true,
+                    }
+                );
+                const { id } = tokenRes;
 
                 // Second, delete all user tokens
-                const delAllRes = await db.query(`
-                    DELETE FROM tokens
-                    WHERE userId=${userId}`
-                );
-                if (delAllRes.error) throw new Error(delAllRes.error);
-            };
+                await prisma.token.deleteMany({
+                    where: {
+                        userId: id,
+                    },
+                });
+            }
 
-            return res.status(200).json({ status: 'success' });
-        };
-
-    } catch(e) {
+            return res.status(200).json({
+                status: 'success',
+            });
+        }
+    } catch (e) {
         console.log('error: ', e.code, e.message);
-        return res.status(500).json({ 
+        return res.status(500).json({
             status: 'error',
-            message: e.message
+            message: e.message,
         });
     }
 };

@@ -1,13 +1,15 @@
+import { NextApiRequest, NextApiResponse } from 'next';
 import prisma from '../../../../../../lib/prisma';
 import { IApiResponse } from '../../../../../../types';
-import { NextApiRequest, NextApiResponse } from 'next';
 
 interface IFollowerCountResponse extends IApiResponse {
     count?: number;
 }
 
-export default async (req: NextApiRequest, res: NextApiResponse<IFollowerCountResponse>) => {
-
+export default async (
+    req: NextApiRequest,
+    res: NextApiResponse<IFollowerCountResponse>
+) => {
     const {
         method,
         query: { id },
@@ -19,14 +21,14 @@ export default async (req: NextApiRequest, res: NextApiResponse<IFollowerCountRe
             const count = await prisma.follower.count({
                 where: {
                     userId: parseInt(id as string),
-                }
-            })
-            return res.json({ 
+                },
+            });
+            return res.json({
                 status: 'success',
                 count,
             });
-        };
-    } catch(e) {
+        }
+    } catch (e) {
         console.log('error: ', e.code, e.message);
         return res.status(500).json({
             status: 'error',

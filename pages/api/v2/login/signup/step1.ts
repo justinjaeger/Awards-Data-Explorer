@@ -1,30 +1,30 @@
+import { NextApiRequest, NextApiResponse } from 'next';
+import { Prisma } from '@prisma/client';
 import prisma from '../../../../../lib/prisma';
 import { createVerificationCodeEmail } from '../../../../../utils/mailHelper';
 import { IApiResponse } from '../../../../../types';
-import { NextApiRequest, NextApiResponse } from 'next';
-import { Prisma } from '@prisma/client';
-
 
 /**
  * User submits email and gets a confirmation link sent to them
  */
 
-export default async (req: NextApiRequest, res: NextApiResponse<IApiResponse>) => {
-
+export default async (
+    req: NextApiRequest,
+    res: NextApiResponse<IApiResponse>
+) => {
     const {
         method,
         body: { email },
     } = req;
-    
+
     try {
         // POST: signup / create new user
         if (method === 'POST') {
-
             // Check that email is properly formatted
             if (!email.includes('@') || !email.includes('.')) {
                 return res.json({
                     status: 'rejected',
-                    message: 'This email is not properly formatted.'
+                    message: 'This email is not properly formatted.',
                 });
             }
 
@@ -35,15 +35,20 @@ export default async (req: NextApiRequest, res: NextApiResponse<IApiResponse>) =
                 },
                 select: {
                     id: true,
-                }
+                },
             });
 
             // Generate verification code
-            const verificationCode = Math.floor(100000 + Math.random() * 900000);
+            const verificationCode = Math.floor(
+                100000 + Math.random() * 900000
+            );
 
             // Utilize the helper function to create e-mail
             // Creates the link to send them to signup/:code
-            const { transport, options } = createVerificationCodeEmail(email, verificationCode);
+            const { transport, options } = createVerificationCodeEmail(
+                email,
+                verificationCode
+            );
 
             // Actually sends the email
             const emailRes = transport.sendMail(options);
@@ -51,8 +56,8 @@ export default async (req: NextApiRequest, res: NextApiResponse<IApiResponse>) =
 
             // Get expiration time (now + 30 minutes)
             const dt = new Date();
-            dt.setMinutes( dt.getMinutes() + 30 );
-            const expiration = dt.toISOString().slice(0, 19).replace("T", " ");
+            dt.setMinutes(dt.getMinutes() + 30);
+            const expiration = dt.toISOString().slice(0, 19).replace('T', ' ');
 
             // Sets verification code in database
             await prisma.code.create({
@@ -63,17 +68,16 @@ export default async (req: NextApiRequest, res: NextApiResponse<IApiResponse>) =
                 },
             });
 
-            return res.status(200).json({ 
+            return res.status(200).json({
                 status: 'success',
             });
-        };
-
-    } catch(e) {
+        }
+    } catch (e) {
         if (e instanceof Prisma.PrismaClientKnownRequestError) {
             if (e.code === 'P2002') {
                 return res.json({
                     status: 'rejected',
-                    message: 'This email is already registered.'
+                    message: 'This email is already registered.',
                 });
             }
         }

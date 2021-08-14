@@ -1,7 +1,7 @@
-module.exports = {
-    presets: [
+{
+    "presets": [
         [
-            "next/babel",
+            "next/babel"
             // {
             //   "preset-env": {},
             //   "transform-runtime": {},
@@ -12,10 +12,12 @@ module.exports = {
         [
             "@babel/preset-env",
             {
-                targets: {
-                    node: "current",
-                },
-            },
-        ],
+                "targets": {
+                    "node": "current",
+                }
+            }
+        ]
     ],
-};
+    "plugins": [["styled-components", { "ssr": true }], "inline-react-svg"]
+  }
+  

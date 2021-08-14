@@ -1,10 +1,10 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef } from 'react';
 
 type IListenForOutsideClicksProps = {
     action: () => void;
-    children?: JSX.Element; 
+    children?: JSX.Element;
     disabled?: boolean;
-}
+};
 
 export default function Card(props: IListenForOutsideClicksProps) {
     const { children, action, disabled } = props;
@@ -19,13 +19,11 @@ export default function Card(props: IListenForOutsideClicksProps) {
 
     useEffect(() => {
         // listen for clicks anywhere the dom
-        document.addEventListener("click", handleClickOutside, true);
+        document.addEventListener('click', handleClickOutside, true);
         return () => {
-            document.removeEventListener("click", handleClickOutside, true);
+            document.removeEventListener('click', handleClickOutside, true);
         };
     }, []);
 
-    return disabled 
-        ? <div>{children}</div> 
-        : <div ref={ref}>{children}</div>;
+    return disabled ? <div>{children}</div> : <div ref={ref}>{children}</div>;
 }

@@ -1,7 +1,6 @@
-
 import React, { useState, useContext } from 'react';
-import { IAuthContext, IAuthState } from './types';
 import { IUser } from '../types';
+import { IAuthContext, IAuthState } from './types';
 
 const [s, setState] = useState<IAuthState>({
     token: undefined,
@@ -11,17 +10,19 @@ const [s, setState] = useState<IAuthState>({
 export const initialAuthContext: IAuthContext = {
     token: undefined,
     user: undefined,
-    setImage: (image: string) => setState({
-        ...s,
-        user: {
-            ...s.user,
-            image
-        }
-    }),
-    setUser: (user: IUser | undefined) => setState({
-        ...s,
-        user,
-    }),
+    setImage: (image: string) =>
+        setState({
+            ...s,
+            user: {
+                ...s.user,
+                image,
+            },
+        }),
+    setUser: (user: IUser | undefined) =>
+        setState({
+            ...s,
+            user,
+        }),
 };
 
 const AuthContext = React.createContext<IAuthContext>(initialAuthContext);

@@ -1,13 +1,15 @@
+import { NextApiRequest, NextApiResponse } from 'next';
 import prisma from '../../../../../../lib/prisma';
 import { IApiResponse } from '../../../../../../types';
-import { NextApiRequest, NextApiResponse } from 'next';
 
 interface IDetermineFollowingResponse extends IApiResponse {
     following?: boolean;
 }
 
-export default async (req: NextApiRequest, res: NextApiResponse<IDetermineFollowingResponse>) => {
-
+export default async (
+    req: NextApiRequest,
+    res: NextApiResponse<IDetermineFollowingResponse>
+) => {
     const {
         method,
         query: { id, targetUserId },
@@ -15,15 +17,15 @@ export default async (req: NextApiRequest, res: NextApiResponse<IDetermineFollow
 
     try {
         // Check if user is following target profile
-        if (method==='GET') {
+        if (method === 'GET') {
             const count = await prisma.follower.findFirst({
                 where: {
                     userId: parseInt(id as string),
-                }
-            })
-            return res.status(200).json({ 
+                },
+            });
+            return res.status(200).json({
                 status: 'success',
-                following: count === null ? false : true,
+                following: count !== null,
             });
         }
 
@@ -35,16 +37,16 @@ export default async (req: NextApiRequest, res: NextApiResponse<IDetermineFollow
                     userId: parseInt(targetUserId as string),
                     followerId: parseInt(id as string),
                 },
-            })
+            });
             return res.status(200).json({
                 status: 'success',
             });
         }
-    } catch(e) {
+    } catch (e) {
         console.log('error: ', e.code, e.message);
         return res.status(500).json({
             status: 'error',
-            message: e.message
+            message: e.message,
         });
     }
 };

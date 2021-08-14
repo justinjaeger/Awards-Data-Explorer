@@ -1,14 +1,15 @@
-import prisma from '../../../../../../lib/prisma';
-import { IFollower } from '../../../../../../types';
-import { IApiResponse } from '../../../../../../types';
 import { NextApiRequest, NextApiResponse } from 'next';
+import prisma from '../../../../../../lib/prisma';
+import { IFollower, IApiResponse } from '../../../../../../types';
 
 interface IFollowerResponse extends IApiResponse {
     following?: IFollower[];
 }
 
-export default async (req: NextApiRequest, res: NextApiResponse<IFollowerResponse>) => {
-
+export default async (
+    req: NextApiRequest,
+    res: NextApiResponse<IFollowerResponse>
+) => {
     const {
         method,
         query: { id },
@@ -22,7 +23,7 @@ export default async (req: NextApiRequest, res: NextApiResponse<IFollowerRespons
             // Second request, get list of those users by the IDs just received
             const { following: followingIds } = await prisma.user.findUnique({
                 where: {
-                    id: parseInt(id as string)
+                    id: parseInt(id as string),
                 },
                 select: {
                     following: {
@@ -36,14 +37,14 @@ export default async (req: NextApiRequest, res: NextApiResponse<IFollowerRespons
             const following = await prisma.user.findMany({
                 where: {
                     id: {
-                        in: [...followingIds.map((f) => f.userId)]
+                        in: [...followingIds.map((f) => f.userId)],
                     },
                 },
                 select: {
                     id: true,
                     username: true,
                     image: true,
-                }
+                },
             });
             return res.status(200).json({
                 status: 'success',
@@ -57,18 +58,17 @@ export default async (req: NextApiRequest, res: NextApiResponse<IFollowerRespons
                 data: {
                     userId: parseInt(targetUserId as string),
                     followerId: parseInt(id as string),
-                }
-            })
-            return res.status(200).json({
-                status: 'success'
+                },
             });
-        };
-
-    } catch(e) {
+            return res.status(200).json({
+                status: 'success',
+            });
+        }
+    } catch (e) {
         console.log('error: ', e.code, e.message);
         return res.status(500).send({
             status: 'error',
-            message: e.message
+            message: e.message,
         });
     }
 };
