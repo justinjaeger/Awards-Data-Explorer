@@ -26,7 +26,7 @@ export default function Header() {
     // LOG OUT
     function logout(): void {
         axios
-            .delete('/api/v2/login')
+            .delete('/api/login')
             .then((res) => {
                 if (res.data.status === 'error') {
                     return setNotification(res.data.message!);

@@ -27,7 +27,7 @@ export default function Home() {
     useEffect(() => {
         // Get the userId from the code
         // We do this instead of authenticating and going through state via useAuth()
-        axios.get(`api/v2/login/signup/${code}`).then((res) => {
+        axios.get(`api/login/signup/${code}`).then((res) => {
             if (res.data.status === 'error') {
                 // navigate to home screen
                 router.push('/');
@@ -52,7 +52,7 @@ export default function Home() {
 
     function handleSubmit(event) {
         axios
-            .post('/api/v2/signup/step2', {
+            .post('/api/signup/step2', {
                 userId,
                 username,
                 password,

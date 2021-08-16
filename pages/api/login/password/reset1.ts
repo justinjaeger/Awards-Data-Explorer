@@ -1,7 +1,7 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import prisma from '../../../../../lib/prisma';
-import createVerificationCodeEmail from '../../../../../utils/mailHelper';
-import { IApiResponse } from '../../../../../types';
+import prisma from '../../../../lib/prisma';
+import createVerificationCodeEmail from '../../../../utils/mailHelper';
+import { IApiResponse } from '../../../../types';
 
 /**
  * Step 1 in reset password preocess

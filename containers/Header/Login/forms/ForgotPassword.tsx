@@ -16,7 +16,7 @@ function ForgotPassword(props: IForgotPasswordProps) {
 
     function handleSubmit(e) {
         axios
-            .post('/api/v2/login/password/reset1', {
+            .post('/api/login/password/reset1', {
                 email,
             })
             .then((res) => {

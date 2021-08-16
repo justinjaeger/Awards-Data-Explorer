@@ -16,7 +16,7 @@ export default function Signup(props: IEnterEmailProps) {
 
     function handleSubmit(e) {
         axios
-            .post('/api/v2/login/signup/step1', { email })
+            .post('/api/login/signup/step1', { email })
             .then((res) => {
                 if (res.data.status === 'rejected') {
                     return setNotification(res.data.message);

@@ -36,7 +36,7 @@ export default function Dashboard(props: IDashboardProps) {
     // FOLLOW USER
     function followUser() {
         axios
-            .post(`/api/v2/users/${user.id}/following`, {
+            .post(`/api/users/${user.id}/following`, {
                 profileUserId: profileUser.userId,
             })
             .then(() => {
@@ -52,7 +52,7 @@ export default function Dashboard(props: IDashboardProps) {
     // UNFOLLOW USER
     function unfollowUser() {
         axios
-            .delete(`/api/v2/users/${user.id}/following/${profileUser.userId}`)
+            .delete(`/api/users/${user.id}/following/${profileUser.userId}`)
             .then(() => {
                 setFollowing(false);
                 // update the following number
@@ -96,7 +96,7 @@ export default function Dashboard(props: IDashboardProps) {
         // save the image to DO Spaces & save the new url in database. Update user
         // NOTE: Changed from commented fetch below (in case isn't working)
         await axios
-            .post(`/api/v2/users/${user.id}/image/?key=${fileName}`, {
+            .post(`/api/users/${user.id}/image/?key=${fileName}`, {
                 data: { formData },
                 headers: {
                     'Content-Type': 'image/jpg',

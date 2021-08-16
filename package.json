@@ -33,6 +33,7 @@
         "mysql": "^2.18.1",
         "net": "^1.0.2",
         "next": "^10.2.3",
+        "next-auth": "^3.28.0",
         "next-cookie": "^2.6.1",
         "next-cookies": "^2.0.3",
         "nodemailer": "^6.4.17",

@@ -1,9 +1,9 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import prisma from '../../../../../../lib/prisma';
-import { IFollower, IApiResponse } from '../../../../../../types';
+import prisma from '../../../../../lib/prisma';
+import { IFollower, IApiResponse } from '../../../../../types';
 
 interface IFollowerResponse extends IApiResponse {
-    following?: IFollower[];
+    followers?: IFollower[];
 }
 
 export default async (
@@ -13,20 +13,22 @@ export default async (
     const {
         method,
         query: { id },
-        body: { targetUserId },
     } = req;
 
     try {
-        // Get array of user's followers
+        // Return all of id's followers
         if (method === 'GET') {
-            // get user's "following" (first request)
-            // Second request, get list of those users by the IDs just received
-            const { following: followingIds } = await prisma.user.findUnique({
+            // look at followers
+            // any person who follows me
+            // they are the follower / followerId, therefore I am userId
+            // any entry where userId = id
+            // but once you get that entry, you then have to query for each user's information
+            const { followers: followerIds } = await prisma.user.findUnique({
                 where: {
                     id: parseInt(id as string),
                 },
                 select: {
-                    following: {
+                    followers: {
                         select: {
                             userId: true,
                         },
@@ -34,10 +36,10 @@ export default async (
                 },
             });
             // https://www.prisma.io/docs/guides/performance-and-optimization/query-optimization-performance#solving-n1-with-in
-            const following = await prisma.user.findMany({
+            const followers = await prisma.user.findMany({
                 where: {
                     id: {
-                        in: [...followingIds.map((f) => f.userId)],
+                        in: [...followerIds.map((f) => f.userId)],
                     },
                 },
                 select: {
@@ -46,22 +48,10 @@ export default async (
                     image: true,
                 },
             });
-            return res.status(200).json({
-                status: 'success',
-                following,
-            });
-        }
 
-        // Follow a target user
-        if (method === 'POST') {
-            prisma.follower.create({
-                data: {
-                    userId: parseInt(targetUserId as string),
-                    followerId: parseInt(id as string),
-                },
-            });
             return res.status(200).json({
                 status: 'success',
+                followers,
             });
         }
     } catch (e) {
