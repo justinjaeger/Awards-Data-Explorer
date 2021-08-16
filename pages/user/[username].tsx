@@ -37,7 +37,7 @@ export default function UserDashboard() {
         try {
             // GET PROFILE IMAGE
             const profileImageResponse = await axios.get(
-                `/api/v2/users/image/profile/${profileUsername}`
+                `/api/users/image/profile/${profileUsername}`
             );
             if (profileImageResponse.data.status === 'error') {
                 throw new Error(profileImageResponse.data.message);
@@ -50,7 +50,7 @@ export default function UserDashboard() {
 
             // GET PROFILE FOLLOWER COUNT
             const followerCountResponse = await axios.get(
-                `api/v2/users/${userId}/followers/count`
+                `api/users/${userId}/followers/count`
             );
             if (followerCountResponse.data.status === 'error') {
                 throw new Error(followerCountResponse.data.message);
@@ -59,7 +59,7 @@ export default function UserDashboard() {
 
             // GET PROFILE FOLLOWING COUNT
             const followingCountResponse = await axios.get(
-                `api/v2/users/${userId}/followers/count`
+                `api/users/${userId}/followers/count`
             );
             if (followingCountResponse.data.status === 'error') {
                 throw new Error(followingCountResponse.data.message);
@@ -77,7 +77,7 @@ export default function UserDashboard() {
             // If this is not our profile, determine if we are following them
             if (user && user.username !== profileUsername) {
                 const determineFollowingResponse = await axios.get(
-                    `/api/v2/users/${user.id}/following/${userId}`
+                    `/api/users/${user.id}/following/${userId}`
                 );
                 if (determineFollowingResponse.data.status === 'error') {
                     throw new Error(determineFollowingResponse.data.message);

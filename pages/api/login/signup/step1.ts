@@ -1,8 +1,8 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { Prisma } from '@prisma/client';
-import prisma from '../../../../../lib/prisma';
-import createVerificationCodeEmail from '../../../../../utils/mailHelper';
-import { IApiResponse } from '../../../../../types';
+import prisma from '../../../../lib/prisma';
+import createVerificationCodeEmail from '../../../../utils/mailHelper';
+import { IApiResponse } from '../../../../types';
 
 /**
  * User submits email and gets a confirmation link sent to them

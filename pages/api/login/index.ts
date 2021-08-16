@@ -2,8 +2,8 @@ import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import Cookies from 'cookies';
 import { NextApiRequest, NextApiResponse } from 'next';
-import { IApiResponse, IUser } from '../../../../types';
-import prisma from '../../../../lib/prisma';
+import { IApiResponse, IUser } from '../../../types';
+import prisma from '../../../lib/prisma';
 
 interface ILoginResponse extends IApiResponse {
     user?: IUser;

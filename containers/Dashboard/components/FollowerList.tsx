@@ -21,7 +21,7 @@ export default function FollowerList(props: IFollowerListProps) {
         if (modalType === 'follower') {
             // Fetch the profile's followers
             await axios
-                .get(`/api/v2/users/${profileUser.userId}/followers`)
+                .get(`/api/users/${profileUser.userId}/followers`)
                 .then((res) => {
                     setUserList(res.data.followers);
                 })
@@ -33,7 +33,7 @@ export default function FollowerList(props: IFollowerListProps) {
         if (modalType === 'following') {
             // Fetch who the profile is following
             await axios
-                .post(`/api/v2/users/${profileUser.userId}/following`)
+                .post(`/api/users/${profileUser.userId}/following`)
                 .then((res) => {
                     setUserList(res.data.followers);
                 })

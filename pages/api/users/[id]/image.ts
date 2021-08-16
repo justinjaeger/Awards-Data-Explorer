@@ -3,8 +3,8 @@ import AWS from 'aws-sdk';
 import formidable from 'formidable-serverless';
 import sharp from 'sharp';
 import { NextApiRequest, NextApiResponse } from 'next';
-import { IApiResponse } from '../../../../../types';
-import prisma from '../../../../../lib/prisma';
+import { IApiResponse } from '../../../../types';
+import prisma from '../../../../lib/prisma';
 
 interface IUploadImageResponse extends IApiResponse {
     url?: string;

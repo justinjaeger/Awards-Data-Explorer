@@ -21,7 +21,7 @@ export default function Login(props: ILoginProps) {
 
     function handleSubmit(e) {
         axios
-            .post('/api/v2/login', {
+            .post('/api/login', {
                 emailOrUsername,
                 password,
             })

@@ -2,31 +2,26 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import Cookies from 'cookies';
 import { NextApiRequest, NextApiResponse } from 'next';
-import { Prisma } from '@prisma/client';
-import profanityFilter from '../../../../../utils/profanityFilter';
-import usernameFilter from '../../../../../utils/usernameFilter';
-import { IApiResponse, IUser } from '../../../../../types';
-import prisma from '../../../../../lib/prisma';
+import prisma from '../../../../lib/prisma';
+import { IApiResponse, IUser } from '../../../../types';
 
-interface ILoginResponse extends IApiResponse {
+interface IReset2Response extends IApiResponse {
     user?: IUser;
 }
 
 /**
- * User has already been partially created (see step1.ts)
- * User has just submitted Signup info (username, password)
- * This checks their username + password, sets them, and validates the account
- * Must send back all relevant user info for login (see IUser) in types/indes.tsx
- * Request made from [code].tsx
+ * User has clicked the link in their email to reset password
+ * and submitted new password
+ * This checks password, updates it, and logs the user in
  */
 
 export default async (
     req: NextApiRequest,
-    res: NextApiResponse<ILoginResponse>
+    res: NextApiResponse<IReset2Response>
 ) => {
     const {
         method,
-        body: { id, username, password, confirmPassword },
+        body: { id, password, confirmPassword },
     } = req;
 
     const cookies = new Cookies(req, res);
@@ -34,21 +29,6 @@ export default async (
     try {
         // POST: update info for user and verify account
         if (method === 'POST') {
-            // Check that username is properly formatted
-            const filterResult = usernameFilter(username);
-            if (!filterResult) {
-                return res.json({
-                    status: 'rejected',
-                    message: filterResult.message,
-                });
-            }
-            // Check that no profanity
-            if (profanityFilter(username)) {
-                return res.json({
-                    status: 'rejected',
-                    message: 'Profanity is not allowed in your username',
-                });
-            }
             // Check that passwords match
             if (password !== confirmPassword) {
                 return res.json({
@@ -80,31 +60,25 @@ export default async (
                 .slice(0, 19)
                 .replace('T', ' ');
 
-            // Update user info and get remaining fields
-            const { email, role, image } = await prisma.user.update({
+            // Update password
+            await prisma.user.update({
                 data: {
-                    username,
                     password: hashedPassword,
                     lastLoggedIn: datetime,
                 },
                 where: {
-                    id: id as number, // ts flag because again it would be nice to be able to type the body of the incoming request (do a wrapper for this later)
-                },
-                select: {
-                    email: true,
-                    role: true,
-                    image: true,
+                    id,
                 },
             });
 
             // Create access token
-            const accessToken: string = jwt.sign(
+            const accessToken = jwt.sign(
                 { id }, // payload
                 process.env.ACCESS_TOKEN_SECRET, // secret
                 { expiresIn: '10m' } // options
             );
 
-            // Save token in db
+            // Save access token
             await prisma.token.create({
                 data: {
                     accessToken,
@@ -114,6 +88,14 @@ export default async (
 
             // Set new cookie in browser
             cookies.set('accessToken', accessToken, { httpOnly: true });
+
+            // Get remaining user info for login
+            const { username, email, role, image } =
+                await prisma.user.findUnique({
+                    where: {
+                        id,
+                    },
+                });
 
             return res.status(200).json({
                 status: 'success',
@@ -127,15 +109,7 @@ export default async (
             });
         }
     } catch (e) {
-        if (e instanceof Prisma.PrismaClientKnownRequestError) {
-            if (e.code === 'P2002') {
-                return res.json({
-                    status: 'rejected',
-                    message: 'This email is already registered.',
-                });
-            }
-        }
-        console.log('error in step2.ts: ', e.code, e.message);
+        console.log('error: ', e.code, e.message);
         return res.status(500).json({
             status: 'error',
             message: e.message,
