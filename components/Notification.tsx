@@ -1,8 +1,10 @@
 import React, { useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { notification, setNotification } from '../context/app';
+import { useAppState } from '../context/app';
 
 export default function Notification() {
+    const { notification, setNotification } = useAppState();
+
     useEffect(() => {
         setTimeout(() => {
             setNotification(undefined);
@@ -26,5 +28,7 @@ export default function Notification() {
                 </button>
             </motion.div>
         );
+    } else {
+        return <></>;
     }
 }

@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import axios, { AxiosResponse } from 'axios';
-import { setNotification } from '../../../../context/app';
+import { useAppState } from '../../../../context/app';
 
 type IForgotPasswordProps = {
     reset: (notification?: string) => void;
 };
 
 function ForgotPassword(props: IForgotPasswordProps) {
+    const { setNotification } = useAppState();
     const [email, setEmail] = useState<string>('');
 
     function validateForm() {

@@ -10,7 +10,9 @@ export type IVerifyTokenResponse = {
     };
 };
 
-export default async (accessToken: string): Promise<IVerifyTokenResponse> => {
+const verifyToken = async (
+    accessToken: string
+): Promise<IVerifyTokenResponse> => {
     try {
         // Get the expiration and userId from the token / JWT
         const jwtData = await jwt.verify(
@@ -112,3 +114,5 @@ export default async (accessToken: string): Promise<IVerifyTokenResponse> => {
         };
     }
 };
+
+export default verifyToken;

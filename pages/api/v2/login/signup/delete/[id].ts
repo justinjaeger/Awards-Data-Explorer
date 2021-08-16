@@ -6,8 +6,6 @@ export default async (
     req: NextApiRequest,
     res: NextApiResponse<IApiResponse>
 ) => {
-    let result;
-
     const {
         method,
         query: { id },

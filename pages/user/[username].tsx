@@ -5,9 +5,9 @@ import { useAsyncEffect } from '../../utils/hooks';
 import Dashboard from '../../containers/Dashboard';
 import NotFound from '../../containers/NotFound';
 import Loading from '../../components/Loading';
-import { user } from '../../context/auth';
+import { useAuthState } from '../../context/auth';
+import { useAppState } from '../../context/app';
 import { IProfileUser } from '../../types';
-import { setNotification } from '../../context/app';
 
 /**
  * A lot of these components (like this one) don't need to render separate components
@@ -17,11 +17,13 @@ export default function UserDashboard() {
     const router = useRouter();
     const profileUsername = router.query.username;
 
+    const { user } = useAuthState();
+    const { setNotification } = useAppState();
+
     const [_404, set404] = useState<boolean>(false);
     const [loading, setLoading] = useState<boolean>(true);
-    const [profileUser, setProfileUser] = useState<IProfileUser | undefined>(
-        undefined
-    );
+    const [profileUser, setProfileUser] =
+        useState<IProfileUser | undefined>(undefined);
     const [following, setFollowing] = useState<boolean>(false); // true is user is following this profile
 
     useAsyncEffect(async () => {

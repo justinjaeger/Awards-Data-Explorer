@@ -1,7 +1,7 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { Prisma } from '@prisma/client';
 import prisma from '../../../../../lib/prisma';
-import { createVerificationCodeEmail } from '../../../../../utils/mailHelper';
+import createVerificationCodeEmail from '../../../../../utils/mailHelper';
 import { IApiResponse } from '../../../../../types';
 
 /**

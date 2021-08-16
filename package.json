@@ -54,6 +54,8 @@
         "@types/react": "^17.0.9",
         "@typescript-eslint/eslint-plugin": "^4.0.1",
         "@typescript-eslint/parser": "^4.0.1",
+        "babel-plugin-inline-react-svg": "^2.0.1",
+        "babel-plugin-styled-components": "^1.13.2",
         "eslint": "^7.32.0",
         "eslint-plugin-import": "^2.23.2",
         "eslint-plugin-jsx-a11y": "^6.4.1",
@@ -79,7 +81,8 @@
         "globals": {
             "React": true,
             "JSX": true,
-            "process": true
+            "process": true,
+            "module": true
         },
         "parser": "@typescript-eslint/parser",
         "parserOptions": {
@@ -101,7 +104,7 @@
             "no-console": 0,
             "consistent-return": 0,
             "react-hooks/exhaustive-deps": 0,
-            "react-hooks/rules-of-hooks": 1,
+            "react-hooks/rules-of-hooks": 2,
             "eslint-comments/no-unlimited-disable": 0,
             "import/order": 2,
             "import/extensions": [

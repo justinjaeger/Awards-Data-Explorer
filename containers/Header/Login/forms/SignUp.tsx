@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import axios, { AxiosResponse } from 'axios';
-import { setNotification } from '../../../../context/app';
+import { useAppState } from '../../../../context/app';
 
 type IEnterEmailProps = {
     reset: (notification?: string) => void;
 };
 
 export default function Signup(props: IEnterEmailProps) {
+    const { setNotification } = useAppState();
     const [email, setEmail] = useState<string>('');
 
     function validateForm() {

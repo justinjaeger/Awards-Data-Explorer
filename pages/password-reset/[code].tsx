@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import axios, { AxiosResponse } from 'axios';
-import { setNotification } from '../../context/app';
-import { setUser } from '../../context/auth';
+import { useAppState } from '../../context/app';
+import { useAuthState } from '../../context/auth';
 
 // This opens when user clicks their password reset link in their email
 // We use the code to get the userId
@@ -14,8 +14,10 @@ export default function Home() {
     const router = useRouter();
     const { code } = router.query;
 
-    const [userId, setUserId] = useState<number | undefined>(undefined);
+    const { setNotification } = useAppState();
+    const { setUser } = useAuthState();
 
+    const [userId, setUserId] = useState<number | undefined>(undefined);
     const [password, setPassword] = useState<string>('');
     const [confirmPassword, setConfirmPassword] = useState<string>('');
 

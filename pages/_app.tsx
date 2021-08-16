@@ -7,7 +7,9 @@ import prisma from '../lib/prisma';
 import verifyToken, { IVerifyTokenResponse } from '../utils/verifyToken';
 import Header from '../containers/Header';
 import { IAppContext, IAuthContext } from '../context/types';
-import Context, { initialState } from '../context';
+import AppProvider, { initialAppContext } from '../context/app';
+import AuthProvider, { initialAuthContext } from '../context/auth';
+// import Context, { initialState } from '../context';
 import Notification from '../components/Notification';
 
 export interface IInitialProps {
@@ -22,17 +24,21 @@ interface IMyAppProps extends AppProps {
 /**
  * Component is the your page eg /index
  * pageProps injects any props from getServerSideProps in that component file
- * initialProps injects props from getInitialProps
+ * initialProps injects props from ßgetInitialProps
  */
 
 function MyApp({ Component, pageProps, initialProps }: IMyAppProps) {
-    <Context.App.Provider value={initialProps.app}>
-        <Context.Auth.Provider value={initialProps.auth}>
-            <Notification />
-            <Header />
-            <Component {...pageProps} {...initialProps} />
-        </Context.Auth.Provider>
-    </Context.App.Provider>;
+    return (
+        <>
+            <AppProvider value={initialProps.app}>
+                <AuthProvider value={initialProps.auth}>
+                    <Notification />
+                    <Header />
+                    <Component {...pageProps} {...initialProps} />
+                </AuthProvider>
+            </AppProvider>
+        </>
+    );
 }
 
 /**
@@ -53,66 +59,68 @@ MyApp.getInitialProps = async (context: AppContext) => {
     // Returning ...appProps is standard Next.js practice
     const initialProps: IInitialProps = {
         app: {
-            ...initialState.app,
+            ...initialAppContext,
             url,
         },
         auth: {
-            ...initialState.auth,
+            ...initialAuthContext,
         },
         ...appProps,
     };
 
     const c = cookies(context.ctx); // for getting cookies
+    // below: disable because useCookie is not actually a hook
+    // eslint-disable-next-line react-hooks/rules-of-hooks
     const cookie = useCookie(context.ctx); // for setting cookies
 
     if (c.accessToken) {
         console.log('access token found');
-        try {
-            const verifyTokenResponse: IVerifyTokenResponse = await verifyToken(
-                c.accessToken
-            );
-            const {
-                status,
-                message,
-                data: { id, updatedAccessToken },
-            } = verifyTokenResponse;
+        // try {
+        //     const verifyTokenResponse: IVerifyTokenResponse = await verifyToken(
+        //         c.accessToken
+        //     );
+        //     const {
+        //         status,
+        //         message,
+        //         data: { id, updatedAccessToken },
+        //     } = verifyTokenResponse;
 
-            switch (status) {
-                case 'error':
-                    throw new Error(message);
-                case 'delete':
-                    cookie.set('accessToken', undefined); // deletes token
-                    return { initialProps };
-                case 'update':
-                    cookie.set('accessToken', updatedAccessToken);
-            }
+        //     switch (status) {
+        //         case 'error':
+        //             throw new Error(message);
+        //         case 'delete':
+        //             cookie.set('accessToken', undefined); // deletes token
+        //             return { initialProps };
+        //         case 'update':
+        //             cookie.set('accessToken', updatedAccessToken);
+        //     }
 
-            const { username, email, image, role } =
-                await prisma.user.findUnique({
-                    where: {
-                        id,
-                    },
-                });
+        //     const { username, email, image, role } =
+        //         await prisma.user.findUnique({
+        //             where: {
+        //                 id,
+        //             },
+        //         });
 
-            // Return the final props object
-            return {
-                ...initialProps,
-                auth: {
-                    ...initialProps.auth,
-                    token: updatedAccessToken || c.accessToken,
-                    user: {
-                        id,
-                        username,
-                        email,
-                        role,
-                        image,
-                    },
-                },
-            };
-        } catch (e) {
-            console.log('error in _app.tsx: ', e.message);
-            throw new Error(e.message);
-        }
+        //     // Return the final props object
+        //     return {
+        //         app: initialProps.app,
+        //         auth: {
+        //             ...initialProps.auth,
+        //             token: updatedAccessToken || c.accessToken,
+        //             user: {
+        //                 id,
+        //                 username,
+        //                 email,
+        //                 role,
+        //                 image,
+        //             },
+        //         },
+        //     };
+        // } catch (e) {
+        //     console.log('error in _app.tsx: ', e.message);
+        //     throw new Error(e.message);
+        // }
     }
 
     // If no accessToken, return initial props

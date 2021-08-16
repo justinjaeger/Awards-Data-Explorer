@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import axios, { AxiosResponse } from 'axios';
-import { setNotification } from '../../../../context/app';
+import { useAppState } from '../../../../context/app';
 import { IUser, ILoginRoute } from '../../../../types';
 
 type ILoginProps = {
@@ -9,6 +9,7 @@ type ILoginProps = {
 };
 
 export default function Login(props: ILoginProps) {
+    const { setNotification } = useAppState();
     const { changeForm, login } = props;
 
     const [emailOrUsername, setEmailOrUsername] = useState<string>('');

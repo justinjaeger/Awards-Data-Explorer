@@ -1,3 +1,4 @@
+import { Dispatch, SetStateAction } from 'react';
 import { IUser } from '../types';
 
 export interface IAppState {
@@ -10,11 +11,14 @@ export interface IAuthState {
     user: IUser | undefined;
 }
 
-export type IAppContext = IAppState & {
-    setNotification: (notification: string) => void;
-};
+export interface IAppContext extends IAppState {
+    setNotification: Dispatch<SetStateAction<string | undefined>>;
+}
 
-export type IAuthContext = IAuthState & {
-    setUser: (user: IUser) => void;
-    setImage: (image: string) => void;
-};
+export interface IAuthContext extends IAuthState {
+    setUser: Dispatch<SetStateAction<IUser | undefined>>;
+    setImage: Dispatch<SetStateAction<string | undefined>>;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-empty-function
+export const _void = () => {};

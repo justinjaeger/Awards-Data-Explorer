@@ -2,11 +2,14 @@ import React, { useState } from 'react';
 import axios, { AxiosResponse } from 'axios';
 import Modal from '../../components/Modal';
 import { ILoginRoute, IUser } from '../../types';
-import { url, setNotification } from '../../context/app';
-import { user, setUser } from '../../context/auth';
+import { useAppState } from '../../context/app';
+import { useAuthState } from '../../context/auth';
 import LoginContainer from './Login';
 
 export default function Header() {
+    const { user, setUser } = useAuthState();
+    const { url, setNotification } = useAppState();
+
     const [profileDropdown, setProfileDropdown] = useState<boolean>(false);
     const [loginModal, setLoginModal] = useState<boolean>(false);
     const [form, setForm] = useState<ILoginRoute>(undefined);
