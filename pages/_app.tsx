@@ -28,17 +28,13 @@ interface IMyAppProps extends AppProps {
  */
 
 function MyApp({ Component, pageProps, initialProps }: IMyAppProps) {
-    return (
-        <>
-            <AppProvider value={initialProps.app}>
-                <AuthProvider value={initialProps.auth}>
-                    <Notification />
-                    <Header />
-                    <Component {...pageProps} {...initialProps} />
-                </AuthProvider>
-            </AppProvider>
-        </>
-    );
+    <AppProvider value={initialProps.app}>
+        <AuthProvider value={initialProps.auth}>
+            <Notification />
+            <Header />
+            <Component {...pageProps} {...initialProps} />
+        </AuthProvider>
+    </AppProvider>;
 }
 
 /**
@@ -75,52 +71,52 @@ MyApp.getInitialProps = async (context: AppContext) => {
 
     if (c.accessToken) {
         console.log('access token found');
-        // try {
-        //     const verifyTokenResponse: IVerifyTokenResponse = await verifyToken(
-        //         c.accessToken
-        //     );
-        //     const {
-        //         status,
-        //         message,
-        //         data: { id, updatedAccessToken },
-        //     } = verifyTokenResponse;
+        try {
+            const verifyTokenResponse: IVerifyTokenResponse = await verifyToken(
+                c.accessToken
+            );
+            const {
+                status,
+                message,
+                data: { id, updatedAccessToken },
+            } = verifyTokenResponse;
 
-        //     switch (status) {
-        //         case 'error':
-        //             throw new Error(message);
-        //         case 'delete':
-        //             cookie.set('accessToken', undefined); // deletes token
-        //             return { initialProps };
-        //         case 'update':
-        //             cookie.set('accessToken', updatedAccessToken);
-        //     }
+            switch (status) {
+                case 'error':
+                    throw new Error(message);
+                case 'delete':
+                    cookie.set('accessToken', undefined); // deletes token
+                    return { initialProps };
+                case 'update':
+                    cookie.set('accessToken', updatedAccessToken);
+            }
 
-        //     const { username, email, image, role } =
-        //         await prisma.user.findUnique({
-        //             where: {
-        //                 id,
-        //             },
-        //         });
+            const { username, email, image, role } =
+                await prisma.user.findUnique({
+                    where: {
+                        id,
+                    },
+                });
 
-        //     // Return the final props object
-        //     return {
-        //         app: initialProps.app,
-        //         auth: {
-        //             ...initialProps.auth,
-        //             token: updatedAccessToken || c.accessToken,
-        //             user: {
-        //                 id,
-        //                 username,
-        //                 email,
-        //                 role,
-        //                 image,
-        //             },
-        //         },
-        //     };
-        // } catch (e) {
-        //     console.log('error in _app.tsx: ', e.message);
-        //     throw new Error(e.message);
-        // }
+            // Return the final props object
+            return {
+                app: initialProps.app,
+                auth: {
+                    ...initialProps.auth,
+                    token: updatedAccessToken || c.accessToken,
+                    user: {
+                        id,
+                        username,
+                        email,
+                        role,
+                        image,
+                    },
+                },
+            };
+        } catch (e) {
+            console.log('error in _app.tsx: ', e.message);
+            throw new Error(e.message);
+        }
     }
 
     // If no accessToken, return initial props
