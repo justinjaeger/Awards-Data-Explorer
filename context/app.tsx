@@ -1,12 +1,15 @@
 import React, { useState, useContext } from 'react';
 import { IAppContext, IAppState, _void } from './types';
 
-export const initialAppState = {
-    url: '',
+const initialAppState = {
+    url:
+        process.env.NODE_ENV === 'development'
+            ? 'http://localhost:3003'
+            : 'https://www.oscarexpert.com',
     notification: undefined,
 };
 
-export const initialAppContext = {
+const initialAppContext = {
     ...initialAppState,
     setNotification: _void,
 };
@@ -15,6 +18,8 @@ const AppContext = React.createContext<IAppContext>(initialAppContext);
 
 export default function AppProvider(props) {
     const [s, setState] = useState<IAppState>(initialAppState);
+
+    console.log('app', s);
 
     return (
         <AppContext.Provider

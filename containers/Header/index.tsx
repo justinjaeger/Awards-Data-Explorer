@@ -1,18 +1,23 @@
 import React, { useState } from 'react';
-import axios, { AxiosResponse } from 'axios';
+import axios from 'axios';
+import { useSession } from 'next-auth/client';
 import Modal from '../../components/Modal';
 import { ILoginRoute, IUser } from '../../types';
 import { useAppState } from '../../context/app';
 import { useAuthState } from '../../context/auth';
-import LoginContainer from './Login';
+import LoginContainer from './forms';
 
 export default function Header() {
+    const [session] = useSession();
     const { user, setUser } = useAuthState();
+
     const { url, setNotification } = useAppState();
 
     const [profileDropdown, setProfileDropdown] = useState<boolean>(false);
     const [loginModal, setLoginModal] = useState<boolean>(false);
     const [form, setForm] = useState<ILoginRoute>(undefined);
+
+    console.log('header refresh');
 
     // RESET VARIOUS COMPONENTS
     function reset(notification?: string): void {
@@ -62,7 +67,7 @@ export default function Header() {
                 </div>
 
                 <div id="header-right">
-                    {!user ? (
+                    {!session ? (
                         <>
                             <div id="left-header-margin" />
                             <button

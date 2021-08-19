@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import axios, { AxiosResponse } from 'axios';
-import { useAppState } from '../../../../context/app';
+import { useAppState } from '../../../context/app';
 
 type IEnterEmailProps = {
     reset: (notification?: string) => void;

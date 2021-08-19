@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import axios, { AxiosResponse } from 'axios';
-import { useAppState } from '../../../../context/app';
-import { IUser, ILoginRoute } from '../../../../types';
+import { signIn, useSession } from 'next-auth/client';
+import { useAppState } from '../../../context/app';
+import { IUser, ILoginRoute } from '../../../types';
 
 type ILoginProps = {
     changeForm: (form: ILoginRoute) => void;
@@ -9,31 +10,37 @@ type ILoginProps = {
 };
 
 export default function Login(props: ILoginProps) {
+    const [session] = useSession();
     const { setNotification } = useAppState();
     const { changeForm, login } = props;
 
-    const [emailOrUsername, setEmailOrUsername] = useState<string>('');
+    const [email, setEmail] = useState<string>('');
     const [password, setPassword] = useState<string>('');
 
     function validateForm() {
-        return emailOrUsername.length > 0 && password.length > 0;
+        return email.length > 0 && password.length > 0;
     }
 
+    console.log('hi');
+
     function handleSubmit(e) {
-        axios
-            .post('/api/login', {
-                emailOrUsername,
-                password,
-            })
-            .then((res) => {
-                if (['rejected', 'error'].includes(res.data.status)) {
-                    return setNotification(res.data.message);
-                }
-                return login(res.data.user);
-            })
-            .catch((e) => {
-                console.log('error logging user in', e.message);
-            });
+        signIn('email', {
+            email,
+        });
+        // axios
+        //     .post('/api/login', {
+        //         emailOrUsername,
+        //         password,
+        //     })
+        //     .then((res) => {
+        //         if (['rejected', 'error'].includes(res.data.status)) {
+        //             return setNotification(res.data.message);
+        //         }
+        //         return login(res.data.user);
+        //     })
+        //     .catch((e) => {
+        //         console.log('error logging user in', e.message);
+        //     });
         e.preventDefault(); // prevents it from refreshing
     }
 
@@ -44,8 +51,8 @@ export default function Login(props: ILoginProps) {
                 className="login-form-input"
                 autoFocus
                 type="text"
-                value={emailOrUsername}
-                onChange={(e) => setEmailOrUsername(e.target.value)}
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
             />
 
             <div className="login-form-label">Password</div>

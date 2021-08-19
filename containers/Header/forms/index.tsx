@@ -1,8 +1,8 @@
 import React from 'react';
 import { IUser, ILoginRoute } from '../../../types';
-import Login from './forms/Login';
-import Signup from './forms/Signup';
-import ForgotPassword from './forms/ForgotPassword';
+import Login from './Login';
+import Signup from './SignUp';
+import ForgotPassword from './ForgotPassword';
 
 type ILoginContainerProps = {
     form: ILoginRoute;
