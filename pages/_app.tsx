@@ -2,11 +2,11 @@ import '../styles/index.scss';
 import React from 'react';
 import { AppProps } from 'next/app';
 import { Provider } from 'next-auth/client';
+import { ThemeProvider } from '@mui/material';
 import Header from '../containers/Header';
-import AppProvider from '../context/app';
+import NotificationProvider from '../context/notification';
 import AuthProvider from '../context/auth';
-
-import Notification from '../components/Notification';
+import muiTheme from '../theme/muiTheme';
 
 /**
  * Component is the your page eg /index
@@ -15,15 +15,16 @@ import Notification from '../components/Notification';
 
 const App = ({ Component, pageProps }: AppProps) => {
     return (
-        <Provider session={pageProps.session}>
-            <AuthProvider>
-                <AppProvider>
-                    {/* <Notification /> */}
-                    {/* <Header /> */}
-                    <Component {...pageProps} />
-                </AppProvider>
-            </AuthProvider>
-        </Provider>
+        <ThemeProvider theme={muiTheme}>
+            <Provider session={pageProps.session}>
+                <AuthProvider>
+                    <NotificationProvider>
+                        <Header />
+                        <Component {...pageProps} />
+                    </NotificationProvider>
+                </AuthProvider>
+            </Provider>
+        </ThemeProvider>
     );
 };
 

@@ -1,78 +1,67 @@
 import React, { useState } from 'react';
-import axios, { AxiosResponse } from 'axios';
-import { signIn, useSession } from 'next-auth/client';
-import { useAppState } from '../../../context/app';
-import { IUser, ILoginRoute } from '../../../types';
+import { signIn, SignInResponse } from 'next-auth/client';
+import theme from '../../../theme';
+import FormInput from '../../../components/UI/FormInput';
+import FormButton from '../../../components/UI/FormButton';
+import { useNotification } from '../../../context/notification';
 
-type ILoginProps = {
-    changeForm: (form: ILoginRoute) => void;
-    login: (user: IUser) => void;
+type ILoginModalProps = {
+    label: string;
 };
 
-export default function Login(props: ILoginProps) {
-    const [session] = useSession();
-    const { setNotification } = useAppState();
-    const { changeForm, login } = props;
-
+export default function Login(props: ILoginModalProps) {
+    const { label } = props;
+    const { setNotification } = useNotification();
     const [email, setEmail] = useState<string>('');
-    const [password, setPassword] = useState<string>('');
 
-    function validateForm() {
-        return email.length > 0 && password.length > 0;
-    }
-
-    console.log('hi');
-
-    function handleSubmit(e) {
+    const handleSignIn = async () => {
+        // sends email to this address if valid account (so long as you provide email)
+        // can potentially wrap this and check for other things before submitting request
+        console.log('email signIn', email);
         signIn('email', {
-            email,
-        });
-        // axios
-        //     .post('/api/login', {
-        //         emailOrUsername,
-        //         password,
-        //     })
-        //     .then((res) => {
-        //         if (['rejected', 'error'].includes(res.data.status)) {
-        //             return setNotification(res.data.message);
-        //         }
-        //         return login(res.data.user);
-        //     })
-        //     .catch((e) => {
-        //         console.log('error logging user in', e.message);
-        //     });
-        e.preventDefault(); // prevents it from refreshing
-    }
+            email: email, // change back to email
+            callbackUrl: 'http://localhost:3003/test', // NEEDS TO CHANGE
+            redirect: false,
+        })
+            .then((res: SignInResponse) => {
+                setNotification({ message: 'hello', status: 'error' });
+                console.log('resssssssssssssss', res);
+            })
+            .catch((err) => {
+                console.log('errrrrrrrrrrrrrrrr', err);
+            });
+    };
 
     return (
-        <form onSubmit={handleSubmit} className="login-form">
-            <div className="login-form-label">Email or Username</div>
-            <input
-                className="login-form-input"
-                autoFocus
-                type="text"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-            />
-
-            <div className="login-form-label">Password</div>
-            <input
-                className="login-form-input"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-            />
-
-            <button disabled={!validateForm()} className="submit-button">
-                Submit
-            </button>
-
-            <button
-                onClick={() => changeForm('forgotPassword')}
-                className="forgot-password-button"
+        <div
+            style={{
+                display: 'flex',
+                justifyContent: 'center',
+                backgroundColor: theme.colors.white,
+                width: '90%',
+                maxWidth: 350,
+                marginTop: window.outerHeight / 8,
+                borderRadius: 8,
+                height: 200,
+            }}
+        >
+            <div
+                style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'space-around',
+                    width: '90%',
+                    maxWidth: '80%',
+                    marginBottom: 20,
+                }}
             >
-                Forgot your password?
-            </button>
-        </form>
+                <FormInput title={'Email'} input={email} setInput={setEmail} />
+                <FormButton
+                    disabled={!email.includes('.') || !email.includes('@')}
+                    onClick={() => handleSignIn()}
+                    text={label}
+                />
+            </div>
+        </div>
     );
 }

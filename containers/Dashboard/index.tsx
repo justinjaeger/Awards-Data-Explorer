@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import axios, { AxiosResponse } from 'axios';
 import Modal from '../../components/Modal';
 import { useAuthState } from '../../context/auth';
-import { useAppState } from '../../context/app';
+import { useNotification } from '../../context/notification';
 import { IProfileUser } from '../../types';
 import FollowerList from './components/FollowerList';
 
@@ -14,11 +14,12 @@ type IDashboardProps = {
 export default function Dashboard(props: IDashboardProps) {
     const { profileUser, following: _following } = props;
     const { user, setUser } = useAuthState();
-    const { setNotification } = useAppState();
+    const { setNotification } = useNotification();
 
     const [dashboardModal, setDashboardModal] = useState<boolean>(false);
-    const [modalType, setModalType] =
-        useState<'follower' | 'following' | undefined>(undefined);
+    const [modalType, setModalType] = useState<
+        'follower' | 'following' | undefined
+    >(undefined);
     // Need below in state because we could choose to unfollow
     const [following, setFollowing] = useState<boolean>(_following);
     const [followersCount, setFollowersCount] = useState<number>(

@@ -1,18 +1,21 @@
 import { Dispatch, SetStateAction } from 'react';
 import { IUser } from '../types';
 
-export interface IAppState {
-    url: string;
-    notification: string | undefined;
+export type INotification = {
+    message: string;
+    status?: 'success' | 'warning' | 'error';
+    timeout?: number;
+};
+export interface INotificationState {
+    notification: INotification;
 }
 
+export interface INotificationContext extends INotificationState {
+    setNotification: Dispatch<SetStateAction<INotification | undefined>>;
+}
 export interface IAuthState {
     token: string | undefined;
     user: IUser | undefined;
-}
-
-export interface IAppContext extends IAppState {
-    setNotification: Dispatch<SetStateAction<string | undefined>>;
 }
 
 export interface IAuthContext extends IAuthState {

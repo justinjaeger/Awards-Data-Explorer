@@ -1,23 +1,19 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useSession } from 'next-auth/client';
-import Modal from '../../components/Modal';
+import { AppBar, Modal, Toolbar } from '@mui/material';
 import { ILoginRoute, IUser } from '../../types';
-import { useAppState } from '../../context/app';
+import { useNotification } from '../../context/notification';
 import { useAuthState } from '../../context/auth';
-import LoginContainer from './forms';
+import Login from '../Header/forms/Login';
+import HeaderItem from './HeaderItem';
 
-export default function Header() {
+const Header = () => {
     const [session] = useSession();
     const { user, setUser } = useAuthState();
-
-    const { url, setNotification } = useAppState();
-
-    const [profileDropdown, setProfileDropdown] = useState<boolean>(false);
+    const { setNotification } = useNotification();
     const [loginModal, setLoginModal] = useState<boolean>(false);
     const [form, setForm] = useState<ILoginRoute>(undefined);
-
-    console.log('header refresh');
 
     // RESET VARIOUS COMPONENTS
     function reset(notification?: string): void {
@@ -59,94 +55,58 @@ export default function Header() {
 
     return (
         <>
-            <div id="Header">
-                <div id="header-left">
-                    <a href={url} className="home-button">
-                        Home
-                    </a>
-                </div>
-
-                <div id="header-right">
-                    {!session ? (
-                        <>
-                            <div id="left-header-margin" />
-                            <button
-                                onClick={() => changeForm('login')}
-                                className="header-button"
-                            >
-                                Log In
-                            </button>
-                            <button
-                                onClick={() => changeForm('email')}
-                                className="header-button"
-                            >
-                                Sign Up
-                            </button>
-                            <div id="right-header-margin" />
-                        </>
-                    ) : (
-                        <>
-                            <div id="header-message">
-                                Welcome,{' '}
-                                <a
-                                    href={`${url}/user/${user.username}`}
-                                    className="header-button"
-                                >
-                                    {user.username}
-                                </a>
-                            </div>
-                            <button
-                                onMouseEnter={() =>
-                                    setProfileDropdown(!profileDropdown)
-                                }
-                                onClick={() => setProfileDropdown(true)}
-                                className="header-button"
-                            >
-                                <img
-                                    className="profile-image-xsm header-profile-pic"
-                                    src={user.image}
-                                />
-                            </button>
-
-                            {profileDropdown && (
-                                <div
-                                    id="profile-dropdown"
-                                    onMouseLeave={() =>
-                                        setProfileDropdown(false)
-                                    }
-                                >
-                                    <a
-                                        className="profile-dropdown-button no-underline"
-                                        href={`${url}/user/${user.username}`}
-                                    >
-                                        My Profile
-                                    </a>
-                                    <button
-                                        className="profile-dropdown-button"
-                                        onClick={logout}
-                                    >
-                                        Log Out
-                                    </button>
-                                </div>
-                            )}
-                        </>
-                    )}
-                </div>
-
-                {loginModal && (
-                    <Modal
-                        setModal={setLoginModal}
-                        size={form === 'login' ? 200 : 350}
+            <AppBar style={{ position: 'relative' }}>
+                <Toolbar>
+                    <HeaderItem label={'Home'} href={'/'} />
+                    <div
+                        style={{
+                            display: 'flex',
+                            justifyContent: 'right',
+                            width: '100%',
+                        }}
                     >
-                        <LoginContainer
-                            form={form}
-                            changeForm={changeForm}
-                            reset={reset}
-                            login={login}
-                        />
-                    </Modal>
-                )}
-            </div>
+                        {!session ? (
+                            <>
+                                <HeaderItem
+                                    label={'Log In'}
+                                    onClick={() => changeForm('login')}
+                                />
+                                <HeaderItem
+                                    label={'Sign Up'}
+                                    onClick={() => changeForm('signup')}
+                                />
+                            </>
+                        ) : (
+                            <>
+                                <HeaderItem
+                                    label={`Welcome, ${user.username}`}
+                                    href={`/user/${user.username}`}
+                                    onClick={() => changeForm('signup')}
+                                />
+                                <HeaderItem
+                                    label={'Log Out'}
+                                    onClick={logout}
+                                />
+                            </>
+                        )}
+                    </div>
+                </Toolbar>
+            </AppBar>
+            <Modal
+                open={loginModal}
+                onClose={() => setLoginModal(false)}
+                style={{
+                    display: 'flex',
+                    justifyContent: 'center',
+                }}
+            >
+                <>
+                    {form === 'login' && <Login label={'Log In'} />}
+                    {form === 'signup' && <Login label={'Sign Up'} />}
+                </>
+            </Modal>
         </>
     );
-}
+};
+
+export default Header;

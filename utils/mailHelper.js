@@ -1,12 +1,13 @@
 import nodemailer from 'nodemailer';
-import { useAppState } from '../context/app';
+import { useNotification } from '../context/notification';
 
 /**
  * Exports an object with all the mail configurations we need
  */
 
 export default (email, verificationCode) => {
-    const { url } = useAppState();
+    // Figure out some other way too get the actual url -- got to be a way
+    const { url } = useNotification();
     const obj = {};
 
     if (process.env.NODE_ENV === 'development') {

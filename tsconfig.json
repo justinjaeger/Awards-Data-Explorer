@@ -22,7 +22,7 @@
     "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx", 
-    "pages/_document.ts"
+    "pages/_document.js"
 , "components/FileDrop.jsx"  ],
   "exclude": [
     "node_modules"

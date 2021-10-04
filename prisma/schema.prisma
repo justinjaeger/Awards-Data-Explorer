@@ -1,5 +1,6 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
+// Some of the models are for compatibility with Next Auth: https://next-auth.js.org/adapters/prisma
 
 // Specify which datasource prisma should connect to
 datasource db {
@@ -13,41 +14,68 @@ generator client {
 }
 
 model User {
-    id Int @id @default(autoincrement())
-    email String @unique
-    username String? @unique
-    password String?
-    role Role @default(USER)
-    authenticated Boolean @default(false)
-    image String @default("/PROFILE.png")
-    dateCreated DateTime @default(now())
-    lastLoggedIn DateTime?
-
-    followers Follower[] @relation("user")
-    following Follower[] @relation("follower")
-    tokens Token[]
-    codes Code[]
+    id              String      @id @default(cuid())
+    email           String      @unique
+    emailVerified   DateTime?
+    name            String?
+    username        String?     @unique
+    password        String?
+    role            Role        @default(USER)
+    image           String      @default("/PROFILE.png")
+    createdAt       DateTime    @default(now())
+    updatedAt       DateTime    @updatedAt
+    lastLoggedIn    DateTime?
+    accounts        Account[]
+    sessions        Session[]
+    followers       Follower[]  @relation("user")
+    following       Follower[]  @relation("follower")
 }
 
-model Token {
-    accessToken String @id
-    user User @relation(fields: [userId], references: [id])
-    userId Int // relation scalar field  (used in the `@relation` attribute above)
+model Account {
+  id                 String    @id @default(cuid())
+  userId             String
+  providerType       String
+  providerId         String
+  providerAccountId  String
+  refreshToken       String?
+  accessToken        String?
+  accessTokenExpires DateTime?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+  user               User      @relation(fields: [userId], references: [id])
+
+  @@unique([providerId, providerAccountId])
 }
 
-model Code {
-    code Int @id
-    user User @relation(fields: [userId], references: [id])
-    userId Int
-    expiration DateTime
+model Session {
+  id           String   @id @default(cuid())
+  userId       String
+  expires      DateTime
+  sessionToken String   @unique
+  accessToken  String   @unique
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  user         User     @relation(fields: [userId], references: [id])
+}
+
+model VerificationRequest {
+  id         String   @id @default(cuid())
+  identifier String
+  token      String   @unique
+  expires    DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@unique([identifier, token])
 }
 
 model Follower {
-    user User @relation("user", fields: [userId], references: [id])
-    userId Int
-    follower User @relation("follower", fields: [followerId], references: [id])
-    followerId Int
-    createdAt DateTime @default(now())
+    user            User        @relation("user", fields: [userId], references: [id])
+    userId          String
+    follower        User        @relation("follower", fields: [followerId], references: [id])
+    followerId      String
+    createdAt       DateTime    @default(now())
+    
     @@id([userId, followerId])
 }
 

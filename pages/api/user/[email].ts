@@ -36,9 +36,8 @@ export default async (
                     image,
                 },
             };
-        } else {
-            throw new Error();
         }
+        throw new Error();
     } catch (e) {
         if (e instanceof Prisma.PrismaClientKnownRequestError) {
             console.log('Known prisma error. Code:', e.code);

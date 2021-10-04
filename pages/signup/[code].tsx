@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import axios, { AxiosResponse } from 'axios';
-import { useAppState } from '../../context/app';
+import { useNotification } from '../../context/notification';
 import { useAuthState } from '../../context/auth';
 
 // At this point, there is a user in DB with userId and email
@@ -15,7 +15,7 @@ export default function Home() {
     const router = useRouter();
     const { code } = router.query;
 
-    const { setNotification } = useAppState();
+    const { setNotification } = useNotification();
     const { setUser } = useAuthState();
 
     const [userId, setUserId] = useState<number | undefined>(undefined);
