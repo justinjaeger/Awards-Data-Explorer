@@ -1,67 +1,87 @@
 import React, { useState } from 'react';
 import { signIn, SignInResponse } from 'next-auth/client';
-import theme from '../../../theme';
+import { Typography } from '@mui/material';
 import FormInput from '../../../components/UI/FormInput';
 import FormButton from '../../../components/UI/FormButton';
 import { useNotification } from '../../../context/notification';
+import { FormContainer, FormContent } from './styles';
 
-type ILoginModalProps = {
-    label: string;
+type ILoginProps = {
+    close: () => void;
 };
 
-export default function Login(props: ILoginModalProps) {
-    const { label } = props;
+const Login = (props: ILoginProps) => {
+    const { close } = props;
     const { setNotification } = useNotification();
+    const [success, setSuccess] = useState<boolean>(false);
     const [email, setEmail] = useState<string>('');
 
+    /**
+     * sends email to this address if valid account (so long as you provide email)
+     * can potentially wrap this and check for other things before submitting request
+     */
     const handleSignIn = async () => {
-        // sends email to this address if valid account (so long as you provide email)
-        // can potentially wrap this and check for other things before submitting request
-        console.log('email signIn', email);
         signIn('email', {
-            email: email, // change back to email
-            callbackUrl: 'http://localhost:3003/test', // NEEDS TO CHANGE
+            email: email,
             redirect: false,
         })
             .then((res: SignInResponse) => {
-                setNotification({ message: 'hello', status: 'error' });
-                console.log('resssssssssssssss', res);
+                if (res.status === 200) {
+                    setSuccess(true);
+                }
             })
             .catch((err) => {
-                console.log('errrrrrrrrrrrrrrrr', err);
+                console.log('err', err);
+                setNotification({ message: err.message, status: 'error' });
             });
     };
 
+    const disabled = () => {
+        if (email.includes('.') && email.includes('@')) {
+            return false;
+        }
+        return true;
+    };
+
+    const FORM_HEIGHT = 200;
+
     return (
-        <div
-            style={{
-                display: 'flex',
-                justifyContent: 'center',
-                backgroundColor: theme.colors.white,
-                width: '90%',
-                maxWidth: 350,
-                marginTop: window.outerHeight / 8,
-                borderRadius: 8,
-                height: 200,
-            }}
-        >
-            <div
-                style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    justifyContent: 'space-around',
-                    width: '90%',
-                    maxWidth: '80%',
-                    marginBottom: 20,
-                }}
-            >
-                <FormInput title={'Email'} input={email} setInput={setEmail} />
-                <FormButton
-                    disabled={!email.includes('.') || !email.includes('@')}
-                    onClick={() => handleSignIn()}
-                    text={label}
-                />
-            </div>
-        </div>
+        <FormContainer height={FORM_HEIGHT} window={window}>
+            <FormContent>
+                {success ? (
+                    <>
+                        <Typography
+                            style={{
+                                textAlign: 'center',
+                                width: '100%',
+                                fontSize: 20,
+                            }}
+                        >
+                            Success! Check your email to verify.
+                        </Typography>
+                        <FormButton
+                            disabled={disabled()}
+                            onClick={() => close()}
+                            text={'close'}
+                        />
+                    </>
+                ) : (
+                    <>
+                        <FormInput
+                            title={'Email'}
+                            input={email}
+                            setInput={setEmail}
+                        />
+                        <FormButton
+                            disabled={disabled()}
+                            onClick={() => handleSignIn()}
+                            text={'Log In'}
+                        />
+                    </>
+                )}
+            </FormContent>
+        </FormContainer>
     );
-}
+};
+
+export default Login;

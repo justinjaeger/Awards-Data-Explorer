@@ -1,12 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { useNotification } from '../context/notification';
-import theme from '../theme';
-import { INotification } from '../context/types';
+import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
+import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
+import { Typography } from '@mui/material';
+import { useNotification } from '../../context/notification';
+import theme from '../../theme';
+import { INotification } from '../../context/types';
+import { NotificationContainer, NotificationContent } from './styles';
 
 export default function Notification(props: INotification) {
     const { message, timeout, status } = props;
-    const { setNotification } = useNotification();
+    const { notification, setNotification } = useNotification();
     const [visible, setVisible] = useState<boolean>(false);
 
     // for handling multiple notifications, need to do some sort of stack
@@ -17,10 +21,10 @@ export default function Notification(props: INotification) {
             setVisible(true);
             setTimeout(() => {
                 setNotification(undefined);
-            }, timeout || 4000);
+            }, timeout || 5500);
             setTimeout(() => {
                 setVisible(false);
-            }, timeout - 500 || 3500);
+            }, timeout - 500 || 5000);
         }
     }, [message]);
 
@@ -28,7 +32,6 @@ export default function Notification(props: INotification) {
         switch (status) {
             case 'success':
                 return theme.colors.success;
-
             case 'error':
                 return theme.colors.error;
             case 'warning':
@@ -36,6 +39,17 @@ export default function Notification(props: INotification) {
                 return theme.colors.warning;
         }
     })();
+
+    const icon = (() => {
+        switch (status) {
+            case 'success':
+                return <CheckCircleOutlineIcon style={{ marginRight: 10 }} />;
+            default:
+                return <ErrorOutlineIcon style={{ marginRight: 10 }} />;
+        }
+    })();
+
+    if (!visible && !notification) return null;
 
     return (
         <>
@@ -55,21 +69,12 @@ export default function Notification(props: INotification) {
                         ease: 'easeInOut',
                     }}
                 >
-                    <div
-                        style={{
-                            position: 'fixed',
-                            top: 10,
-                            left: 20,
-                            maxWidth: 600,
-                            color: theme.colors.text,
-                            backgroundColor: backgroundColor,
-                            borderRadius: 5,
-                            padding: 10,
-                            zIndex: 2,
-                        }}
-                    >
-                        {message}
-                    </div>
+                    <NotificationContainer style={{ backgroundColor }}>
+                        <NotificationContent>
+                            {icon}
+                            <Typography>{message}</Typography>
+                        </NotificationContent>
+                    </NotificationContainer>
                 </motion.div>
             </div>
         </>

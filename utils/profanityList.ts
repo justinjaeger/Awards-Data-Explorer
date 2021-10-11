@@ -1,4 +1,4 @@
-export default [
+const profanityList = [
     'testuser',
     'theoscarexpert',
     'brotherbro',
@@ -40,7 +40,6 @@ export default [
     'heeb',
     'homo',
     'hooker',
-    'idiot',
     'insane',
     'insanitie',
     'insanity',
@@ -61,7 +60,6 @@ export default [
     'nazi',
     'negress',
     'negro',
-    'nigg',
     'nig_nog',
     'nigga',
     'nigger',
@@ -94,3 +92,5 @@ export default [
     'whore',
     'wigger',
 ];
+
+export default profanityList;

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import axios, { AxiosResponse } from 'axios';
 import Modal from '../../components/Modal';
-import { useAuthState } from '../../context/auth';
+import { useAuth } from '../../context/auth';
 import { useNotification } from '../../context/notification';
 import { IProfileUser } from '../../types';
 import FollowerList from './components/FollowerList';
@@ -13,7 +13,7 @@ type IDashboardProps = {
 
 export default function Dashboard(props: IDashboardProps) {
     const { profileUser, following: _following } = props;
-    const { user, setUser } = useAuthState();
+    const { user, setUser } = useAuth();
     const { setNotification } = useNotification();
 
     const [dashboardModal, setDashboardModal] = useState<boolean>(false);

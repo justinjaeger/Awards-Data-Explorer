@@ -21,6 +21,7 @@ export default function Login(props: ILoginProps) {
             disabled={disabled || false}
             error={error || false}
             fullWidth={true}
+            style={{ marginTop: 10, marginBottom: 10 }}
         >
             <InputLabel style={{ marginLeft: -10 }}>{title}</InputLabel>
             <Input
@@ -35,7 +36,7 @@ export default function Login(props: ILoginProps) {
                     type: password ? 'password' : undefined,
                 }}
             />
-            <FormHelperText>{label}</FormHelperText>
+            <FormHelperText style={{ marginLeft: 0 }}>{label}</FormHelperText>
         </FormControl>
     );
 }

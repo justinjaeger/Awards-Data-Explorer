@@ -1,57 +1,39 @@
 import React, { useState } from 'react';
-import axios from 'axios';
-import { useSession } from 'next-auth/client';
 import { AppBar, Modal, Toolbar } from '@mui/material';
-import { ILoginRoute, IUser } from '../../types';
-import { useNotification } from '../../context/notification';
-import { useAuthState } from '../../context/auth';
+import { signOut, SignOutResponse } from 'next-auth/client';
+import { ILoginRoute } from '../../types';
+import { useAuth } from '../../context/auth';
 import Login from '../Header/forms/Login';
+import { useDeepCompareEffect } from '../../utils/hooks';
 import HeaderItem from './HeaderItem';
+import AccountSetup from './forms/AccountSetup';
 
 const Header = () => {
-    const [session] = useSession();
-    const { user, setUser } = useAuthState();
-    const { setNotification } = useNotification();
+    const { user } = useAuth();
     const [loginModal, setLoginModal] = useState<boolean>(false);
     const [form, setForm] = useState<ILoginRoute>(undefined);
 
-    // RESET VARIOUS COMPONENTS
-    function reset(notification?: string): void {
-        setLoginModal(false);
-        setForm(undefined);
-        notification
-            ? setNotification(notification)
-            : setNotification(undefined);
-    }
+    // If user hasn't created their username, make them do so
+    useDeepCompareEffect(() => {
+        if (user && !user.username) {
+            changeForm('account_setup');
+        }
+    }, [user]);
 
-    // LOG OUT
-    function logout(): void {
-        axios
-            .delete('/api/login')
-            .then((res) => {
-                if (res.data.status === 'error') {
-                    return setNotification(res.data.message!);
-                }
-                setUser(undefined);
-                reset();
-                window.location.reload();
-            })
-            .catch((err) => {
-                console.log('err, could not log out', err.response);
-            });
-    }
-
-    // LOG IN
-    function login(user: IUser): void {
-        reset();
-        setUser(user);
-        window.location.reload();
-    }
-
-    function changeForm(route: ILoginRoute): void {
+    const changeForm = (route: ILoginRoute) => {
         setLoginModal(true);
         setForm(route);
-    }
+    };
+
+    const logout = () => {
+        signOut()
+            .then((res: SignOutResponse) => {
+                console.log('res', res);
+            })
+            .catch((err) => {
+                console.log('err', err);
+            });
+    };
 
     return (
         <>
@@ -65,23 +47,27 @@ const Header = () => {
                             width: '100%',
                         }}
                     >
-                        {!session ? (
+                        {!user ? (
                             <>
                                 <HeaderItem
                                     label={'Log In'}
                                     onClick={() => changeForm('login')}
                                 />
-                                <HeaderItem
-                                    label={'Sign Up'}
-                                    onClick={() => changeForm('signup')}
-                                />
                             </>
                         ) : (
                             <>
                                 <HeaderItem
-                                    label={`Welcome, ${user.username}`}
-                                    href={`/user/${user.username}`}
-                                    onClick={() => changeForm('signup')}
+                                    label={
+                                        user.username
+                                            ? `Welcome, ${user.username}`
+                                            : 'Welcome, new user'
+                                    }
+                                    // href={
+                                    //     user.username
+                                    //         ? `/user/${user.username}`
+                                    //         : undefined
+                                    // }
+                                    onClick={() => changeForm('account_setup')}
                                 />
                                 <HeaderItem
                                     label={'Log Out'}
@@ -94,15 +80,26 @@ const Header = () => {
             </AppBar>
             <Modal
                 open={loginModal}
-                onClose={() => setLoginModal(false)}
+                onClose={
+                    form === 'account_setup'
+                        ? undefined
+                        : () => setLoginModal(false)
+                }
                 style={{
                     display: 'flex',
                     justifyContent: 'center',
                 }}
             >
                 <>
-                    {form === 'login' && <Login label={'Log In'} />}
-                    {form === 'signup' && <Login label={'Sign Up'} />}
+                    {form === 'login' && (
+                        <Login close={() => setLoginModal(false)} />
+                    )}
+                    {form === 'account_setup' && (
+                        <AccountSetup
+                            close={() => setLoginModal(false)}
+                            logout={logout}
+                        />
+                    )}
                 </>
             </Modal>
         </>

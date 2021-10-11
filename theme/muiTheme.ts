@@ -26,6 +26,9 @@ const muiTheme = createTheme({
         text: {
             primary: theme.colors.black,
         },
+        info: {
+            main: theme.colors.grey,
+        },
     },
     components: {
         MuiButton: {

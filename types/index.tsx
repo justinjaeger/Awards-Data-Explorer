@@ -1,10 +1,11 @@
-// TYPES
+import { Session } from 'next-auth';
+
 export interface IUser {
-    id: number;
-    username: string;
+    id: string;
     email: string;
     role: 'USER' | 'ADMIN';
     image: string;
+    username?: string;
 }
 
 export type IProfileUser = {
@@ -25,11 +26,14 @@ export type ILoginRoute =
     | 'login'
     | 'email'
     | 'signup'
-    | 'forgotPassword'
-    | 'resetPassword'
+    | 'forgot_password'
+    | 'reset_password'
+    | 'account_setup'
     | undefined;
 
 export interface IApiResponse {
     status: 'success' | 'rejected' | 'error';
     message?: string;
 }
+
+export type ISession = [Session | null, boolean];

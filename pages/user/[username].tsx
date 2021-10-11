@@ -5,7 +5,7 @@ import { useAsyncEffect } from '../../utils/hooks';
 import Dashboard from '../../containers/Dashboard';
 import NotFound from '../../containers/NotFound';
 import Loading from '../../components/Loading';
-import { useAuthState } from '../../context/auth';
+import { useAuth } from '../../context/auth';
 import { IProfileUser } from '../../types';
 import Notification from '../../components/Notification';
 
@@ -17,7 +17,7 @@ export default function UserDashboard() {
     const router = useRouter();
     const profileUsername = router.query.username;
 
-    const { user } = useAuthState();
+    const { user } = useAuth();
     const [notification, setNotification] = useState<string | JSX.Element>();
     const [_404, set404] = useState<boolean>(false);
     const [loading, setLoading] = useState<boolean>(true);

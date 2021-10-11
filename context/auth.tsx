@@ -1,66 +1,65 @@
-import { Prisma } from '@prisma/client';
-import axios, { AxiosResponse } from 'axios';
-// import { useSession } from 'next-auth/client';
 import React, { useState, useContext } from 'react';
-import { useEffect } from 'react';
-import prisma from '../lib/prisma';
-import { IUploadImageResponse } from '../pages/api/user/[email]';
-import { IUser } from '../types';
-import { useAsyncEffect } from '../utils/hooks';
+import axios, { AxiosResponse } from 'axios';
+import { useSession } from 'next-auth/client';
+import { IGetUserResponse } from '../pages/api/user/[email]';
+import { ISession, IUser } from '../types';
+import { useDeepCompareEffect } from '../utils/hooks';
 import { IAuthContext, IAuthState, _void } from './types';
 
-export const initialAuthState = {
-    token: undefined,
+export const initialAuthState: IAuthState = {
     user: undefined,
 };
 
-export const initialAuthContext = {
+export const initialAuthContext: IAuthContext = {
     ...initialAuthState,
     setUser: _void,
     setImage: _void,
+    setUsername: _void,
 };
 
 const AuthContext = React.createContext<IAuthContext>(initialAuthContext);
 
-export default function AuthProvider(props) {
-    // const [session, loading] = useSession();
+export default function AuthProvider(props: { children: React.ReactChild }) {
+    const [session] = useSession() as ISession;
     const [s, setState] = useState<IAuthState>(initialAuthState);
 
-    // console.log('SESSION: ', session, 'loading', loading);
-
-    // useEffect(() => {
-    //     // If there's an active session, update state
-    //     if (session) {
-    //         getUserData();
-    //     }
-    // }, []);
-
-    // const getUserData = async () => {
-    //     const { email } = session.user;
-    //     const result: IUploadImageResponse = await axios.get(
-    //         `/api/user/${email}`
-    //     );
-    //     if (result.status === 'success') {
-    //         setState({
-    //             ...s,
-    //             user: result.user,
-    //         });
-    //     }
-    // };
+    // IF username is null aka they just signed up, change that
+    useDeepCompareEffect(() => {
+        // update user data if session found
+        if (session) {
+            console.log('updating session');
+            const { email } = session.user;
+            axios
+                .get(`/api/user/${email}`)
+                .then((res: AxiosResponse<IGetUserResponse>) => {
+                    console.log('RESULT', res.data.user);
+                    if (res.data.status === 'success') {
+                        setState({
+                            ...s,
+                            user: res.data.user,
+                        });
+                    }
+                });
+        }
+    }, [session]);
 
     return (
         <AuthContext.Provider
             value={{
-                token: s.token,
                 user: s.user,
                 setUser: (user: IUser) =>
                     setState({
-                        ...s,
                         user,
+                    }),
+                setUsername: (username: string) =>
+                    setState({
+                        user: {
+                            ...s.user,
+                            username,
+                        },
                     }),
                 setImage: (image: string) =>
                     setState({
-                        ...s,
                         user: {
                             ...s.user,
                             image,
@@ -73,4 +72,4 @@ export default function AuthProvider(props) {
     );
 }
 
-export const useAuthState = () => useContext(AuthContext);
+export const useAuth = () => useContext(AuthContext);

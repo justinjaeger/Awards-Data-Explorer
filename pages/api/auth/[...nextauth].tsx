@@ -2,7 +2,6 @@ import { NextApiHandler } from 'next';
 import NextAuth from 'next-auth';
 import Adapters from 'next-auth/adapters';
 import Providers from 'next-auth/providers';
-import sendVerificationRequest from '../../../utils/sendVerificationRequest';
 import prisma from '../../../lib/prisma';
 
 // https://www.youtube.com/watch?v=o_wZIVmWteQ
@@ -11,7 +10,7 @@ import prisma from '../../../lib/prisma';
 // https://next-auth.js.org/tutorials/creating-a-database-adapter
 
 /**
- * The email provider sends you a magic link to sign in for authenticated users
+ * The email provider sends you a magic link to sign in or sign up users
  */
 const options = {
     providers: [
@@ -23,7 +22,6 @@ const options = {
     adapter: Adapters.Prisma.Adapter({ prisma }),
     secret: process.env.SECRET,
     database: process.env.DATABASE_URL,
-    // sendVerificationRequest,
 };
 
 const authHandler: NextApiHandler = (req, res) => NextAuth(req, res, options);
