@@ -5,10 +5,13 @@ import { useAuth } from '../../context/auth';
 import { useNotification } from '../../context/notification';
 import { IProfileUser } from '../../types';
 import FollowerList from './components/FollowerList';
+import { User } from '.prisma/client';
 
 type IDashboardProps = {
-    profileUser: IProfileUser;
-    following: boolean;
+    profileUser: User;
+    followingProfile: boolean;
+    followerCount: number;
+    followingCount: number;
 };
 
 export default function Dashboard(props: IDashboardProps) {
@@ -170,13 +173,11 @@ export default function Dashboard(props: IDashboardProps) {
                             <div id="dashboard-image-hover">Upload Image</div>
                         </div>
                     </label>
-                    ,
                     <input
                         id="file-upload"
                         type="file"
                         onChange={handleProfileImageUpload}
                     />
-                    ,
                 </>
             ) : (
                 <label htmlFor="file-upload">

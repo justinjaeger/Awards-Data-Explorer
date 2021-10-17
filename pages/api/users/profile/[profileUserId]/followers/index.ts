@@ -1,6 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import prisma from '../../../../../lib/prisma';
-import { IFollower, IApiResponse } from '../../../../../types';
+import prisma from '../../../../../../lib/prisma';
+import { IFollower, IApiResponse } from '../../../../../../types';
 
 interface IFollowerResponse extends IApiResponse {
     followers?: IFollower[];
@@ -23,7 +23,7 @@ export default async (
             // they are the follower / followerId, therefore I am userId
             // any entry where userId = id
             // but once you get that entry, you then have to query for each user's information
-            const { followers: followerIds } = await prisma.user.findUnique({
+            const result = await prisma.user.findUnique({
                 where: {
                     id: parseInt(id as string),
                 },

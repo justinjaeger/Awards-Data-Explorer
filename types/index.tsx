@@ -9,11 +9,11 @@ export interface IUser {
 }
 
 export type IProfileUser = {
-    image: string;
     username: string;
-    userId: number | undefined;
-    followers: number | undefined;
-    following: number | undefined;
+    id?: string;
+    image?: string;
+    followers?: number;
+    following?: number;
 };
 
 export type IFollower = {

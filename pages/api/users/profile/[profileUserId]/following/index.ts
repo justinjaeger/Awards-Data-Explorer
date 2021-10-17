@@ -1,6 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import prisma from '../../../../../lib/prisma';
-import { IFollower, IApiResponse } from '../../../../../types';
+import prisma from '../../../../../../lib/prisma';
+import { IFollower, IApiResponse } from '../../../../../../types';
 
 interface IFollowerResponse extends IApiResponse {
     following?: IFollower[];

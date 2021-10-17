@@ -1,7 +1,7 @@
 import '../styles/index.scss';
 import React from 'react';
 import { AppProps } from 'next/app';
-import { Provider } from 'next-auth/client';
+import { Provider as SessionProvider } from 'next-auth/client';
 import { ThemeProvider } from '@mui/material';
 import Header from '../containers/Header';
 import NotificationProvider from '../context/notification';
@@ -16,14 +16,14 @@ import muiTheme from '../theme/muiTheme';
 const App = ({ Component, pageProps }: AppProps) => {
     return (
         <ThemeProvider theme={muiTheme}>
-            <Provider session={pageProps.session}>
+            <SessionProvider session={pageProps.session}>
                 <AuthProvider>
                     <NotificationProvider>
                         <Header />
                         <Component {...pageProps} />
                     </NotificationProvider>
                 </AuthProvider>
-            </Provider>
+            </SessionProvider>
         </ThemeProvider>
     );
 };

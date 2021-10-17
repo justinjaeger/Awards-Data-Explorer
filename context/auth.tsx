@@ -1,9 +1,8 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import axios, { AxiosResponse } from 'axios';
 import { useSession } from 'next-auth/client';
 import { IGetUserResponse } from '../pages/api/user/[email]';
 import { ISession, IUser } from '../types';
-import { useDeepCompareEffect } from '../utils/hooks';
 import { IAuthContext, IAuthState, _void } from './types';
 
 export const initialAuthState: IAuthState = {
@@ -24,15 +23,15 @@ export default function AuthProvider(props: { children: React.ReactChild }) {
     const [s, setState] = useState<IAuthState>(initialAuthState);
 
     // IF username is null aka they just signed up, change that
-    useDeepCompareEffect(() => {
+    useEffect(() => {
         // update user data if session found
         if (session) {
-            console.log('updating session');
+            console.log('UPDATING SESSION:');
             const { email } = session.user;
             axios
                 .get(`/api/user/${email}`)
                 .then((res: AxiosResponse<IGetUserResponse>) => {
-                    console.log('RESULT', res.data.user);
+                    console.log('LOGGED IN USER:', res.data.user);
                     if (res.data.status === 'success') {
                         setState({
                             ...s,

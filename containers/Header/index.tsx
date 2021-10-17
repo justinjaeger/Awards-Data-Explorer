@@ -62,12 +62,11 @@ const Header = () => {
                                             ? `Welcome, ${user.username}`
                                             : 'Welcome, new user'
                                     }
-                                    // href={
-                                    //     user.username
-                                    //         ? `/user/${user.username}`
-                                    //         : undefined
-                                    // }
-                                    onClick={() => changeForm('account_setup')}
+                                    href={
+                                        user.username
+                                            ? `/user/${user.username}`
+                                            : undefined
+                                    }
                                 />
                                 <HeaderItem
                                     label={'Log Out'}

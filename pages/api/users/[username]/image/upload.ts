@@ -3,12 +3,8 @@ import AWS from 'aws-sdk';
 import formidable from 'formidable-serverless';
 import sharp from 'sharp';
 import { NextApiRequest, NextApiResponse } from 'next';
-import { IApiResponse } from '../../../../types';
-import prisma from '../../../../lib/prisma';
-
-interface IUploadImageResponse extends IApiResponse {
-    url?: string;
-}
+import { IApiResponse } from '../../../../../types';
+import prisma from '../../../../../lib/prisma';
 
 export const config = {
     // idk if this shit is going to give me hell
@@ -17,24 +13,39 @@ export const config = {
     },
 };
 
+export interface IUploadImageResponse extends IApiResponse {
+    image?: string;
+}
+
 export default async (
     req: NextApiRequest,
     res: NextApiResponse<IUploadImageResponse>
 ) => {
     const {
         method,
-        query: { id }, // key used to be passed here but now is not
-        body: { key }, // had different names on frontend
+        query, // key used to be passed here but now is not
+        body, // had different names on frontend
     } = req;
-
-    console.log('key', key);
+    const username = query.username as string;
+    const key = body.key as string;
 
     try {
         // GET: profile image
         if (method === 'GET') {
             // dont have any use for this right now
+            const { image } = await prisma.user.findUnique({
+                where: {
+                    username,
+                },
+                select: {
+                    image: true,
+                },
+            });
+            return res.status(200).send({
+                status: 'success',
+                image,
+            });
         }
-
         // POST: upload profile image
         if (method === 'POST') {
             // create S3 instance with credentials
@@ -86,7 +97,7 @@ export default async (
                         // save URL in database
                         await prisma.user.update({
                             where: {
-                                id: parseInt(id as string),
+                                username,
                             },
                             data: {
                                 image: url,
@@ -94,7 +105,7 @@ export default async (
                         });
                         return res.status(200).json({
                             status: 'success',
-                            url,
+                            image: url,
                         });
                     }
                 });
@@ -126,8 +137,10 @@ export default async (
                 }
             });
         }
+
+        throw new Error();
     } catch (e) {
-        console.log('error in image.ts: ', e.code, e.message);
+        console.log(e);
         return res.status(500).send({
             status: 'error',
             message: e.message,
