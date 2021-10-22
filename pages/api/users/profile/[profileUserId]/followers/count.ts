@@ -21,7 +21,7 @@ export default async (
                     userId,
                 },
             });
-            return res.json({
+            return res.send({
                 status: 'success',
                 count,
             });
@@ -29,7 +29,7 @@ export default async (
         throw new Error();
     } catch (e) {
         console.log(e);
-        return res.status(500).json({
+        return res.status(500).send({
             status: 'error',
             message: 'An error has occured',
         });

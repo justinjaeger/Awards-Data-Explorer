@@ -1,36 +1,37 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { User } from '@prisma/client';
 import { getSession } from 'next-auth/client';
-import { IApiResponse } from '../../../types';
-import prisma from '../../../lib/prisma';
+import prisma from '../../../../lib/prisma';
+import { IApiResponse } from '../../../../types';
 
-export interface IGetUserResponse extends IApiResponse {
-    user?: User;
-}
+export type ISaveProfileImage = IApiResponse;
 
 export default async (
     req: NextApiRequest,
-    res: NextApiResponse<IGetUserResponse>
+    res: NextApiResponse<ISaveProfileImage>
 ) => {
-    const { method } = req;
+    const { method, body } = req;
+    const edgeUrl = body.edgeUrl as string;
+
     const session = await getSession({ req });
     if (!session) {
         return res.status(401).send({
             status: 'error',
-            message: 'User is not authenticated.',
+            message: 'User not authenticated',
         });
     }
 
     try {
-        if (method === 'GET') {
-            const user = await prisma.user.findUnique({
+        if (method === 'POST') {
+            await prisma.user.update({
                 where: {
                     id: session.user.id,
+                },
+                data: {
+                    image: edgeUrl,
                 },
             });
             return res.status(200).send({
                 status: 'success',
-                user,
             });
         }
         throw new Error();
@@ -38,7 +39,7 @@ export default async (
         console.error(e);
         return res.status(500).send({
             status: 'error',
-            message: 'An error has occured',
+            message: 'An error has occurred',
         });
     }
 };

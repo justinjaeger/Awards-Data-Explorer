@@ -1,6 +1,5 @@
 import axios, { AxiosResponse, AxiosError } from 'axios';
 import { IFollowerCountResponse } from '../pages/api/users/profile/[profileUserId]/followers/count';
-import { ICheckIfFollowing } from '../pages/api/users/profile/[profileUserId]/[id]';
 import { IGetProfileUserResponse } from '../pages/api/users/[username]';
 
 /**
@@ -20,21 +19,6 @@ import { IGetProfileUserResponse } from '../pages/api/users/[username]';
  * headers: { Authorization: `Token ${token}` }
  */
 
-// determine if the user (id) is following the profile (profileUserId)
-export const checkIfFollowing = (
-    profileUserId: string,
-    id: string
-): Promise<ICheckIfFollowing> => {
-    return axios
-        .get(`/api/users/profile/${profileUserId}/${id}`)
-        .then((res: AxiosResponse<ICheckIfFollowing>) => res.data)
-        .catch((err: AxiosError<ICheckIfFollowing>) => {
-            if (err.response.status === 404)
-                return { status: 'error', message: 'A 404 error has occured' };
-            return err.response.data;
-        });
-};
-
 export const getProfileUser = (
     profileUsername: string
 ): Promise<IGetProfileUserResponse> => {
@@ -42,9 +26,8 @@ export const getProfileUser = (
         .get(`/api/users/${profileUsername}`)
         .then((res: AxiosResponse<IGetProfileUserResponse>) => res.data)
         .catch((err: AxiosError<IGetProfileUserResponse>) => {
-            console.log('err', err);
-            // if (err.response.status === 404)
-            //     return { status: 'error', message: 'A 404 error has occured' };
+            if (err.response.status === 404)
+                return { status: 'error', message: 'A 404 error has occured' };
             return err.response.data;
         });
 };

@@ -1,9 +1,10 @@
-import React, { useState, useContext, useEffect } from 'react';
-import axios, { AxiosResponse } from 'axios';
+import React, { useState, useContext } from 'react';
 import { useSession } from 'next-auth/client';
-import { IGetUserResponse } from '../pages/api/user/[email]';
-import { ISession, IUser } from '../types';
+import { ISession } from '../types';
+import { useDeepCompareEffect } from '../utils/hooks';
+import * as SecureServices from '../services/secure';
 import { IAuthContext, IAuthState, _void } from './types';
+import { User } from '.prisma/client';
 
 export const initialAuthState: IAuthState = {
     user: undefined,
@@ -20,49 +21,35 @@ const AuthContext = React.createContext<IAuthContext>(initialAuthContext);
 
 export default function AuthProvider(props: { children: React.ReactChild }) {
     const [session] = useSession() as ISession;
-    const [s, setState] = useState<IAuthState>(initialAuthState);
+    const [user, setUser] = useState<User>();
 
-    // IF username is null aka they just signed up, change that
-    useEffect(() => {
+    useDeepCompareEffect(() => {
         // update user data if session found
         if (session) {
-            console.log('UPDATING SESSION:');
-            const { email } = session.user;
-            axios
-                .get(`/api/user/${email}`)
-                .then((res: AxiosResponse<IGetUserResponse>) => {
-                    console.log('LOGGED IN USER:', res.data.user);
-                    if (res.data.status === 'success') {
-                        setState({
-                            ...s,
-                            user: res.data.user,
-                        });
-                    }
-                });
+            console.log('UPDATING SESSION...');
+            SecureServices.getUser().then((res) => {
+                if (res.status === 'error') {
+                    console.log('Could not retrieve user session');
+                }
+                setUser(res.user);
+            });
         }
     }, [session]);
 
     return (
         <AuthContext.Provider
             value={{
-                user: s.user,
-                setUser: (user: IUser) =>
-                    setState({
-                        user,
-                    }),
+                user,
+                setUser: (user) => setUser(user),
                 setUsername: (username: string) =>
-                    setState({
-                        user: {
-                            ...s.user,
-                            username,
-                        },
+                    setUser({
+                        ...user,
+                        username,
                     }),
                 setImage: (image: string) =>
-                    setState({
-                        user: {
-                            ...s.user,
-                            image,
-                        },
+                    setUser({
+                        ...user,
+                        image,
                     }),
             }}
         >

@@ -1,5 +1,5 @@
 import { Dispatch, SetStateAction } from 'react';
-import { IUser } from '../types';
+import { User } from '.prisma/client';
 
 export type INotification = {
     message: string;
@@ -17,10 +17,10 @@ export interface INotificationContext extends INotificationState {
 
 // AUTH CONTEXT
 export interface IAuthState {
-    user: IUser | undefined;
+    user: User | undefined;
 }
 export interface IAuthContext extends IAuthState {
-    setUser: Dispatch<SetStateAction<IUser | undefined>>;
+    setUser: Dispatch<SetStateAction<User | undefined>>;
     setImage: Dispatch<SetStateAction<string | undefined>>;
     setUsername: Dispatch<SetStateAction<string | undefined>>;
 }

@@ -1,13 +1,5 @@
 import { Session } from 'next-auth';
 
-export interface IUser {
-    id: string;
-    email: string;
-    role: 'USER' | 'ADMIN';
-    image: string;
-    username?: string;
-}
-
 export type IProfileUser = {
     username: string;
     id?: string;

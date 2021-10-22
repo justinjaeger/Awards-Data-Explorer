@@ -33,7 +33,7 @@ export default async (
         if (e instanceof Prisma.PrismaClientKnownRequestError) {
             console.log('CODE', e.code);
             if (e.code === 'P2002') {
-                return res.json({
+                return res.status(400).send({
                     status: 'error',
                     message: 'This email is already registered.',
                 });

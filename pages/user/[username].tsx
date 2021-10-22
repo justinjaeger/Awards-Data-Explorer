@@ -1,6 +1,4 @@
-import { Agent } from 'http';
 import React, { useState } from 'react';
-import { useRouter } from 'next/router';
 import { useSession } from 'next-auth/client';
 import { GetServerSidePropsContext, GetServerSidePropsResult } from 'next';
 import { useAsyncEffect } from '../../utils/hooks';
@@ -8,9 +6,10 @@ import Dashboard from '../../containers/Dashboard';
 import NotFound from '../../containers/NotFound';
 import Loading from '../../components/Loading';
 import { useAuth } from '../../context/auth';
-import { IProfileUser, ISession } from '../../types';
+import { ISession } from '../../types';
 import { useNotification } from '../../context/notification';
 import * as Services from '../../services';
+import * as SecureServices from '../../services/secure';
 import prisma from '../../lib/prisma';
 import { User } from '.prisma/client';
 
@@ -57,34 +56,33 @@ const UserDashboard = (props: IUserDashboardServerSideProps) => {
             setFollowingCount(res.count);
         });
 
-        // If not our profile, determine if we are following this profile
+        // DETERMINE IF LOGGED IN USER IS FOLLOWING THIS PROFILE
         if (profileUser.id !== user.id) {
-            Services.checkIfFollowing(profileUser.username, user.id).then(
-                (res) => {
-                    if (res.status === 'error') {
-                        return setNotification({
-                            message: res.message,
-                            status: 'error',
-                        });
-                    }
-                    setFollowingProfile(res.following);
+            SecureServices.checkIfFollowing(profileUser.id).then((res) => {
+                if (res.status === 'error') {
+                    return setNotification({
+                        message: res.message,
+                        status: 'error',
+                    });
                 }
-            );
+                setFollowingProfile(res.following);
+            });
         }
     }, [user]);
 
     return (
         <>
             {notFound && <NotFound thingCannotFind="User" />}
-            {profileUser && followerCount && followingCount ? (
-                <></>
+            {![profileUser, followerCount, followingCount].some(
+                (el) => el === undefined
+            ) ? (
+                <Dashboard
+                    profileUser={profileUser}
+                    followingProfile={followingProfile}
+                    followerCount={followerCount}
+                    followingCount={followingCount}
+                />
             ) : (
-                // <Dashboard
-                //     profileUser={profileUser}
-                //     followingProfile={followingProfile}
-                //     followerCount={followerCount}
-                //     followingCount={followingCount}
-                // />
                 <Loading />
             )}
         </>

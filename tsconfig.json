@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "typeRoots": ["./node_modules/@types", "./@types"], // https://www.typescriptlang.org/tsconfig#typeRoots
     "target": "es5",
     "lib": [
       "dom",

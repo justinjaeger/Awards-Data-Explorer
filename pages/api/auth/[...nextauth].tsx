@@ -1,5 +1,5 @@
 import { NextApiHandler } from 'next';
-import NextAuth from 'next-auth';
+import NextAuth, { NextAuthOptions } from 'next-auth';
 import Adapters from 'next-auth/adapters';
 import Providers from 'next-auth/providers';
 import prisma from '../../../lib/prisma';
@@ -12,7 +12,7 @@ import prisma from '../../../lib/prisma';
 /**
  * The email provider sends you a magic link to sign in or sign up users
  */
-const options = {
+const options: NextAuthOptions = {
     providers: [
         Providers.Email({
             server: process.env.SMTP_SERVER,
@@ -22,6 +22,16 @@ const options = {
     adapter: Adapters.Prisma.Adapter({ prisma }),
     secret: process.env.SECRET,
     database: process.env.DATABASE_URL,
+    callbacks: {
+        // Modify this to make new fields available for the session callback
+        session: async (session, user) => {
+            //@ts-ignore
+            session.user.id = user.id;
+            //@ts-ignore
+            session.user.username = user.username;
+            return Promise.resolve(session);
+        },
+    },
 };
 
 const authHandler: NextApiHandler = (req, res) => NextAuth(req, res, options);
