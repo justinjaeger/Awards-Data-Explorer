@@ -1,71 +1,87 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { Session } from 'next-auth';
+import Image from 'next/image';
 import Modal from '../../components/Modal';
-import { useAuth } from '../../context/auth';
 import { useNotification } from '../../context/notification';
-import * as SecureSevices from '../../services/secure';
+import * as SecureServices from '../../services/secure';
 import FollowerList from './components/FollowerList';
 import { User } from '.prisma/client';
 
 type IDashboardProps = {
     profileUser: User;
-    followingProfile: boolean;
     followerCount: number;
     followingCount: number;
+    isMyProfile: boolean;
+    userIsFollowing: boolean;
+    session?: Session;
 };
 
-type IModalType = 'follower' | 'following' | undefined;
+export type IModalType = 'follower' | 'following' | undefined;
 
-export default function Dashboard(props: IDashboardProps) {
+const Dashboard = (props: IDashboardProps) => {
     const {
         profileUser,
-        followingProfile,
         followerCount: _followerCount,
         followingCount,
+        isMyProfile,
+        userIsFollowing: _userIsFollowing,
+        session,
     } = props;
-    const { user } = useAuth();
-    const { setNotification } = useNotification();
 
+    const { setNotification } = useNotification();
     const [dashboardModal, setDashboardModal] = useState<boolean>(false);
-    const [modalType, setModalType] = useState<IModalType>(undefined);
-    // Need below in state because we could choose to unfollow
-    // ACTUALLY these should probably be updated automatically? idk. maybe not
-    const [following, setFollowing] = useState<boolean>(followingProfile);
+    const [modalType, setModalType] = useState<IModalType>();
     const [followerCount, setFollowerCount] = useState<number>(_followerCount);
+    const [userIsFollowing, setUserIsFollowing] =
+        useState<boolean>(_userIsFollowing);
     const [profileImage, setProfileImage] = useState<string>(profileUser.image);
 
-    // Determine if page is YOUR profile or someone else's
-    const isMyProfile = user.username === profileUser.username;
+    // console.log('session', session);
+    // console.log('profileUser', profileUser);
+    console.log('profileImage', profileImage);
+    // console.log('followerCount', followerCount);
+    // console.log('followingCount', followingCount);
+    // console.log('isMyProfile', isMyProfile);
+    // console.log('userIsFollowing', userIsFollowing, _userIsFollowing);
 
-    function setModal(_modalType: IModalType) {
+    useEffect(() => {
+        // idk why but I have to do this again
+        // will fix when I create dashbord context
+        setUserIsFollowing(_userIsFollowing);
+        setProfileImage(profileUser.image);
+        setFollowerCount(_followerCount);
+    }, [_userIsFollowing, profileUser.image, _followerCount]);
+
+    const setModal = (_modalType: IModalType) => {
         setDashboardModal(true);
         setModalType(_modalType);
-    }
+    };
 
     // FOLLOW USER
     // Should we put these follow functions in context maybe?
     const follow = () => {
-        SecureSevices.follow(profileUser.id).then((res) => {
+        SecureServices.follow(profileUser.id).then((res) => {
             if (res.status === 'error') {
                 return setNotification({
                     message: res.message,
                     status: 'error',
                 });
             }
-            setFollowing(true);
+            setUserIsFollowing(true);
             setFollowerCount(followerCount + 1);
         });
     };
 
     // UNFOLLOW USER
     const unfollow = () => {
-        SecureSevices.unfollow(profileUser.id).then((res) => {
+        SecureServices.unfollow(profileUser.id).then((res) => {
             if (res.status === 'error') {
                 return setNotification({
                     message: res.message,
                     status: 'error',
                 });
             }
-            setFollowing(false);
+            setUserIsFollowing(false);
             setFollowerCount(followerCount - 1);
         });
     };
@@ -86,13 +102,13 @@ export default function Dashboard(props: IDashboardProps) {
         }
 
         // generate unique new file name
-        const fileName = user.id + Math.floor(Math.random() * 10000000);
+        const fileName = session.user.id + Math.floor(Math.random() * 10000000);
 
         // Store the previous user image key
-        const previousKey = user.image.slice(52);
+        const previousKey = session.user.image.slice(52);
 
         // Upload the image
-        const uploadImageResult = await SecureSevices.uploadProfileImage(
+        const uploadImageResult = await SecureServices.uploadProfileImage(
             fileName,
             formData
         );
@@ -109,7 +125,7 @@ export default function Dashboard(props: IDashboardProps) {
 
         // If there was a previous image uploaded, delete that form Spaces/S3
         if (previousKey !== '/PROFILE.png') {
-            SecureSevices.deleteProfileImage(previousKey).then((res) => {
+            SecureServices.deleteProfileImage(previousKey).then((res) => {
                 if (res.status === 'error') {
                     return setNotification({
                         message: res.message,
@@ -121,16 +137,20 @@ export default function Dashboard(props: IDashboardProps) {
         }
     };
 
-    // Load the skeleton until the data has been fetched
     return (
         <div id="dashboard-content">
             {isMyProfile ? (
                 <>
                     <label htmlFor="file-upload">
                         <div>
-                            <img
+                            {/* <img
                                 src={profileUser.image}
                                 className="profile-image-lg dashboard-profile-image"
+                            /> */}
+                            <Image
+                                src={profileImage}
+                                height={200}
+                                width={200}
                             />
                             <div id="dashboard-image-hover">Upload Image</div>
                         </div>
@@ -143,27 +163,29 @@ export default function Dashboard(props: IDashboardProps) {
                 </>
             ) : (
                 <label htmlFor="file-upload">
-                    <img
+                    <Image src={profileImage} height={200} width={200} />
+                    {/* <img
                         src={profileImage}
                         className="profile-image-lg dashboard-profile-image-logout"
-                    />
+                    /> */}
                 </label>
             )}
 
             <div id="dashboard-info">
                 <div id="profile-name">{profileUser.username}</div>
-                {!isMyProfile &&
-                user &&
-                // If someone else's profile AND logged in, display follow/unfollow buttons
-                following ? (
-                    <button id="follow-button" onClick={unfollow}>
-                        Unfollow
-                    </button>
-                ) : (
-                    <button id="follow-button" onClick={follow}>
-                        Follow
-                    </button>
-                )}
+
+                {session &&
+                    (userIsFollowing ? (
+                        <button id="follow-button" onClick={unfollow}>
+                            Unfollow
+                        </button>
+                    ) : (
+                        !isMyProfile && (
+                            <button id="follow-button" onClick={follow}>
+                                Follow
+                            </button>
+                        )
+                    ))}
 
                 <div id="dashboard-follower-buttons">
                     <button
@@ -199,4 +221,6 @@ export default function Dashboard(props: IDashboardProps) {
             )}
         </div>
     );
-}
+};
+
+export default Dashboard;

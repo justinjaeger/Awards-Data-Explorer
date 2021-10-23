@@ -3,7 +3,6 @@ import { IGetUserResponse } from '../pages/api/user';
 import { IFollow } from '../pages/api/user/follow/[targetUserId]';
 import { ICheckIfFollowing } from '../pages/api/user/following/[profileUserId]';
 import { IDeleteProfileImage } from '../pages/api/user/image/delete';
-import { ISaveProfileImage } from '../pages/api/user/image/save';
 import { IUploadProfileImage } from '../pages/api/user/image/upload/[fileName]';
 
 /**

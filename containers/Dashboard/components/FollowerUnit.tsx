@@ -1,11 +1,11 @@
+import { User } from '@prisma/client';
 import React from 'react';
-import { IFollower } from '../../../types';
 
 type IFollowerUnitProps = {
-    follower: IFollower;
+    follower: User;
 };
 
-export default function FollowerUnit(props: IFollowerUnitProps) {
+const FollowerUnit = (props: IFollowerUnitProps) => {
     const {
         follower: { username, image },
     } = props;
@@ -18,4 +18,6 @@ export default function FollowerUnit(props: IFollowerUnitProps) {
             </a>
         </div>
     );
-}
+};
+
+export default FollowerUnit;

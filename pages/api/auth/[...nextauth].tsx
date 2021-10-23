@@ -29,6 +29,8 @@ const options: NextAuthOptions = {
             session.user.id = user.id;
             //@ts-ignore
             session.user.username = user.username;
+            //@ts-ignore
+            session.user.role = user.role;
             return Promise.resolve(session);
         },
     },

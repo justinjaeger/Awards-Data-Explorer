@@ -7,15 +7,19 @@ export type IFollow = IApiResponse;
 
 export default async (req: NextApiRequest, res: NextApiResponse<IFollow>) => {
     const { method, query } = req;
-    const targetUserId = query.targetUseId as string;
+    const targetUserId = query.targetUserId as string;
 
     const session = await getSession({ req });
+
     if (!session) {
         return res.status(401).send({
             status: 'error',
             message: 'User not authenticated',
         });
     }
+
+    console.log('TARGET USER', targetUserId);
+    console.log('SESSION USER', session.user.id);
 
     try {
         if (method === 'POST') {

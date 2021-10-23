@@ -3,39 +3,41 @@ import prisma from '../../../../../../lib/prisma';
 import { IApiResponse } from '../../../../../../types';
 import { User } from '.prisma/client';
 
-export interface IFollowingResponse extends IApiResponse {
+export interface IFollowerResponse extends IApiResponse {
     followers?: User[];
 }
 
 export default async (
     req: NextApiRequest,
-    res: NextApiResponse<IFollowingResponse>
+    res: NextApiResponse<IFollowerResponse>
 ) => {
     const { method, query } = req;
-    const followerId = query.profileUserId as string;
+    const userId = query.profileUserId as string;
 
     /**
      * WARNING: As this scales, it is probably not good to fetch everynoe at once
      * https://www.youtube.com/watch?v=G7_0VxMRJe4
      */
 
+    console.log('PRROFILE USER ID', userId);
+
     try {
         if (method === 'GET') {
             const result = await prisma.user.findUnique({
                 where: {
-                    id: followerId,
+                    id: userId,
                 },
                 select: {
-                    following: {
+                    followers: {
                         select: {
-                            user: true,
+                            follower: true,
                         },
                     },
                 },
             });
             return res.status(200).json({
                 status: 'success',
-                followers: result.following.map((f) => f.user),
+                followers: result.followers.map((f) => f.follower),
             });
         }
     } catch (e) {

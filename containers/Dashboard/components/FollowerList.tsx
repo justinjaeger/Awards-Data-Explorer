@@ -1,67 +1,68 @@
-import React, { useState } from 'react';
-import axios, { AxiosResponse } from 'axios';
-import { useAsyncEffect } from '../../../utils/hooks';
-import { IProfileUser, IFollower } from '../../../types';
+import React, { useEffect, useState } from 'react';
 import Loading from '../../../components/Loading';
+import { IModalType } from '..';
+import * as Service from '../../../services';
+import { useNotification } from '../../../context/notification';
 import FollowerUnit from './FollowerUnit';
+import { User } from '.prisma/client';
 
 type IFollowerListProps = {
-    modalType: 'follower' | 'following';
-    profileUser: IProfileUser;
+    modalType: IModalType;
+    profileUser: User;
 };
 
-export default function FollowerList(props: IFollowerListProps) {
+/**
+ * WARNING: This data is regenerating every time the modal pops up.
+ * We should have this in some sort of context.
+ * Actually, the whole user dashboard should be in a context
+ */
+const FollowerList = (props: IFollowerListProps) => {
     const { modalType, profileUser } = props;
+    const [loading, setLoading] = useState<boolean>(true);
+    const { setNotification } = useNotification();
 
-    const [userList, setUserList] = useState<IFollower[] | undefined>(
-        undefined
-    );
+    const [userList, setUserList] = useState<User[]>(undefined);
 
-    useAsyncEffect(async () => {
+    useEffect(() => {
+        // Fetch profile's followers
         if (modalType === 'follower') {
-            // Fetch the profile's followers
-            await axios
-                .get(`/api/users/${profileUser.userId}/followers`)
-                .then((res) => {
-                    setUserList(res.data.followers);
-                })
-                .catch((err) => {
-                    console.log('something went wrong fetching followers', err);
-                });
+            Service.getFollowers(profileUser.id).then((res) => {
+                if (res.status === 'error') {
+                    return setNotification({
+                        status: 'error',
+                        message: res.message,
+                    });
+                }
+                setUserList(res.followers);
+                setLoading(false);
+            });
         }
 
+        // Fetch who profile follows
         if (modalType === 'following') {
-            // Fetch who the profile is following
-            await axios
-                .post(`/api/users/${profileUser.userId}/following`)
-                .then((res) => {
-                    setUserList(res.data.followers);
-                })
-                .catch((err) => {
-                    console.log(
-                        'something went wrong fetching followings',
-                        err
-                    );
-                });
+            Service.getFollowings(profileUser.id).then((res) => {
+                if (res.status === 'error') {
+                    return setNotification({
+                        status: 'error',
+                        message: res.message,
+                    });
+                }
+                setUserList(res.followers);
+                setLoading(false);
+            });
         }
     }, []);
 
+    // There must be some library that automatically lazily loads a list...
+    // https://www.youtube.com/watch?v=G7_0VxMRJe4
+    if (loading) return <Loading />;
     return (
-        <>
-            {userList ? (
-                <div id="follower-list">
-                    {userList.map((follower, i) => (
-                        <FollowerUnit
-                            follower={follower}
-                            key={`${modalType}${i}`}
-                        />
-                    ))}
-                </div>
-            ) : (
-                <div id="follower-list">
-                    <Loading />
-                </div>
-            )}
-        </>
+        <div id="follower-list">
+            {userList.map((follower, i) => (
+                <FollowerUnit follower={follower} key={`${modalType}${i}`} />
+            ))}
+        </div>
     );
-}
+};
+
+export default FollowerList;

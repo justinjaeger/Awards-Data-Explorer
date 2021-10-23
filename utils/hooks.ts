@@ -22,3 +22,14 @@ export const useDeepCompareMemoize = (value: any) => {
 export const useDeepCompareEffect = (effect: VoidFunction, deps: any[]) => {
     useEffect(effect, deps.map(useDeepCompareMemoize));
 };
+
+export const useAsyncDeepCompareEffect = (
+    effect: () => Promise<void>,
+    deps: any[]
+) => {
+    useEffect(() => {
+        (async () => {
+            await effect();
+        })();
+    }, deps.map(useDeepCompareMemoize));
+};
