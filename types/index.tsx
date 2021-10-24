@@ -1,18 +1,11 @@
-// TYPES
-export interface IUser {
-    id: number;
-    username: string;
-    email: string;
-    role: 'USER' | 'ADMIN';
-    image: string;
-}
+import { Session } from 'next-auth';
 
 export type IProfileUser = {
-    image: string;
     username: string;
-    userId: number | undefined;
-    followers: number | undefined;
-    following: number | undefined;
+    id?: string;
+    image?: string;
+    followers?: number;
+    following?: number;
 };
 
 export type IFollower = {
@@ -25,11 +18,14 @@ export type ILoginRoute =
     | 'login'
     | 'email'
     | 'signup'
-    | 'forgotPassword'
-    | 'resetPassword'
+    | 'forgot_password'
+    | 'reset_password'
+    | 'account_setup'
     | undefined;
 
 export interface IApiResponse {
     status: 'success' | 'rejected' | 'error';
     message?: string;
 }
+
+export type ISession = [Session | null, boolean];

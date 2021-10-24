@@ -1,21 +1,32 @@
 import React from 'react';
-import { IFollower } from '../../../types';
+import Image from 'next/image';
+import { User } from '@prisma/client';
+import FollowButton from '../../../components/UI/FollowButton';
+import TextButton from '../../../components/UI/TextButton';
 
 type IFollowerUnitProps = {
-    follower: IFollower;
+    follower: User;
 };
 
-export default function FollowerUnit(props: IFollowerUnitProps) {
+const FollowerUnit = (props: IFollowerUnitProps) => {
     const {
         follower: { username, image },
     } = props;
 
     return (
-        <div id="follower-unit">
-            <img className="profile-image-xsm" src={image} />
-            <a href={`/user/${username}`} className="follower-unit-username">
+        <div style={{ marginTop: 20, display: 'flex', alignItems: 'center' }}>
+            <Image
+                src={image}
+                height={35}
+                width={35}
+                className={'profile-image'}
+            />
+            <TextButton text={username} href={`/user/${username}`} />
+            {/* <a href={`/user/${username}`} style={{ marginLeft: 10 }}>
                 {username}
-            </a>
+            </a> */}
         </div>
     );
-}
+};
+
+export default FollowerUnit;

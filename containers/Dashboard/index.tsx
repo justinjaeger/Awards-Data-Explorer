@@ -1,238 +1,265 @@
-import React, { useState } from 'react';
-import axios, { AxiosResponse } from 'axios';
-import Modal from '../../components/Modal';
-import { useAuthState } from '../../context/auth';
-import { useAppState } from '../../context/app';
-import { IProfileUser } from '../../types';
+import React, { useEffect, useState } from 'react';
+import { Session } from 'next-auth';
+import Image from 'next/image';
+import CloudUploadIcon from '@mui/icons-material/CloudUpload';
+import { Modal, Typography } from '@mui/material';
+import { useNotification } from '../../context/notification';
+import * as SecureServices from '../../services/secure';
+import FollowButton from '../../components/UI/FollowButton';
 import FollowerList from './components/FollowerList';
+import { DashboardModalContainer, ImageWrapper } from './styles';
+import { User } from '.prisma/client';
 
 type IDashboardProps = {
-    profileUser: IProfileUser;
-    following: boolean;
+    profileUser: User;
+    followerCount: number;
+    followingCount: number;
+    isMyProfile: boolean;
+    userIsFollowing: boolean;
+    session?: Session;
 };
 
-export default function Dashboard(props: IDashboardProps) {
-    const { profileUser, following: _following } = props;
-    const { user, setUser } = useAuthState();
-    const { setNotification } = useAppState();
+export type IModalType = 'follower' | 'following' | undefined;
 
+const PROFILE_PIC_DIAMETER = 200;
+
+const Dashboard = (props: IDashboardProps) => {
+    const {
+        profileUser,
+        followerCount: _followerCount,
+        followingCount,
+        isMyProfile,
+        userIsFollowing: _userIsFollowing,
+        session,
+    } = props;
+
+    const { setNotification } = useNotification();
     const [dashboardModal, setDashboardModal] = useState<boolean>(false);
-    const [modalType, setModalType] =
-        useState<'follower' | 'following' | undefined>(undefined);
-    // Need below in state because we could choose to unfollow
-    const [following, setFollowing] = useState<boolean>(_following);
-    const [followersCount, setFollowersCount] = useState<number>(
-        profileUser.followers
-    );
+    const [modalType, setModalType] = useState<IModalType>();
+    const [followerCount, setFollowerCount] = useState<number>(_followerCount);
+    const [userIsFollowing, setUserIsFollowing] =
+        useState<boolean>(_userIsFollowing);
+    const [profileImage, setProfileImage] = useState<string>(profileUser.image);
+    const [profileImageHover, setProfileImageHover] = useState<boolean>();
 
-    // Determine if page is YOUR profile or someone else's
-    const isMyProfile = user.username === profileUser.username;
+    useEffect(() => {
+        // idk why but I have to do this again
+        // will fix when I create dashbord context
+        setUserIsFollowing(_userIsFollowing);
+        setProfileImage(profileUser.image);
+        setFollowerCount(_followerCount);
+    }, [_userIsFollowing, profileUser.image, _followerCount]);
 
-    function setModal(_modalType: 'follower' | 'following' | undefined) {
+    const setModal = (_modalType: IModalType) => {
         setDashboardModal(true);
         setModalType(_modalType);
-    }
+    };
 
     // FOLLOW USER
-    function followUser() {
-        axios
-            .post(`/api/users/${user.id}/following`, {
-                profileUserId: profileUser.userId,
-            })
-            .then(() => {
-                setFollowing(true);
-                // update the following number
-                setFollowersCount(followersCount + 1);
-            })
-            .catch((e) => {
-                console.log('error following user: ', e.message);
-            });
-    }
+    // Should we put these follow functions in context maybe?
+    const follow = () => {
+        SecureServices.follow(profileUser.id).then((res) => {
+            if (res.status === 'error') {
+                return setNotification({
+                    message: res.message,
+                    status: 'error',
+                });
+            }
+            setUserIsFollowing(true);
+            setFollowerCount(followerCount + 1);
+        });
+    };
 
     // UNFOLLOW USER
-    function unfollowUser() {
-        axios
-            .delete(`/api/users/${user.id}/following/${profileUser.userId}`)
-            .then(() => {
-                setFollowing(false);
-                // update the following number
-                setFollowersCount(followersCount - 1);
-            })
-            .catch((err) => {
-                if (err)
-                    console.log('something went wrong fetching followers', err);
-            });
-    }
+    const unfollow = () => {
+        SecureServices.unfollow(profileUser.id).then((res) => {
+            if (res.status === 'error') {
+                return setNotification({
+                    message: res.message,
+                    status: 'error',
+                });
+            }
+            setUserIsFollowing(false);
+            setFollowerCount(followerCount - 1);
+        });
+    };
 
     // UPLOAD PROFILE IMAGE
-    async function handleProfileImageUpload(e) {
-        // Get the uploaded file
+    const handleProfileImageUpload = async (e) => {
+        // Create a form with uploaded file in it
         const file = e.target.files[0];
-        // Create a form with the file in it
         const formData = new FormData();
         formData.append('file', file);
 
-        // Check that file is valid type
-        const validTypes = ['image/jpeg', 'image/jpg', 'image/png'];
-        let valid = false;
-        validTypes.forEach((type) => {
-            if (file.type === type) valid = true;
-        });
-        if (!valid) {
-            return setNotification(
-                'Not a valid image type. Accepts .jpeg / .jpg / .png'
-            );
+        // Check that file type is valid
+        if (!['image/jpeg', 'image/jpg', 'image/png'].includes(file.type)) {
+            return setNotification({
+                message: 'Not a valid image type. Accepts .jpeg / .jpg / .png',
+                status: 'warning',
+            });
         }
 
-        // Get the previous user image key
-        // Not ssure why never used but uncommenting for now
-        // const previousKey =
-        //     user.image === "/PROFILE.png" ? null : user.image.slice(52);
-
         // generate unique new file name
-        const randomNumber = Math.floor(Math.random() * 10000);
-        const fileName = user.username + randomNumber + file.name;
+        const fileName = session.user.id + Math.floor(Math.random() * 10000000);
 
-        // save the image to DO Spaces & save the new url in database. Update user
-        // NOTE: Changed from commented fetch below (in case isn't working)
-        await axios
-            .post(`/api/users/${user.id}/image/?key=${fileName}`, {
-                data: { formData },
-                headers: {
-                    'Content-Type': 'image/jpg',
-                },
-            })
-            .then((res) => {
-                // convert url to edge url
-                const image = `${res.data.url.slice(
-                    0,
-                    24
-                )}.cdn${res.data.url.slice(24)}`;
-                // setProfileImage(edgeUrl);
-                setUser({
-                    ...user,
-                    image,
-                });
-            })
-            .catch((e) =>
-                console.log('error uploading image to Spaces: ', e.message)
-            );
+        // Store the previous user image key
+        const previousKey = session.user.image.slice(52);
 
-        // await fetch(`/api/image/uploadProfileImage?key=${fileName}`, {
-        //     method: "POST",
-        //     body: formData,
-        //     "Content-Type": "image/jpg",
-        // })
-        //     .then((res) => res.json())
-        //     .then((res) => {
-        //         // convert url to edge url
-        //         newUrl = res.url.slice(0, 24) + ".cdn" + res.url.slice(24);
-        //         setProfileImage(newUrl);
-        //     })
-        //     .catch((err) =>
-        //         console.log("error uplßoading image to Spaces", err)
-        //     );
+        // Upload the image
+        const uploadImageResult = await SecureServices.uploadProfileImage(
+            fileName,
+            formData
+        );
 
-        // // If upload was successful...
-        // if (edgeUrl) {
-        //     // Write image to database
-        //     await axios.post('/api/image/saveProfileImage', {
-        //         username: user.username,
-        //         edgeUrl,
-        //     }).then((res) => console.log("success saving url"))
-        //         .catch((err) => console.log("err saving url", err));
-        //     // Delete previous image from Spaces if there is one
-        //     if (previousKey) {
-        //         await axios
-        //             .post("/api/image/deleteProfileImage", { previousKey })
-        //             .then((data) =>
-        //                 console.log("success deleting previous image")
-        //             )
-        //             .catch((err) =>
-        //                 console.log("err deleting previous image", err)
-        //             );
-        //     }
-        // }
-    }
+        if (uploadImageResult.status === 'error') {
+            return setNotification({
+                message: 'Error uploading profile picture.',
+                status: 'error',
+            });
+        }
 
-    // Load the skeleton until the data has been fetched
+        // right now, doesn't do anything. idk why
+        setProfileImage(uploadImageResult.image);
+
+        // If there was a previous image uploaded, delete that form Spaces/S3
+        if (previousKey !== '/PROFILE.png') {
+            SecureServices.deleteProfileImage(previousKey).then((res) => {
+                if (res.status === 'error') {
+                    return setNotification({
+                        message: res.message,
+                        status: 'error',
+                    });
+                }
+                console.log('deleteProfileImage', res);
+            });
+        }
+    };
+
+    const ImageHoverWrapper = (props: {
+        children: React.ReactNode;
+        style: React.CSSProperties;
+    }) => (
+        <ImageWrapper
+            style={{ ...props.style }}
+            onMouseEnter={() => setProfileImageHover(true)}
+            onMouseLeave={() => setProfileImageHover(false)}
+        >
+            {props.children}
+        </ImageWrapper>
+    );
+
+    const ProfileImageMyProfile = () => (
+        <>
+            <label htmlFor="file-upload">
+                <ImageHoverWrapper
+                    style={{ opacity: profileImageHover ? '20%' : '100%' }}
+                >
+                    <Image
+                        src={profileImage}
+                        height={PROFILE_PIC_DIAMETER}
+                        width={PROFILE_PIC_DIAMETER}
+                        className={'dashboard-profile-image-my-profile'}
+                    />
+                </ImageHoverWrapper>
+                <ImageHoverWrapper style={{ cursor: 'pointer' }}>
+                    <CloudUploadIcon
+                        style={{
+                            height: PROFILE_PIC_DIAMETER / 2,
+                            width: PROFILE_PIC_DIAMETER / 2,
+                            marginLeft: PROFILE_PIC_DIAMETER / 4,
+                            marginTop: PROFILE_PIC_DIAMETER / 4,
+                            opacity:
+                                profileImageHover && isMyProfile
+                                    ? '100%'
+                                    : '0%',
+                        }}
+                    />
+                </ImageHoverWrapper>
+            </label>
+            <input
+                id="file-upload"
+                type="file"
+                onChange={handleProfileImageUpload}
+            />
+        </>
+    );
+
+    const ProfileImage = () => (
+        <ImageWrapper>
+            <Image
+                src={profileImage}
+                height={PROFILE_PIC_DIAMETER}
+                width={PROFILE_PIC_DIAMETER}
+                className={'profile-image'}
+            />
+        </ImageWrapper>
+    );
+
     return (
-        <div id="dashboard-content">
-            {isMyProfile ? (
-                <>
-                    <label htmlFor="file-upload">
-                        <div>
-                            <img
-                                src={profileUser.image}
-                                className="profile-image-lg dashboard-profile-image"
-                            />
-                            <div id="dashboard-image-hover">Upload Image</div>
-                        </div>
-                    </label>
-                    ,
-                    <input
-                        id="file-upload"
-                        type="file"
-                        onChange={handleProfileImageUpload}
-                    />
-                    ,
-                </>
-            ) : (
-                <label htmlFor="file-upload">
-                    <img
-                        src={profileUser.image}
-                        className="profile-image-lg dashboard-profile-image-logout"
-                    />
-                </label>
-            )}
+        <div style={{ display: 'flex', flexWrap: 'wrap' }}>
+            {isMyProfile ? <ProfileImageMyProfile /> : <ProfileImage />}
 
-            <div id="dashboard-info">
-                <div id="profile-name">{profileUser.username}</div>
-                {!isMyProfile &&
-                user &&
-                // If someone else's profile AND logged in, display follow/unfollow buttons
-                following ? (
-                    <button id="follow-button" onClick={unfollowUser}>
-                        Unfollow
-                    </button>
-                ) : (
-                    <button id="follow-button" onClick={followUser}>
-                        Follow
-                    </button>
-                )}
+            <div style={{ position: 'absolute', marginLeft: 220 }}>
+                <Typography
+                    style={{
+                        display: 'inline-block',
+                        alignItems: 'baseline',
+                        margin: 10,
+                        marginRight: 30,
+                        fontSize: 36,
+                    }}
+                    component={'span'}
+                >
+                    {profileUser.username}
+                </Typography>
 
-                <div id="dashboard-follower-buttons">
-                    <button
+                {session &&
+                    (userIsFollowing ? (
+                        <FollowButton onClick={unfollow} text={'Unfollow'} />
+                    ) : (
+                        !isMyProfile && (
+                            <FollowButton onClick={follow} text={'Follow'} />
+                        )
+                    ))}
+
+                <div style={{ display: 'flex' }}>
+                    <FollowButton
                         onClick={() => setModal('follower')}
-                        id="follower-button"
-                    >
-                        {profileUser.followers} followers
-                    </button>
-                    <button
+                        text={followerCount + ' followers'}
+                    />
+                    <FollowButton
                         onClick={() => setModal('following')}
-                        id="follower-button"
-                    >
-                        {profileUser.following} following
-                    </button>
+                        text={followingCount + ' following'}
+                    />
                 </div>
             </div>
 
             {dashboardModal && (
-                <Modal setModal={setDashboardModal}>
-                    <div id="follower-list-container">
-                        {modalType === 'follower' && (
-                            <div id="follower-title">Followers:</div>
-                        )}
-                        {modalType === 'following' && (
-                            <div id="follower-title">Following:</div>
-                        )}
-                        <FollowerList
-                            modalType={modalType}
-                            profileUser={profileUser}
-                        />
-                    </div>
+                <Modal
+                    open={dashboardModal}
+                    onClose={() => setDashboardModal(false)}
+                    style={{
+                        display: 'flex',
+                        justifyContent: 'center',
+                    }}
+                >
+                    <DashboardModalContainer window={window}>
+                        <Typography
+                            component={'span'}
+                            style={{ padding: 20, width: '100%' }}
+                        >
+                            {modalType === 'follower' && 'Followers:'}
+                            {modalType === 'following' && 'Following:'}
+                            <FollowerList
+                                modalType={modalType}
+                                profileUser={profileUser}
+                            />
+                        </Typography>
+                    </DashboardModalContainer>
                 </Modal>
             )}
         </div>
     );
-}
+};
+
+export default Dashboard;

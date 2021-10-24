@@ -1,108 +1,115 @@
 import React, { useState } from 'react';
-import { useRouter } from 'next/router';
-import axios, { AxiosResponse } from 'axios';
-import { useAsyncEffect } from '../../utils/hooks';
+import { useSession } from 'next-auth/client';
+import { GetServerSidePropsContext, GetServerSidePropsResult } from 'next';
+import { useAsyncDeepCompareEffect } from '../../utils/hooks';
 import Dashboard from '../../containers/Dashboard';
 import NotFound from '../../containers/NotFound';
 import Loading from '../../components/Loading';
-import { useAuthState } from '../../context/auth';
-import { useAppState } from '../../context/app';
-import { IProfileUser } from '../../types';
+import { useNotification } from '../../context/notification';
+import * as Services from '../../services';
+import * as SecureServices from '../../services/secure';
+import prisma from '../../lib/prisma';
+import { User } from '.prisma/client';
 
-/**
- * A lot of these components (like this one) don't need to render separate components
- */
-
-export default function UserDashboard() {
-    const router = useRouter();
-    const profileUsername = router.query.username;
-
-    const { user } = useAuthState();
-    const { setNotification } = useAppState();
-
-    const [_404, set404] = useState<boolean>(false);
-    const [loading, setLoading] = useState<boolean>(true);
-    const [profileUser, setProfileUser] =
-        useState<IProfileUser | undefined>(undefined);
-    const [following, setFollowing] = useState<boolean>(false); // true is user is following this profile
-
-    useAsyncEffect(async () => {
-        // Fetch the data of the profile
-        // I wonder if this is better in a non-try catch
-        // It may actually not catch the errors in here due to a bug (saw on GitHub)
-
-        // This is a bad solution because we're fetching BEFORE we know the profileUser data
-        // We need to get the username from the query and fetch all the info about that user and pass it in
-        // But to setProfileUser it has to reload again so it would be a double fetch or something
-        try {
-            // GET PROFILE IMAGE
-            const profileImageResponse = await axios.get(
-                `/api/users/image/profile/${profileUsername}`
-            );
-            if (profileImageResponse.data.status === 'error') {
-                throw new Error(profileImageResponse.data.message);
-            }
-            if (profileImageResponse.data.status === 'rejected') {
-                setLoading(false);
-                return set404(true);
-            }
-            const { userId, image } = profileImageResponse.data;
-
-            // GET PROFILE FOLLOWER COUNT
-            const followerCountResponse = await axios.get(
-                `api/users/${userId}/followers/count`
-            );
-            if (followerCountResponse.data.status === 'error') {
-                throw new Error(followerCountResponse.data.message);
-            }
-            const { count: followers } = followerCountResponse.data;
-
-            // GET PROFILE FOLLOWING COUNT
-            const followingCountResponse = await axios.get(
-                `api/users/${userId}/followers/count`
-            );
-            if (followingCountResponse.data.status === 'error') {
-                throw new Error(followingCountResponse.data.message);
-            }
-            const { count: following } = followingCountResponse.data;
-
-            setProfileUser({
-                image: image || '/PROFILE.png',
-                userId,
-                username: profileUser.username,
-                followers,
-                following,
-            });
-
-            // If this is not our profile, determine if we are following them
-            if (user && user.username !== profileUsername) {
-                const determineFollowingResponse = await axios.get(
-                    `/api/users/${user.id}/following/${userId}`
-                );
-                if (determineFollowingResponse.data.status === 'error') {
-                    throw new Error(determineFollowingResponse.data.message);
-                }
-                const { following: _following } =
-                    determineFollowingResponse.data;
-                setFollowing(_following);
-            }
-
-            setLoading(false);
-        } catch (e) {
-            setNotification(e.message);
-            console.error('error in [username].tsx', e.message);
-        }
-    }, []);
-
-    return (
-        <>
-            {loading ? (
-                <Loading />
-            ) : _404 ? (
-                <NotFound thingCannotFind="User" />
-            ) : (
-                <Dashboard profileUser={profileUser} following={following} />
-            )}
-        </>
-    );
+interface IUserDashboardServerSideProps {
+    notFound?: boolean;
+    profileUser?: User;
 }
+
+const UserDashboard = (props: IUserDashboardServerSideProps) => {
+    const { notFound, profileUser } = props;
+    const [session] = useSession();
+    const { setNotification } = useNotification();
+    const [followerCount, setFollowerCount] = useState<number>();
+    const [followingCount, setFollowingCount] = useState<number>();
+    const [userIsFollowing, setUserIsFollowing] = useState<boolean>(false);
+    const [loading, setLoading] = useState<boolean>(true);
+
+    useAsyncDeepCompareEffect(async () => {
+        if (notFound) return;
+
+        // GET PROFILE FOLLOWER COUNT
+        const promise1 = Services.getProfileFollowerCount(profileUser.id).then(
+            (res) => {
+                if (res.status === 'error') {
+                    return setNotification({
+                        message: res.message,
+                        status: 'error',
+                    });
+                }
+                setFollowerCount(res.count);
+            }
+        );
+
+        // GET PROFILE FOLLOWING COUNT
+        const promise2 = Services.getProfileFollowingCount(profileUser.id).then(
+            (res) => {
+                if (res.status === 'error') {
+                    return setNotification({
+                        message: res.message,
+                        status: 'error',
+                    });
+                }
+                setFollowingCount(res.count);
+            }
+        );
+
+        // DETERMINE IF LOGGED IN USER IS FOLLOWING THIS PROFILE
+        const promise3 =
+            session && profileUser.id !== session.user.id
+                ? SecureServices.checkIfFollowing(profileUser.id).then(
+                      (res) => {
+                          if (res.status === 'error') {
+                              return setNotification({
+                                  message: res.message,
+                                  status: 'error',
+                              });
+                          }
+                          setUserIsFollowing(res.following);
+                      }
+                  )
+                : false;
+
+        await Promise.allSettled([promise1, promise2, promise3]).then(() =>
+            setLoading(false)
+        );
+    }, [session]);
+
+    if (notFound) return <NotFound thingCannotFind="User" />;
+    if (loading) return <Loading />;
+    return (
+        <Dashboard
+            profileUser={profileUser}
+            followerCount={followerCount}
+            followingCount={followingCount}
+            isMyProfile={session && profileUser.id === session.user.id}
+            userIsFollowing={userIsFollowing}
+            session={session}
+        />
+    );
+};
+
+export async function getServerSideProps(
+    context: GetServerSidePropsContext
+): Promise<GetServerSidePropsResult<IUserDashboardServerSideProps>> {
+    const profileUsername = context.query.username as string;
+
+    const response = await prisma.user.findUnique({
+        where: {
+            username: profileUsername,
+        },
+    });
+
+    if (!response) {
+        return {
+            props: { notFound: true },
+        };
+    }
+    return {
+        props: {
+            profileUser: JSON.parse(JSON.stringify(response)),
+        },
+    };
+}
+
+export default UserDashboard;

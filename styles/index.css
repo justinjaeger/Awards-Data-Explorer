@@ -1,0 +1,29 @@
+* {
+    margin: 0;
+    padding: 0;
+    border: none;
+    box-sizing: border-box;
+    color: '#2E4057';
+    background: '#2E4057';
+    background-color: '#2E4057';
+}
+
+#ass{
+    background: '#2E4057';
+    background-color: '#2E4057';
+}
+
+input[type="file"] {
+    display: none;
+}
+
+/* ACTUALLY BEING USED */
+.profile-image {
+    border-radius: 50%;
+    object-fit: cover;
+}
+.dashboard-profile-image-my-profile {
+    border-radius: 50%;
+    object-fit: cover;
+    cursor: pointer;
+}

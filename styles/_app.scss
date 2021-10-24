@@ -72,3 +72,14 @@ input[type="file"] {
     background-color: $off-white;
     overflow: scroll;
 }
+
+// ACTUALLY BEING USED
+.dashboard-profile-image {
+    border-radius: 50%;
+    object-fit: cover;
+}
+.dashboard-profile-image-my-profile {
+    border-radius: 50%;
+    object-fit: cover;
+    cursor: pointer;
+}

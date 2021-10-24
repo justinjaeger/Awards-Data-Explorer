@@ -1,147 +1,108 @@
 import React, { useState } from 'react';
-import axios, { AxiosResponse } from 'axios';
-import Modal from '../../components/Modal';
-import { ILoginRoute, IUser } from '../../types';
-import { useAppState } from '../../context/app';
-import { useAuthState } from '../../context/auth';
-import LoginContainer from './Login';
+import { AppBar, Modal, Toolbar } from '@mui/material';
+import { signOut, SignOutResponse } from 'next-auth/client';
+import { ILoginRoute } from '../../types';
+import { useAuth } from '../../context/auth';
+import Login from '../Header/forms/Login';
+import { useDeepCompareEffect } from '../../utils/hooks';
+import HeaderItem from './HeaderItem';
+import AccountSetup from './forms/AccountSetup';
 
-export default function Header() {
-    const { user, setUser } = useAuthState();
-    const { url, setNotification } = useAppState();
-
-    const [profileDropdown, setProfileDropdown] = useState<boolean>(false);
+const Header = () => {
+    const { user } = useAuth();
     const [loginModal, setLoginModal] = useState<boolean>(false);
-    const [form, setForm] = useState<ILoginRoute>(undefined);
+    const [form, setForm] = useState<ILoginRoute>();
 
-    // RESET VARIOUS COMPONENTS
-    function reset(notification?: string): void {
-        setLoginModal(false);
-        setForm(undefined);
-        notification
-            ? setNotification(notification)
-            : setNotification(undefined);
-    }
+    // If user hasn't created their username, make them do so
+    useDeepCompareEffect(() => {
+        if (user && !user.username) {
+            changeForm('account_setup');
+        }
+    }, [user]);
 
-    // LOG OUT
-    function logout(): void {
-        axios
-            .delete('/api/login')
-            .then((res) => {
-                if (res.data.status === 'error') {
-                    return setNotification(res.data.message!);
-                }
-                setUser(undefined);
-                reset();
-                window.location.reload();
-            })
-            .catch((err) => {
-                console.log('err, could not log out', err.response);
-            });
-    }
-
-    // LOG IN
-    function login(user: IUser): void {
-        reset();
-        setUser(user);
-        window.location.reload();
-    }
-
-    function changeForm(route: ILoginRoute): void {
+    const changeForm = (route: ILoginRoute) => {
         setLoginModal(true);
         setForm(route);
-    }
+    };
+
+    const logout = () => {
+        signOut()
+            .then((res: SignOutResponse) => {
+                console.log('res', res);
+            })
+            .catch((err) => {
+                console.log('err', err);
+            });
+    };
 
     return (
-        <>
-            <div id="Header">
-                <div id="header-left">
-                    <a href={url} className="home-button">
-                        Home
-                    </a>
-                </div>
-
-                <div id="header-right">
-                    {!user ? (
-                        <>
-                            <div id="left-header-margin" />
-                            <button
-                                onClick={() => changeForm('login')}
-                                className="header-button"
-                            >
-                                Log In
-                            </button>
-                            <button
-                                onClick={() => changeForm('email')}
-                                className="header-button"
-                            >
-                                Sign Up
-                            </button>
-                            <div id="right-header-margin" />
-                        </>
-                    ) : (
-                        <>
-                            <div id="header-message">
-                                Welcome,{' '}
-                                <a
-                                    href={`${url}/user/${user.username}`}
-                                    className="header-button"
-                                >
-                                    {user.username}
-                                </a>
-                            </div>
-                            <button
-                                onMouseEnter={() =>
-                                    setProfileDropdown(!profileDropdown)
-                                }
-                                onClick={() => setProfileDropdown(true)}
-                                className="header-button"
-                            >
-                                <img
-                                    className="profile-image-xsm header-profile-pic"
-                                    src={user.image}
-                                />
-                            </button>
-
-                            {profileDropdown && (
-                                <div
-                                    id="profile-dropdown"
-                                    onMouseLeave={() =>
-                                        setProfileDropdown(false)
-                                    }
-                                >
-                                    <a
-                                        className="profile-dropdown-button no-underline"
-                                        href={`${url}/user/${user.username}`}
-                                    >
-                                        My Profile
-                                    </a>
-                                    <button
-                                        className="profile-dropdown-button"
-                                        onClick={logout}
-                                    >
-                                        Log Out
-                                    </button>
-                                </div>
-                            )}
-                        </>
-                    )}
-                </div>
-
-                {loginModal && (
-                    <Modal
-                        setModal={setLoginModal}
-                        size={form === 'login' ? 200 : 350}
+        <div style={{ width: '100%', flex: 1, backgroundColor: 'red' }}>
+            <AppBar style={{ position: 'relative', width: '100%', flex: 1 }}>
+                <Toolbar>
+                    <HeaderItem label={'Home'} href={`/`} />
+                    <div
+                        style={{
+                            display: 'flex',
+                            justifyContent: 'right',
+                            width: '100%',
+                        }}
                     >
-                        <LoginContainer
-                            form={form}
-                            changeForm={changeForm}
-                            reset={reset}
-                            login={login}
+                        {!user ? (
+                            <>
+                                <HeaderItem
+                                    label={'Log In'}
+                                    onClick={() => changeForm('login')}
+                                />
+                            </>
+                        ) : (
+                            <>
+                                <HeaderItem
+                                    label={
+                                        user.username
+                                            ? `Welcome, ${user.username}`
+                                            : 'Welcome, new user'
+                                    }
+                                    href={
+                                        user.username
+                                            ? `/user/${user.username}`
+                                            : undefined
+                                    }
+                                />
+                                <HeaderItem
+                                    label={'Log Out'}
+                                    onClick={logout}
+                                />
+                            </>
+                        )}
+                    </div>
+                </Toolbar>
+            </AppBar>
+            <Modal
+                open={loginModal}
+                onClose={
+                    form === 'account_setup'
+                        ? undefined
+                        : () => setLoginModal(false)
+                }
+                style={{
+                    display: 'flex',
+                    justifyContent: 'center',
+                }}
+            >
+                <>
+                    {form === 'login' && (
+                        <Login close={() => setLoginModal(false)} />
+                    )}
+                    {form === 'account_setup' && (
+                        <AccountSetup
+                            close={() => setLoginModal(false)}
+                            logout={logout}
                         />
-                    </Modal>
-                )}
-            </div>
-        </>
+                    )}
+                </>
+            </Modal>
+        </div>
     );
-}
+};
+
+export default Header;

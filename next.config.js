@@ -1,12 +1,8 @@
 module.exports = {
-    webpack: (config, { isServer }) => {
-        // Fixes npm packages that depend on `fs` module
-        if (!isServer) {
-            config.node = {
-                fs: 'empty',
-            };
-        }
-
+    images: {
+        domains: ['oscarexpert.nyc3.cdn.digitaloceanspaces.com'],
+    },
+    webpack: (config) => {
         return config;
     },
 };

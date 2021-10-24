@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "typeRoots": ["./node_modules/@types", "./@types"], // https://www.typescriptlang.org/tsconfig#typeRoots
     "target": "es5",
     "lib": [
       "dom",
@@ -22,7 +23,7 @@
     "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx", 
-    "pages/_document.ts"
+    "pages/_document.js"
 , "components/FileDrop.jsx"  ],
   "exclude": [
     "node_modules"
