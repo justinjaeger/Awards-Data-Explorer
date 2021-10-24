@@ -5,7 +5,7 @@ import theme from './index';
 const muiTheme = createTheme({
     palette: {
         primary: {
-            main: theme.colors.black,
+            main: theme.colors.blue,
         },
         secondary: {
             main: theme.colors.yellow,
@@ -44,10 +44,24 @@ const muiTheme = createTheme({
             },
         },
     },
+    typography: {
+        fontFamily: [
+            '-apple-system',
+            'BlinkMacSystemFont',
+            '"Segoe UI"',
+            'Roboto',
+            '"Helvetica Neue"',
+            'Arial',
+            'sans-serif',
+            '"Apple Color Emoji"',
+            '"Segoe UI Emoji"',
+            '"Segoe UI Symbol"',
+        ].join(','),
+    },
 });
 
 export const muiStyles: { [key: string]: React.CSSProperties } = {
-    headerItem: {
+    headerTextStyle: {
         fontFamily: 'Oswald, sans-serif',
         fontWeight: 400,
         fontSize: 20,

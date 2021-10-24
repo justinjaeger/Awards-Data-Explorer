@@ -26,6 +26,7 @@ const Login = (props: ILoginProps) => {
             redirect: false,
         })
             .then((res: SignInResponse) => {
+                console.log('res', res);
                 if (res.status === 200) {
                     setSuccess(true);
                 }

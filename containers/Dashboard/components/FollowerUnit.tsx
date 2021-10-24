@@ -1,5 +1,8 @@
-import { User } from '@prisma/client';
 import React from 'react';
+import Image from 'next/image';
+import { User } from '@prisma/client';
+import FollowButton from '../../../components/UI/FollowButton';
+import TextButton from '../../../components/UI/TextButton';
 
 type IFollowerUnitProps = {
     follower: User;
@@ -11,11 +14,17 @@ const FollowerUnit = (props: IFollowerUnitProps) => {
     } = props;
 
     return (
-        <div id="follower-unit">
-            <img className="profile-image-xsm" src={image} />
-            <a href={`/user/${username}`} className="follower-unit-username">
+        <div style={{ marginTop: 20, display: 'flex', alignItems: 'center' }}>
+            <Image
+                src={image}
+                height={35}
+                width={35}
+                className={'profile-image'}
+            />
+            <TextButton text={username} href={`/user/${username}`} />
+            {/* <a href={`/user/${username}`} style={{ marginLeft: 10 }}>
                 {username}
-            </a>
+            </a> */}
         </div>
     );
 };

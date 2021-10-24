@@ -8,7 +8,7 @@ const HeaderItem = (props: {
     onClick?: () => void;
     style?: React.CSSProperties;
 }) => {
-    const { headerItem } = muiStyles;
+    const { headerTextStyle } = muiStyles;
 
     return (
         <Button
@@ -18,10 +18,11 @@ const HeaderItem = (props: {
             disableRipple={true}
         >
             <Typography
+                component={'span'}
                 style={{
                     marginLeft: 10,
                     marginRight: 10,
-                    ...headerItem,
+                    ...headerTextStyle,
                     ...props.style,
                 }}
             >

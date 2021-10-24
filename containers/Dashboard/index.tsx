@@ -1,10 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { Session } from 'next-auth';
 import Image from 'next/image';
-import Modal from '../../components/Modal';
+import CloudUploadIcon from '@mui/icons-material/CloudUpload';
+import { Modal, Typography } from '@mui/material';
 import { useNotification } from '../../context/notification';
 import * as SecureServices from '../../services/secure';
+import FollowButton from '../../components/UI/FollowButton';
 import FollowerList from './components/FollowerList';
+import { DashboardModalContainer, ImageWrapper } from './styles';
 import { User } from '.prisma/client';
 
 type IDashboardProps = {
@@ -17,6 +20,8 @@ type IDashboardProps = {
 };
 
 export type IModalType = 'follower' | 'following' | undefined;
+
+const PROFILE_PIC_DIAMETER = 200;
 
 const Dashboard = (props: IDashboardProps) => {
     const {
@@ -35,14 +40,7 @@ const Dashboard = (props: IDashboardProps) => {
     const [userIsFollowing, setUserIsFollowing] =
         useState<boolean>(_userIsFollowing);
     const [profileImage, setProfileImage] = useState<string>(profileUser.image);
-
-    // console.log('session', session);
-    // console.log('profileUser', profileUser);
-    console.log('profileImage', profileImage);
-    // console.log('followerCount', followerCount);
-    // console.log('followingCount', followingCount);
-    // console.log('isMyProfile', isMyProfile);
-    // console.log('userIsFollowing', userIsFollowing, _userIsFollowing);
+    const [profileImageHover, setProfileImageHover] = useState<boolean>();
 
     useEffect(() => {
         // idk why but I have to do this again
@@ -137,86 +135,127 @@ const Dashboard = (props: IDashboardProps) => {
         }
     };
 
-    return (
-        <div id="dashboard-content">
-            {isMyProfile ? (
-                <>
-                    <label htmlFor="file-upload">
-                        <div>
-                            {/* <img
-                                src={profileUser.image}
-                                className="profile-image-lg dashboard-profile-image"
-                            /> */}
-                            <Image
-                                src={profileImage}
-                                height={200}
-                                width={200}
-                            />
-                            <div id="dashboard-image-hover">Upload Image</div>
-                        </div>
-                    </label>
-                    <input
-                        id="file-upload"
-                        type="file"
-                        onChange={handleProfileImageUpload}
-                    />
-                </>
-            ) : (
-                <label htmlFor="file-upload">
-                    <Image src={profileImage} height={200} width={200} />
-                    {/* <img
-                        src={profileImage}
-                        className="profile-image-lg dashboard-profile-image-logout"
-                    /> */}
-                </label>
-            )}
+    const ImageHoverWrapper = (props: {
+        children: React.ReactNode;
+        style: React.CSSProperties;
+    }) => (
+        <ImageWrapper
+            style={{ ...props.style }}
+            onMouseEnter={() => setProfileImageHover(true)}
+            onMouseLeave={() => setProfileImageHover(false)}
+        >
+            {props.children}
+        </ImageWrapper>
+    );
 
-            <div id="dashboard-info">
-                <div id="profile-name">{profileUser.username}</div>
+    const ProfileImageMyProfile = () => (
+        <>
+            <label htmlFor="file-upload">
+                <ImageHoverWrapper
+                    style={{ opacity: profileImageHover ? '20%' : '100%' }}
+                >
+                    <Image
+                        src={profileImage}
+                        height={PROFILE_PIC_DIAMETER}
+                        width={PROFILE_PIC_DIAMETER}
+                        className={'dashboard-profile-image-my-profile'}
+                    />
+                </ImageHoverWrapper>
+                <ImageHoverWrapper style={{ cursor: 'pointer' }}>
+                    <CloudUploadIcon
+                        style={{
+                            height: PROFILE_PIC_DIAMETER / 2,
+                            width: PROFILE_PIC_DIAMETER / 2,
+                            marginLeft: PROFILE_PIC_DIAMETER / 4,
+                            marginTop: PROFILE_PIC_DIAMETER / 4,
+                            opacity:
+                                profileImageHover && isMyProfile
+                                    ? '100%'
+                                    : '0%',
+                        }}
+                    />
+                </ImageHoverWrapper>
+            </label>
+            <input
+                id="file-upload"
+                type="file"
+                onChange={handleProfileImageUpload}
+            />
+        </>
+    );
+
+    const ProfileImage = () => (
+        <ImageWrapper>
+            <Image
+                src={profileImage}
+                height={PROFILE_PIC_DIAMETER}
+                width={PROFILE_PIC_DIAMETER}
+                className={'profile-image'}
+            />
+        </ImageWrapper>
+    );
+
+    return (
+        <div style={{ display: 'flex', flexWrap: 'wrap' }}>
+            {isMyProfile ? <ProfileImageMyProfile /> : <ProfileImage />}
+
+            <div style={{ position: 'absolute', marginLeft: 220 }}>
+                <Typography
+                    style={{
+                        display: 'inline-block',
+                        alignItems: 'baseline',
+                        margin: 10,
+                        marginRight: 30,
+                        fontSize: 36,
+                    }}
+                    component={'span'}
+                >
+                    {profileUser.username}
+                </Typography>
 
                 {session &&
                     (userIsFollowing ? (
-                        <button id="follow-button" onClick={unfollow}>
-                            Unfollow
-                        </button>
+                        <FollowButton onClick={unfollow} text={'Unfollow'} />
                     ) : (
                         !isMyProfile && (
-                            <button id="follow-button" onClick={follow}>
-                                Follow
-                            </button>
+                            <FollowButton onClick={follow} text={'Follow'} />
                         )
                     ))}
 
-                <div id="dashboard-follower-buttons">
-                    <button
+                <div style={{ display: 'flex' }}>
+                    <FollowButton
                         onClick={() => setModal('follower')}
-                        id="follower-button"
-                    >
-                        {followerCount} followers
-                    </button>
-                    <button
+                        text={followerCount + ' followers'}
+                    />
+                    <FollowButton
                         onClick={() => setModal('following')}
-                        id="follower-button"
-                    >
-                        {followingCount} following
-                    </button>
+                        text={followingCount + ' following'}
+                    />
                 </div>
             </div>
 
             {dashboardModal && (
-                <Modal setModal={setDashboardModal}>
-                    <div id="follower-list-container">
-                        {modalType === 'follower' && (
-                            <div id="follower-title">Followers:</div>
-                        )}
-                        {modalType === 'following' && (
-                            <div id="follower-title">Following:</div>
-                        )}
-                        <FollowerList
-                            modalType={modalType}
-                            profileUser={profileUser}
-                        />
-                    </div>
+                <Modal
+                    open={dashboardModal}
+                    onClose={() => setDashboardModal(false)}
+                    style={{
+                        display: 'flex',
+                        justifyContent: 'center',
+                    }}
+                >
+                    <DashboardModalContainer window={window}>
+                        <Typography
+                            component={'span'}
+                            style={{ padding: 20, width: '100%' }}
+                        >
+                            {modalType === 'follower' && 'Followers:'}
+                            {modalType === 'following' && 'Following:'}
+                            <FollowerList
+                                modalType={modalType}
+                                profileUser={profileUser}
+                            />
+                        </Typography>
+                    </DashboardModalContainer>
                 </Modal>
             )}
         </div>

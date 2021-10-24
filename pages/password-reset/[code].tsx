@@ -24,7 +24,7 @@ export default function Home() {
     useEffect(() => {
         // Get the userId from the code
         // We do this instead of authenticating and going through state via useAuth()
-        axios.get(`api/login/signup/${code}`).then((res) => {
+        axios.get(`/api/login/signup/${code}`).then((res) => {
             if (res.data.status === 'error') {
                 // navigate to home screen
                 router.push('/');

@@ -12,6 +12,8 @@ export default function Notification(props: INotification) {
     const { message, timeout, status } = props;
     const { notification, setNotification } = useNotification();
     const [visible, setVisible] = useState<boolean>(false);
+    const [timeoutIds, setTimeoutIds] =
+        useState<{ t1: NodeJS.Timeout; t2: NodeJS.Timeout }>();
 
     // for handling multiple notifications, need to do some sort of stack
     // make hoverable
@@ -19,12 +21,13 @@ export default function Notification(props: INotification) {
     useEffect(() => {
         if (message) {
             setVisible(true);
-            setTimeout(() => {
+            const t1 = setTimeout(() => {
                 setNotification(undefined);
             }, timeout || 5500);
-            setTimeout(() => {
+            const t2 = setTimeout(() => {
                 setVisible(false);
             }, timeout - 500 || 5000);
+            setTimeoutIds({ t1, t2 });
         }
     }, [message]);
 
@@ -49,7 +52,7 @@ export default function Notification(props: INotification) {
         }
     })();
 
-    if (!visible && !notification) return null;
+    if (!visible && !notification.status) return null;
 
     return (
         <>
@@ -58,7 +61,13 @@ export default function Notification(props: INotification) {
                     position: 'absolute',
                     zIndex: 10000,
                 }}
-                onClick={() => setVisible(false)}
+                onClick={() => {
+                    // Cancel the timeout
+                    setVisible(false);
+                    setNotification(undefined);
+                    clearTimeout(timeoutIds.t1);
+                    clearTimeout(timeoutIds.t2);
+                }}
             >
                 <motion.div
                     animate={{ opacity: visible ? 1 : 0 }}
@@ -72,7 +81,9 @@ export default function Notification(props: INotification) {
                     <NotificationContainer style={{ backgroundColor }}>
                         <NotificationContent>
                             {icon}
-                            <Typography>{message}</Typography>
+                            <Typography component={'span'}>
+                                {message}
+                            </Typography>
                         </NotificationContent>
                     </NotificationContainer>
                 </motion.div>

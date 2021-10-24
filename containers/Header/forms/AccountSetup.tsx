@@ -51,7 +51,7 @@ const AccountSetup = (props: ISignupProps) => {
             });
         }
         axios
-            .post(`api/user/username/${session.user.email}`, { username })
+            .post(`/api/user/username/${session.user.email}`, { username })
             .then((res: AxiosResponse<ICreateUsernameResponse>) => {
                 if (res.data.status === 'success') {
                     _setUsername(res.data.username);
@@ -78,6 +78,7 @@ const AccountSetup = (props: ISignupProps) => {
             <FormContent>
                 <>
                     <Typography
+                        component={'span'}
                         style={{
                             textAlign: 'center',
                             width: '100%',
@@ -90,7 +91,7 @@ const AccountSetup = (props: ISignupProps) => {
                         title={'Username'}
                         input={username}
                         setInput={setUsername}
-                        label={'Must be at least 8 characters'}
+                        label={'At least 8 characters. Lowercase only'}
                     />
                     <FormButton
                         disabled={disabled()}
@@ -104,7 +105,7 @@ const AccountSetup = (props: ISignupProps) => {
                         }}
                         onClick={() => logout()}
                     >
-                        <Typography style={{ fontSize: 14 }}>
+                        <Typography component={'span'} style={{ fontSize: 14 }}>
                             Click here to log out
                         </Typography>
                     </Link>

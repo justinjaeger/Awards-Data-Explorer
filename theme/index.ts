@@ -1,10 +1,12 @@
 const theme = {
     colors: {
-        white: '#fcfced',
+        white: '#fff',
+        offWhite: '#fcfced',
         black: '#23231a',
-        yellow: '#ffc60a',
-        lightYellow: '#ffe180',
-        red: '#a4031f',
+        yellow: '#F9DD4D',
+        lightYellow: '#FBE889',
+        blue: '#2E4057',
+        red: '#861805',
         error: '#E13838',
         warning: '#ffc60a',
         success: '#4EE07A',

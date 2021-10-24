@@ -1,4 +1,5 @@
-import '../styles/index.scss';
+// import '../styles/index.scss';
+import '../styles/index.css';
 import React from 'react';
 import { AppProps } from 'next/app';
 import { Provider as SessionProvider } from 'next-auth/client';
@@ -7,6 +8,7 @@ import Header from '../containers/Header';
 import NotificationProvider from '../context/notification';
 import AuthProvider from '../context/auth';
 import muiTheme from '../theme/muiTheme';
+import theme from '../theme';
 
 /**
  * Component is the your page eg /index
@@ -19,8 +21,17 @@ const App = ({ Component, pageProps }: AppProps) => {
             <SessionProvider session={pageProps.session}>
                 <AuthProvider>
                     <NotificationProvider>
-                        <Header />
-                        <Component {...pageProps} />
+                        <div
+                            style={{
+                                width: '100%',
+                                height: '100%',
+                                position: 'absolute',
+                                backgroundColor: theme.colors.white,
+                            }}
+                        >
+                            <Header />
+                            <Component {...pageProps} />
+                        </div>
                     </NotificationProvider>
                 </AuthProvider>
             </SessionProvider>

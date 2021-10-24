@@ -11,7 +11,7 @@ import AccountSetup from './forms/AccountSetup';
 const Header = () => {
     const { user } = useAuth();
     const [loginModal, setLoginModal] = useState<boolean>(false);
-    const [form, setForm] = useState<ILoginRoute>(undefined);
+    const [form, setForm] = useState<ILoginRoute>();
 
     // If user hasn't created their username, make them do so
     useDeepCompareEffect(() => {
@@ -36,10 +36,10 @@ const Header = () => {
     };
 
     return (
-        <>
-            <AppBar style={{ position: 'relative' }}>
+        <div style={{ width: '100%', flex: 1, backgroundColor: 'red' }}>
+            <AppBar style={{ position: 'relative', width: '100%', flex: 1 }}>
                 <Toolbar>
-                    <HeaderItem label={'Home'} href={'/'} />
+                    <HeaderItem label={'Home'} href={`/`} />
                     <div
                         style={{
                             display: 'flex',
@@ -101,7 +101,7 @@ const Header = () => {
                     )}
                 </>
             </Modal>
-        </>
+        </div>
     );
 };
 

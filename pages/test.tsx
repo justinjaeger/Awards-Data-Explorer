@@ -51,7 +51,7 @@ export default function Home(props: IHomeProps) {
     const handleSignUp = async () => {
         console.log('email signUp', email);
         await axios
-            .post('api/user', {
+            .post('/api/user', {
                 email,
             })
             .then((res: AxiosResponse<IApiResponse>) => {

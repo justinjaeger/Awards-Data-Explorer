@@ -57,11 +57,11 @@ const FollowerList = (props: IFollowerListProps) => {
     // https://www.youtube.com/watch?v=G7_0VxMRJe4
     if (loading) return <Loading />;
     return (
-        <div id="follower-list">
+        <>
             {userList.map((follower, i) => (
                 <FollowerUnit follower={follower} key={`${modalType}${i}`} />
             ))}
-        </div>
+        </>
     );
 };
 
