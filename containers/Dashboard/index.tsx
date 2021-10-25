@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import { Session } from 'next-auth';
 import Image from 'next/image';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import { Modal, Typography } from '@mui/material';
 import { useNotification } from '../../context/notification';
 import * as SecureServices from '../../services/secure';
 import FollowButton from '../../components/UI/FollowButton';
+import { useAuth } from '../../context/auth';
 import FollowerList from './components/FollowerList';
-import { DashboardModalContainer, ImageWrapper } from './styles';
+import { DashboardModalContainer } from './styles';
 import { User } from '.prisma/client';
 
 type IDashboardProps = {
@@ -16,7 +16,6 @@ type IDashboardProps = {
     followingCount: number;
     isMyProfile: boolean;
     userIsFollowing: boolean;
-    session?: Session;
 };
 
 export type IModalType = 'follower' | 'following' | undefined;
@@ -30,17 +29,16 @@ const Dashboard = (props: IDashboardProps) => {
         followingCount,
         isMyProfile,
         userIsFollowing: _userIsFollowing,
-        session,
     } = props;
 
     const { setNotification } = useNotification();
+    const { user } = useAuth();
     const [dashboardModal, setDashboardModal] = useState<boolean>(false);
     const [modalType, setModalType] = useState<IModalType>();
     const [followerCount, setFollowerCount] = useState<number>(_followerCount);
     const [userIsFollowing, setUserIsFollowing] =
         useState<boolean>(_userIsFollowing);
     const [profileImage, setProfileImage] = useState<string>(profileUser.image);
-    const [profileImageHover, setProfileImageHover] = useState<boolean>();
 
     useEffect(() => {
         // idk why but I have to do this again
@@ -85,7 +83,10 @@ const Dashboard = (props: IDashboardProps) => {
     };
 
     // UPLOAD PROFILE IMAGE
-    const handleProfileImageUpload = async (e) => {
+    const handleProfileImageUpload = async (
+        e: React.ChangeEvent<HTMLInputElement>
+    ) => {
+        console.log('uploading profile pic');
         // Create a form with uploaded file in it
         const file = e.target.files[0];
         const formData = new FormData();
@@ -100,10 +101,11 @@ const Dashboard = (props: IDashboardProps) => {
         }
 
         // generate unique new file name
-        const fileName = session.user.id + Math.floor(Math.random() * 10000000);
+        const fileName = user.id + Math.floor(Math.random() * 10000000);
 
-        // Store the previous user image key
-        const previousKey = session.user.image.slice(52);
+        // Store the previous user image + key
+        const previousImage = user.image;
+        const previousKey = user.image.slice(52);
 
         // Upload the image
         const uploadImageResult = await SecureServices.uploadProfileImage(
@@ -122,7 +124,7 @@ const Dashboard = (props: IDashboardProps) => {
         setProfileImage(uploadImageResult.image);
 
         // If there was a previous image uploaded, delete that form Spaces/S3
-        if (previousKey !== '/PROFILE.png') {
+        if (previousImage !== '/PROFILE.png') {
             SecureServices.deleteProfileImage(previousKey).then((res) => {
                 if (res.status === 'error') {
                     return setNotification({
@@ -135,64 +137,50 @@ const Dashboard = (props: IDashboardProps) => {
         }
     };
 
-    const ImageHoverWrapper = (props: {
-        children: React.ReactNode;
-        style: React.CSSProperties;
-    }) => (
-        <ImageWrapper
-            style={{ ...props.style }}
-            onMouseEnter={() => setProfileImageHover(true)}
-            onMouseLeave={() => setProfileImageHover(false)}
-        >
-            {props.children}
-        </ImageWrapper>
-    );
-
     const ProfileImageMyProfile = () => (
-        <>
-            <label htmlFor="file-upload">
-                <ImageHoverWrapper
-                    style={{ opacity: profileImageHover ? '20%' : '100%' }}
-                >
-                    <Image
-                        src={profileImage}
-                        height={PROFILE_PIC_DIAMETER}
-                        width={PROFILE_PIC_DIAMETER}
-                        className={'dashboard-profile-image-my-profile'}
-                    />
-                </ImageHoverWrapper>
-                <ImageHoverWrapper style={{ cursor: 'pointer' }}>
-                    <CloudUploadIcon
-                        style={{
-                            height: PROFILE_PIC_DIAMETER / 2,
-                            width: PROFILE_PIC_DIAMETER / 2,
-                            marginLeft: PROFILE_PIC_DIAMETER / 4,
-                            marginTop: PROFILE_PIC_DIAMETER / 4,
-                            opacity:
-                                profileImageHover && isMyProfile
-                                    ? '100%'
-                                    : '0%',
-                        }}
-                    />
-                </ImageHoverWrapper>
-            </label>
-            <input
-                id="file-upload"
-                type="file"
-                onChange={handleProfileImageUpload}
-            />
-        </>
+        <div
+            style={{
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'center',
+                alignItems: 'center',
+            }}
+        >
+            <div style={{ padding: 10 }}>
+                <Image
+                    src={profileImage}
+                    height={PROFILE_PIC_DIAMETER}
+                    width={PROFILE_PIC_DIAMETER}
+                    className={'dashboard-profile-image-my-profile'}
+                />
+            </div>
+            <div>
+                <label htmlFor="file-upload" style={{ cursor: 'pointer' }}>
+                    <div style={{ display: 'flex', flexDirection: 'row' }}>
+                        <CloudUploadIcon style={{ marginRight: 10 }} />
+                        <Typography>Change Picture</Typography>
+                    </div>
+                </label>
+                <input
+                    id="file-upload"
+                    name="logo"
+                    type="file"
+                    onChange={(e) => handleProfileImageUpload(e)}
+                    style={{ display: 'none' }}
+                />
+            </div>
+        </div>
     );
 
     const ProfileImage = () => (
-        <ImageWrapper>
+        <div style={{ padding: 10 }}>
             <Image
                 src={profileImage}
                 height={PROFILE_PIC_DIAMETER}
                 width={PROFILE_PIC_DIAMETER}
                 className={'profile-image'}
             />
-        </ImageWrapper>
+        </div>
     );
 
     return (
@@ -213,7 +201,7 @@ const Dashboard = (props: IDashboardProps) => {
                     {profileUser.username}
                 </Typography>
 
-                {session &&
+                {user &&
                     (userIsFollowing ? (
                         <FollowButton onClick={unfollow} text={'Unfollow'} />
                     ) : (

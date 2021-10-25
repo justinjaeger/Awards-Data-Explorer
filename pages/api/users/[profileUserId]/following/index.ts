@@ -1,6 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import prisma from '../../../../../../lib/prisma';
-import { IApiResponse } from '../../../../../../types';
+import prisma from '../../../../../lib/prisma';
+import { IApiResponse } from '../../../../../types';
 import { User } from '.prisma/client';
 
 export interface IFollowingResponse extends IApiResponse {

@@ -1,6 +1,4 @@
 import React, { useState, useContext } from 'react';
-import { useSession } from 'next-auth/client';
-import { ISession } from '../types';
 import { useDeepCompareEffect } from '../utils/hooks';
 import * as SecureServices from '../services/secure';
 import { IAuthContext, IAuthState, _void } from './types';
@@ -19,22 +17,12 @@ export const initialAuthContext: IAuthContext = {
 
 const AuthContext = React.createContext<IAuthContext>(initialAuthContext);
 
-export default function AuthProvider(props: { children: React.ReactChild }) {
-    const [session] = useSession() as ISession;
+const AuthProvider = (props: { children: React.ReactChild }) => {
     const [user, setUser] = useState<User>();
 
     useDeepCompareEffect(() => {
-        // update user data if session found
-        if (session) {
-            console.log('UPDATING SESSION...');
-            SecureServices.getUser().then((res) => {
-                if (res.status === 'error') {
-                    console.log('Could not retrieve user session');
-                }
-                setUser(res.user);
-            });
-        }
-    }, [session]);
+        SecureServices.getUser().then((res) => setUser(res.user));
+    }, [user]);
 
     return (
         <AuthContext.Provider
@@ -56,6 +44,7 @@ export default function AuthProvider(props: { children: React.ReactChild }) {
             {props.children}
         </AuthContext.Provider>
     );
-}
+};
 
 export const useAuth = () => useContext(AuthContext);
+export default AuthProvider;
