@@ -13,9 +13,9 @@
     background-color: '#2E4057';
 }
 
-input[type="file"] {
+/* input[type="file"] {
     display: none;
-}
+} */
 
 /* ACTUALLY BEING USED */
 .profile-image {

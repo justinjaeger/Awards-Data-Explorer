@@ -1,8 +1,7 @@
 import axios, { AxiosResponse, AxiosError } from 'axios';
-import { IFollowerResponse } from '../pages/api/users/profile/[profileUserId]/follower';
-import { IFollowerCountResponse } from '../pages/api/users/profile/[profileUserId]/follower/count';
-import { IFollowingResponse } from '../pages/api/users/profile/[profileUserId]/following';
-import { IGetProfileUserResponse } from '../pages/api/users/[username]';
+import { IFollowerResponse } from '../pages/api/users/[profileUserId]/follower';
+import { IFollowerCountResponse } from '../pages/api/users/[profileUserId]/follower/count';
+import { IFollowingResponse } from '../pages/api/users/[profileUserId]/following';
 
 /**
  * The point of this file is to make sure consistent responses
@@ -13,24 +12,11 @@ import { IGetProfileUserResponse } from '../pages/api/users/[username]';
  * ^ can deal with all errors in a "then" block on front
  */
 
-export const getProfileUser = (
-    profileUsername: string
-): Promise<IGetProfileUserResponse> => {
-    return axios
-        .get(`/api/users/${profileUsername}`)
-        .then((res: AxiosResponse<IGetProfileUserResponse>) => res.data)
-        .catch((err: AxiosError<IGetProfileUserResponse>) => {
-            if (err.response.status === 404)
-                return { status: 'error', message: 'A 404 error has occured' };
-            return err.response.data;
-        });
-};
-
 export const getProfileFollowerCount = (
     profileUserId: string
 ): Promise<IFollowerCountResponse> => {
     return axios
-        .get(`/api/users/profile/${profileUserId}/follower/count`)
+        .get(`/api/users/${profileUserId}/follower/count`)
         .then((res: AxiosResponse<IFollowerCountResponse>) => res.data)
         .catch((err: AxiosError<IFollowerCountResponse>) => {
             if (err.response.status === 404)
@@ -43,7 +29,7 @@ export const getProfileFollowingCount = (
     profileUserId: string
 ): Promise<IFollowerCountResponse> => {
     return axios
-        .get(`/api/users/profile/${profileUserId}/following/count`)
+        .get(`/api/users/${profileUserId}/following/count`)
         .then((res: AxiosResponse<IFollowerCountResponse>) => res.data)
         .catch((err: AxiosError<IFollowerCountResponse>) => {
             if (err.response.status === 404)
@@ -56,7 +42,7 @@ export const getFollowers = (
     profileUserId: string
 ): Promise<IFollowerResponse> => {
     return axios
-        .get(`/api/users/profile/${profileUserId}/follower`)
+        .get(`/api/users/${profileUserId}/follower`)
         .then((res: AxiosResponse<IFollowerResponse>) => res.data)
         .catch((err: AxiosError<IFollowerResponse>) => {
             if (err.response.status === 404)
@@ -69,7 +55,7 @@ export const getFollowings = (
     profileUserId: string
 ): Promise<IFollowingResponse> => {
     return axios
-        .get(`/api/users/profile/${profileUserId}/following`)
+        .get(`/api/users/${profileUserId}/following`)
         .then((res: AxiosResponse<IFollowingResponse>) => res.data)
         .catch((err: AxiosError<IFollowingResponse>) => {
             if (err.response.status === 404)

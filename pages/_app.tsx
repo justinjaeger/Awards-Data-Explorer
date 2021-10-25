@@ -13,10 +13,14 @@ import theme from '../theme';
 /**
  * Component is the your page eg /index
  * pageProps is whatever you get from getServerSideProps in your component
+ * 
+ * Try to get this initial load down: 
+ * https://dev.to/estruyf/devhack-optimizing-initial-load-js-from-next-js-5c3d
+ * - experiment with dynamic imports
  */
 
 const App = ({ Component, pageProps }: AppProps) => {
-    return (
+    return (<>
         <ThemeProvider theme={muiTheme}>
             <SessionProvider session={pageProps.session}>
                 <AuthProvider>
@@ -36,6 +40,7 @@ const App = ({ Component, pageProps }: AppProps) => {
                 </AuthProvider>
             </SessionProvider>
         </ThemeProvider>
+        </>
     );
 };
 

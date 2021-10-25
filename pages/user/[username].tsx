@@ -1,29 +1,39 @@
-import React, { useState } from 'react';
-import { useSession } from 'next-auth/client';
+import React, { useEffect, useState } from 'react';
 import { GetServerSidePropsContext, GetServerSidePropsResult } from 'next';
+import Router from 'next/router';
 import { useAsyncDeepCompareEffect } from '../../utils/hooks';
 import Dashboard from '../../containers/Dashboard';
-import NotFound from '../../containers/NotFound';
 import Loading from '../../components/Loading';
 import { useNotification } from '../../context/notification';
 import * as Services from '../../services';
 import * as SecureServices from '../../services/secure';
 import prisma from '../../lib/prisma';
+import { useAuth } from '../../context/auth';
 import { User } from '.prisma/client';
 
 interface IUserDashboardServerSideProps {
-    notFound?: boolean;
     profileUser?: User;
+    notFound?: boolean;
 }
 
 const UserDashboard = (props: IUserDashboardServerSideProps) => {
-    const { notFound, profileUser } = props;
-    const [session] = useSession();
+    const { profileUser, notFound } = props;
+    const { user } = useAuth();
     const { setNotification } = useNotification();
     const [followerCount, setFollowerCount] = useState<number>();
     const [followingCount, setFollowingCount] = useState<number>();
     const [userIsFollowing, setUserIsFollowing] = useState<boolean>(false);
     const [loading, setLoading] = useState<boolean>(true);
+
+    useEffect(() => {
+        if (notFound) {
+            setNotification({
+                status: 'warning',
+                message: 'User not found.',
+            });
+            Router.push('/');
+        }
+    }, [notFound]);
 
     useAsyncDeepCompareEffect(async () => {
         if (notFound) return;
@@ -56,7 +66,7 @@ const UserDashboard = (props: IUserDashboardServerSideProps) => {
 
         // DETERMINE IF LOGGED IN USER IS FOLLOWING THIS PROFILE
         const promise3 =
-            session && profileUser.id !== session.user.id
+            user && profileUser.id !== user.id
                 ? SecureServices.checkIfFollowing(profileUser.id).then(
                       (res) => {
                           if (res.status === 'error') {
@@ -73,18 +83,16 @@ const UserDashboard = (props: IUserDashboardServerSideProps) => {
         await Promise.allSettled([promise1, promise2, promise3]).then(() =>
             setLoading(false)
         );
-    }, [session]);
+    }, [user]);
 
-    if (notFound) return <NotFound thingCannotFind="User" />;
     if (loading) return <Loading />;
     return (
         <Dashboard
             profileUser={profileUser}
             followerCount={followerCount}
             followingCount={followingCount}
-            isMyProfile={session && profileUser.id === session.user.id}
+            isMyProfile={user && profileUser.id === user.id}
             userIsFollowing={userIsFollowing}
-            session={session}
         />
     );
 };

@@ -1,12 +1,10 @@
 import React, { useState } from 'react';
 import { Link, Typography } from '@mui/material';
 import axios, { AxiosResponse, AxiosError } from 'axios';
-import { useSession } from 'next-auth/client';
 import FormInput from '../../../components/UI/FormInput';
 import FormButton from '../../../components/UI/FormButton';
 import { useNotification } from '../../../context/notification';
 import { ICreateUsernameResponse } from '../../../pages/api/user/username/[email]';
-import { ISession } from '../../../types';
 import { useAuth } from '../../../context/auth';
 import { profanityFilter, validateUsername } from '../../../utils/Filter';
 import { FormContainer, FormContent } from './styles';
@@ -18,7 +16,7 @@ type ISignupProps = {
 
 const AccountSetup = (props: ISignupProps) => {
     const { close, logout } = props;
-    const [session] = useSession() as ISession;
+    const { user } = useAuth();
     const { setUsername: _setUsername } = useAuth();
     const { setNotification } = useNotification();
     const [username, setUsername] = useState<string>('');
@@ -51,7 +49,7 @@ const AccountSetup = (props: ISignupProps) => {
             });
         }
         axios
-            .post(`/api/user/username/${session.user.email}`, { username })
+            .post(`/api/user/username/${user.email}`, { username })
             .then((res: AxiosResponse<ICreateUsernameResponse>) => {
                 if (res.data.status === 'success') {
                     _setUsername(res.data.username);

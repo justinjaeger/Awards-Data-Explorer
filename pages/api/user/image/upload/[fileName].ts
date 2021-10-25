@@ -7,8 +7,9 @@ import { getSession } from 'next-auth/client';
 import { IApiResponse } from '../../../../../types';
 import prisma from '../../../../../lib/prisma';
 
+// IMPORTANT for formiable to parse the body
+// Note: this makes us unable to read the body
 export const config = {
-    // idk if this shit is going to give me hell
     api: {
         bodyParser: false,
     },
