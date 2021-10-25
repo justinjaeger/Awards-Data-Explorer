@@ -36,7 +36,6 @@
     "devDependencies": {
         "@babel/core": "^7.12.13",
         "@babel/preset-env": "^7.12.13",
-        "@next/eslint-plugin-next": "^11.1.2",
         "@types/react": "^17.0.9",
         "@typescript-eslint/eslint-plugin": "^4.0.1",
         "@typescript-eslint/parser": "^4.0.1",
@@ -61,10 +60,8 @@
             "eslint:recommended",
             "plugin:react/recommended",
             "plugin:@typescript-eslint/recommended",
-            "plugin:@next/next/recommended",
             "prettier",
-            "plugin:import/typescript",
-            "plugin:react/recommended"
+            "plugin:import/typescript"
         ],
         "globals": {
             "React": true,
