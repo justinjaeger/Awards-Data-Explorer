@@ -1,7 +1,8 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { Prisma } from '@prisma/client';
-import { IApiResponse } from '../../../../types';
-import prisma from '../../../../lib/prisma';
+import { Prisma as PrismaClient } from '@prisma/client';
+import { getSession } from 'next-auth/client';
+import { IApiResponse } from '../../../types';
+import prisma from '../../../lib/prisma';
 
 export interface ICreateUsernameResponse extends IApiResponse {
     username?: string;
@@ -11,15 +12,21 @@ export default async (
     req: NextApiRequest,
     res: NextApiResponse<ICreateUsernameResponse>
 ) => {
-    const { method, query, body } = req;
-    const email = query.email as string;
+    const { method, body } = req;
+    const session = await getSession({ req });
+    if (!session) {
+        return res.status(401).send({
+            status: 'error',
+            message: 'User is not authenticated.',
+        });
+    }
     const username = body.username as string;
 
     try {
         if (method === 'POST') {
             const result = await prisma.user.update({
                 where: {
-                    email,
+                    id: session.user.id,
                 },
                 data: {
                     username,
@@ -33,7 +40,7 @@ export default async (
         throw new Error();
     } catch (e) {
         console.error(e);
-        if (e instanceof Prisma.PrismaClientKnownRequestError) {
+        if (e instanceof PrismaClient.PrismaClientKnownRequestError) {
             let message = e.message;
             if (e.code === 'P2002') {
                 message = 'This username has already been taken.';

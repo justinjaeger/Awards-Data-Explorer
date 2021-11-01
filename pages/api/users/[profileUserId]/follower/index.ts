@@ -19,8 +19,6 @@ export default async (
      * https://www.youtube.com/watch?v=G7_0VxMRJe4
      */
 
-    console.log('PRROFILE USER ID', userId);
-
     try {
         if (method === 'GET') {
             const result = await prisma.user.findUnique({

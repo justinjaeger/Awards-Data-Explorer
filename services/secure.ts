@@ -4,6 +4,7 @@ import { IFollow } from '../pages/api/user/follow/[targetUserId]';
 import { ICheckIfFollowing } from '../pages/api/user/following/[profileUserId]';
 import { IDeleteProfileImage } from '../pages/api/user/image/delete';
 import { IUploadProfileImage } from '../pages/api/user/image/upload/[fileName]';
+import { ICreateUsernameResponse } from '../pages/api/user/username';
 
 /**
  * These api routes use getSession() or getToken()
@@ -16,6 +17,20 @@ export const getUser = (): Promise<IGetUserResponse> => {
         .get(`/api/user`)
         .then((res: AxiosResponse<IGetUserResponse>) => res.data)
         .catch((err: AxiosError<IGetUserResponse>) => {
+            if (err.response.status === 404)
+                return { status: 'error', message: 'A 404 error has occured' };
+            return err.response.data;
+        });
+};
+
+// create username
+export const createUsername = (
+    username: string
+): Promise<ICreateUsernameResponse> => {
+    return axios
+        .post(`/api/user/username`, { username })
+        .then((res: AxiosResponse<ICreateUsernameResponse>) => res.data)
+        .catch((err: AxiosError<ICreateUsernameResponse>) => {
             if (err.response.status === 404)
                 return { status: 'error', message: 'A 404 error has occured' };
             return err.response.data;
