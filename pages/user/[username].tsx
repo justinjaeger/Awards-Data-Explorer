@@ -9,7 +9,7 @@ import * as Services from '../../services';
 import * as SecureServices from '../../services/secure';
 import Prisma from '../../lib/prisma';
 import { useAuth } from '../../context/auth';
-import { User } from '.prisma/client';
+import { User } from '../../prisma/user';
 
 interface IUserDashboardServerSideProps {
     profileUser?: User;

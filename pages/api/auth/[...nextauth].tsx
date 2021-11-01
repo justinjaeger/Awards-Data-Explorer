@@ -21,7 +21,7 @@ const options: NextAuthOptions = {
     ],
     adapter: Adapters.Prisma.Adapter({ prisma: Prisma.User }),
     secret: process.env.SECRET,
-    database: process.env.DATABASE_URL,
+    database: process.env.USER_DATABASE_URL,
     callbacks: {
         // Modify this to make new fields available for the session callback
         session: async (session, user) => {

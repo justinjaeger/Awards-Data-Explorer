@@ -1,7 +1,7 @@
 import React from 'react';
 import Image from 'next/image';
-import { User } from '@prisma/client';
 import TextButton from '../../../components/UI/TextButton';
+import { User } from '../../../prisma/user';
 
 type IFollowerUnitProps = {
     follower: User;

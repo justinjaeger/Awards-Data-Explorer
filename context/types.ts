@@ -1,5 +1,5 @@
 import { Dispatch, SetStateAction } from 'react';
-import { User } from '.prisma/client';
+import { User } from '../prisma/user';
 
 export type INotification = {
     message: string;

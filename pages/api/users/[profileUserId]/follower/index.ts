@@ -1,7 +1,7 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import Prisma from '../../../../../lib/prisma';
+import { User } from '../../../../../prisma/user';
 import { IApiResponse } from '../../../../../types';
-import { User } from '.prisma/client';
 
 export interface IFollowerResponse extends IApiResponse {
     followers?: User[];
@@ -18,8 +18,6 @@ export default async (
      * WARNING: As this scales, it is probably not good to fetch everynoe at once
      * https://www.youtube.com/watch?v=G7_0VxMRJe4
      */
-
-    console.log('PRROFILE USER ID', userId);
 
     try {
         if (method === 'GET') {

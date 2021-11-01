@@ -1,7 +1,7 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import Prisma from '../../../../../lib/prisma';
+import { User } from '../../../../../prisma/user';
 import { IApiResponse } from '../../../../../types';
-import { User } from '.prisma/client';
 
 export interface IFollowingResponse extends IApiResponse {
     followers?: User[];

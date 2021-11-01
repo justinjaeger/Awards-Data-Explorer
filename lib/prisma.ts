@@ -1,5 +1,5 @@
 import { PrismaClient as PrismaClientUser } from '../prisma/user';
-import { PrismaClient as PrismaClientAwards } from '../prisma/awards';
+// import { PrismaClient as PrismaClientAwards } from '../prisma/awards';
 
 // PrismaClient is attached to the `global` object in development to prevent
 // exhausting your database connection limit.
@@ -29,21 +29,21 @@ const prisma_user: PrismaClientUser = (() => {
 })();
 
 //@ts-ignore
-const prisma_awards: PrismaClientAwards = (() => {
-    if (process.env.NODE_ENV === 'production') {
-        return new PrismaClientAwards();
-    }
-    // helps not exhaust db connection limit in development
-    // https://www.prisma.io/docs/support/help-articles/nextjs-prisma-client-dev-practices
-    if (!global.prisma) {
-        global.prisma = new PrismaClientAwards();
-    }
-    return global.prisma;
-})();
+// const prisma_awards: PrismaClientAwards = (() => {
+//     if (process.env.NODE_ENV === 'production') {
+//         return new PrismaClientAwards();
+//     }
+//     // helps not exhaust db connection limit in development
+//     // https://www.prisma.io/docs/support/help-articles/nextjs-prisma-client-dev-practices
+//     if (!global.prisma) {
+//         global.prisma = new PrismaClientAwards();
+//     }
+//     return global.prisma;
+// })();
 
 const Prisma = {
     User: prisma_user,
-    Awards: prisma_awards,
+    // Awards: prisma_awards,
 };
 
 export default Prisma;

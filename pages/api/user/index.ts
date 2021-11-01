@@ -1,8 +1,8 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { User } from '@prisma/client';
 import { getSession } from 'next-auth/client';
 import { IApiResponse } from '../../../types';
 import Prisma from '../../../lib/prisma';
+import { User } from '../../../prisma/user';
 
 export interface IGetUserResponse extends IApiResponse {
     user?: User;
