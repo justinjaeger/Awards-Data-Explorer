@@ -1,0 +1,61 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+// Some of the models are for compatibility with Next Auth: https://next-auth.js.org/adapters/prisma
+
+// Specify which datasource prisma should connect to
+datasource db {
+  provider = "mysql"
+  url      = env("AWARDS_DATABASE_URL")
+}
+
+// This is default for the time being
+generator client {
+    provider = "prisma-client-js"
+    output = "./awards"
+}
+
+model Movie {
+    id              String          @id @default(cuid())
+    wikiUrl         String          @unique
+    title           String      
+    year            Int
+    imdbUrl         String?
+    nominations     Nomination[]    @relation("movie-nomination")
+}
+
+model Person {
+    id              String          @id @default(cuid())
+    wikiUrl         String          @unique
+    name            String
+    nominations     Nomination[]    @relation("person-nomination")
+}
+
+model Nomination {
+    id              String      @id @default(cuid())
+    winner          Boolean     @default(false)
+    person          Person      @relation("person-nomination", fields: [personId], references: [id])
+    personId        String
+    movie           Movie       @relation("movie-nomination", fields: [movieId], references: [id])
+    movieId         String
+}
+
+model AwardsBody {
+    id         String       @id @default(cuid())
+    name       String   
+    awards     Award[]      @relation("awardsbody-award")
+}
+
+model AwardsCategory {
+    id         String     @id @default(cuid())
+    name       String    
+    awards     Award[]      @relation("awardscategory-award")
+}
+
+model Award {
+    id                String          @id @default(cuid())
+    year              String  
+    awardsBody        AwardsBody      @relation("awardsbody-award", fields: [awardsBodyId], references: [id])  
+    awardsBodyId      String
+    awardsCategory    AwardsCategory  @relation("awardscategory-award", fields: [awardsCategoryId], references: [id])  
+    awardsCategoryId  String
+}

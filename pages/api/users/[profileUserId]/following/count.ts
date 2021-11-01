@@ -1,5 +1,5 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import prisma from '../../../../../lib/prisma';
+import Prisma from '../../../../../lib/prisma';
 import { IFollowerCountResponse } from '../follower/count';
 
 export default async (
@@ -12,7 +12,7 @@ export default async (
     try {
         // count how many users are following id
         if (method === 'GET') {
-            const count = await prisma.follower.count({
+            const count = await Prisma.User.follower.count({
                 where: {
                     followerId,
                 },

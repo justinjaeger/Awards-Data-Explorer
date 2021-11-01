@@ -1,5 +1,5 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import prisma from '../../../../../lib/prisma';
+import Prisma from '../../../../../lib/prisma';
 import { IApiResponse } from '../../../../../types';
 import { User } from '.prisma/client';
 
@@ -23,7 +23,7 @@ export default async (
 
     try {
         if (method === 'GET') {
-            const result = await prisma.user.findUnique({
+            const result = await Prisma.User.user.findUnique({
                 where: {
                     id: userId,
                 },

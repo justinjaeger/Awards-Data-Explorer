@@ -1,6 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getSession } from 'next-auth/client';
-import prisma from '../../../../lib/prisma';
+import Prisma from '../../../../lib/prisma';
 import { IApiResponse } from '../../../../types';
 
 export interface ICheckIfFollowing extends IApiResponse {
@@ -23,7 +23,7 @@ export default async (
 
     try {
         if (method === 'GET') {
-            const result = await prisma.follower.findFirst({
+            const result = await Prisma.User.follower.findFirst({
                 where: {
                     userId,
                     followerId: session.user.id,
