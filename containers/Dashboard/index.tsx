@@ -6,9 +6,9 @@ import { useNotification } from '../../context/notification';
 import * as SecureServices from '../../services/secure';
 import FollowButton from '../../components/UI/FollowButton';
 import { useAuth } from '../../context/auth';
+import { User } from '../../prisma/user';
 import FollowerList from './components/FollowerList';
 import { DashboardModalContainer } from './styles';
-import { User } from '.prisma/client';
 
 type IDashboardProps = {
     profileUser: User;

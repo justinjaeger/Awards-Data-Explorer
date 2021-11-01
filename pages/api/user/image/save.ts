@@ -1,6 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getSession } from 'next-auth/client';
-import prisma from '../../../../lib/prisma';
+import Prisma from '../../../../lib/prisma';
 import { IApiResponse } from '../../../../types';
 
 export type ISaveProfileImage = IApiResponse;
@@ -22,7 +22,7 @@ export default async (
 
     try {
         if (method === 'POST') {
-            await prisma.user.update({
+            await Prisma.User.user.update({
                 where: {
                     id: session.user.id,
                 },

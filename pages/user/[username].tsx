@@ -7,9 +7,9 @@ import Loading from '../../components/Loading';
 import { useNotification } from '../../context/notification';
 import * as Services from '../../services';
 import * as SecureServices from '../../services/secure';
-import prisma from '../../lib/prisma';
+import Prisma from '../../lib/prisma';
 import { useAuth } from '../../context/auth';
-import { User } from '.prisma/client';
+import { User } from '../../prisma/user';
 
 interface IUserDashboardServerSideProps {
     profileUser?: User;
@@ -102,7 +102,7 @@ export async function getServerSideProps(
 ): Promise<GetServerSidePropsResult<IUserDashboardServerSideProps>> {
     const profileUsername = context.query.username as string;
 
-    const response = await prisma.user.findUnique({
+    const response = await Prisma.User.user.findUnique({
         where: {
             username: profileUsername,
         },

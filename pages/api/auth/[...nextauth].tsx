@@ -2,7 +2,7 @@ import { NextApiHandler } from 'next';
 import NextAuth, { NextAuthOptions } from 'next-auth';
 import Adapters from 'next-auth/adapters';
 import Providers from 'next-auth/providers';
-import prisma from '../../../lib/prisma';
+import Prisma from '../../../lib/prisma';
 
 // https://www.youtube.com/watch?v=o_wZIVmWteQ
 // https://github.com/nextauthjs/next-auth/blob/main/src/providers/email.js
@@ -19,9 +19,9 @@ const options: NextAuthOptions = {
             from: process.env.SMTP_FROM,
         }),
     ],
-    adapter: Adapters.Prisma.Adapter({ prisma }),
+    adapter: Adapters.Prisma.Adapter({ prisma: Prisma.User }),
     secret: process.env.SECRET,
-    database: process.env.DATABASE_URL,
+    database: process.env.USER_DATABASE_URL,
     callbacks: {
         // Modify this to make new fields available for the session callback
         session: async (session, user) => {

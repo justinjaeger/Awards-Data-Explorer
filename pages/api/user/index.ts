@@ -1,8 +1,8 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { User } from '@prisma/client';
 import { getSession } from 'next-auth/client';
 import { IApiResponse } from '../../../types';
-import prisma from '../../../lib/prisma';
+import Prisma from '../../../lib/prisma';
+import { User } from '../../../prisma/user';
 
 export interface IGetUserResponse extends IApiResponse {
     user?: User;
@@ -23,7 +23,7 @@ export default async (
 
     try {
         if (method === 'GET') {
-            const user = await prisma.user.findUnique({
+            const user = await Prisma.User.user.findUnique({
                 where: {
                     id: session.user.id,
                 },

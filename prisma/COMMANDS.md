@@ -1,10 +1,10 @@
-Prisma terminal commands for running migrations:
-
-npx prisma generate
-- whenever you make changes in database that are reflected in your Prisma schema, run this command
-
-AFTER CHANGING THE DATA MODEL:
-npx prisma migrate dev --name whatever_you_want_to_name_it
-- this starts a history / chain of migrations
-
+### With our TWO schemas / databases
 https://www.prisma.io/docs/concepts/components/prisma-migrate
+
+# GENERATE
+npx prisma generate --schema prisma/userSchema.prisma
+npx prisma generate --schema prisma/awardsSchema.prisma
+
+# MIGRATION - Whenever we alter the data model
+npx prisma migrate dev --schema prisma/userSchema.prisma --name initial_migration
+npx prisma migrate dev --schema prisma/awardsSchema.prisma --name initial_migration

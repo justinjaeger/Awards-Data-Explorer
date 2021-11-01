@@ -1,7 +1,7 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import prisma from '../../../../../lib/prisma';
+import Prisma from '../../../../../lib/prisma';
+import { User } from '../../../../../prisma/user';
 import { IApiResponse } from '../../../../../types';
-import { User } from '.prisma/client';
 
 export interface IFollowerResponse extends IApiResponse {
     followers?: User[];
@@ -19,11 +19,9 @@ export default async (
      * https://www.youtube.com/watch?v=G7_0VxMRJe4
      */
 
-    console.log('PRROFILE USER ID', userId);
-
     try {
         if (method === 'GET') {
-            const result = await prisma.user.findUnique({
+            const result = await Prisma.User.user.findUnique({
                 where: {
                     id: userId,
                 },

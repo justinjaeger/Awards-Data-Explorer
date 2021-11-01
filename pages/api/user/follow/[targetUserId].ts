@@ -1,6 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getSession } from 'next-auth/client';
-import prisma from '../../../../lib/prisma';
+import Prisma from '../../../../lib/prisma';
 import { IApiResponse } from '../../../../types';
 
 export type IFollow = IApiResponse;
@@ -18,12 +18,9 @@ export default async (req: NextApiRequest, res: NextApiResponse<IFollow>) => {
         });
     }
 
-    console.log('TARGET USER', targetUserId);
-    console.log('SESSION USER', session.user.id);
-
     try {
         if (method === 'POST') {
-            await prisma.follower.create({
+            await Prisma.User.follower.create({
                 data: {
                     userId: targetUserId,
                     followerId: session.user.id,
@@ -34,7 +31,7 @@ export default async (req: NextApiRequest, res: NextApiResponse<IFollow>) => {
             });
         }
         if (method === 'DELETE') {
-            await prisma.follower.delete({
+            await Prisma.User.follower.delete({
                 where: {
                     userId_followerId: {
                         userId: targetUserId,

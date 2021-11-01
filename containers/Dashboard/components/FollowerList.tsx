@@ -3,8 +3,8 @@ import Loading from '../../../components/Loading';
 import { IModalType } from '..';
 import * as Service from '../../../services';
 import { useNotification } from '../../../context/notification';
+import { User } from '../../../prisma/user';
 import FollowerUnit from './FollowerUnit';
-import { User } from '.prisma/client';
 
 type IFollowerListProps = {
     modalType: IModalType;

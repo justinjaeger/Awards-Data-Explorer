@@ -5,7 +5,7 @@ import sharp from 'sharp';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getSession } from 'next-auth/client';
 import { IApiResponse } from '../../../../../types';
-import prisma from '../../../../../lib/prisma';
+import Prisma from '../../../../../lib/prisma';
 
 // IMPORTANT for formiable to parse the body
 // Note: this makes us unable to read the body
@@ -92,7 +92,7 @@ export default async (
 
                         console.log('EDGE URL', edgeUrl);
 
-                        await prisma.user.update({
+                        await Prisma.User.user.update({
                             where: {
                                 username,
                             },

@@ -1,8 +1,8 @@
 import React, { useState, useContext } from 'react';
 import { useDeepCompareEffect } from '../utils/hooks';
 import * as SecureServices from '../services/secure';
+import { User } from '../prisma/user';
 import { IAuthContext, IAuthState, _void } from './types';
-import { User } from '.prisma/client';
 
 export const initialAuthState: IAuthState = {
     user: undefined,
