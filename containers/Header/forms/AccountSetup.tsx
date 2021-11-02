@@ -1,12 +1,11 @@
 import React, { useState } from 'react';
 import { Link, Typography } from '@mui/material';
-import axios, { AxiosResponse, AxiosError } from 'axios';
 import FormInput from '../../../components/UI/FormInput';
 import FormButton from '../../../components/UI/FormButton';
 import { useNotification } from '../../../context/notification';
-import { ICreateUsernameResponse } from '../../../pages/api/user/username/[email]';
 import { useAuth } from '../../../context/auth';
 import { profanityFilter, validateUsername } from '../../../utils/Filter';
+import * as SecureServices from '../../../services/secure';
 import { FormContainer, FormContent } from './styles';
 
 type ISignupProps = {
@@ -16,7 +15,6 @@ type ISignupProps = {
 
 const AccountSetup = (props: ISignupProps) => {
     const { close, logout } = props;
-    const { user } = useAuth();
     const { setUsername: _setUsername } = useAuth();
     const { setNotification } = useNotification();
     const [username, setUsername] = useState<string>('');
@@ -48,25 +46,22 @@ const AccountSetup = (props: ISignupProps) => {
                 timeout: 7000,
             });
         }
-        axios
-            .post(`/api/user/username/${user.email}`, { username })
-            .then((res: AxiosResponse<ICreateUsernameResponse>) => {
-                if (res.data.status === 'success') {
-                    _setUsername(res.data.username);
-                    close();
-                }
-            })
-            .catch((err: AxiosError<ICreateUsernameResponse>) => {
-                const message = err.response.data.message;
-                if (message) {
-                    setNotification({
-                        message,
-                        status: 'warning',
-                    });
-                } else {
-                    setNotification({ message: err.message, status: 'error' });
-                }
-            });
+        SecureServices.createUsername(username).then((res) => {
+            if (res.status === 'error') {
+                return setNotification({
+                    message: res.message,
+                    status: 'error',
+                });
+            }
+            if (res.status === 'rejected') {
+                return setNotification({
+                    message: res.message,
+                    status: 'warning',
+                });
+            }
+            _setUsername(res.username);
+            close();
+        });
     };
 
     const FORM_HEIGHT = 250;

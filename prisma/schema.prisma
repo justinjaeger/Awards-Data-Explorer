@@ -4,13 +4,13 @@
 
 // Specify which datasource prisma should connect to
 datasource db {
-  provider = "mysql"
-  url      = env("DATABASE_URL")
+    provider = "mysql"
+    url      = env("DATABASE_URL")
 }
 
 // This is default for the time being
 generator client {
-  provider = "prisma-client-js"
+    provider = "prisma-client-js"
 }
 
 model User {
