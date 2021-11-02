@@ -13,6 +13,10 @@ generator client {
     provider = "prisma-client-js"
 }
 
+/////////////////
+// USER / AUTH //
+/////////////////
+
 model User {
     id              String      @id @default(cuid())
     email           String      @unique
@@ -82,4 +86,54 @@ model Follower {
 enum Role {
   USER
   ADMIN
+}
+
+/////////////////////
+// AWARDS DATABASE //
+/////////////////////
+
+model DB_Movie {
+    id              String              @id @default(cuid())
+    wikiUrl         String              @unique
+    title           String      
+    year            Int
+    imdbUrl         String?
+    nominations     DB_Nomination[]     @relation("movie-nomination")
+}
+
+model DB_Person {
+    id              String              @id @default(cuid())
+    wikiUrl         String              @unique
+    name            String
+    nominations     DB_Nomination[]     @relation("person-nomination")
+}
+
+model DB_Nomination {
+    id              String          @id @default(cuid())
+    winner          Boolean         @default(false)
+    person          DB_Person       @relation("person-nomination", fields: [personId], references: [id])
+    personId        String
+    movie           DB_Movie        @relation("movie-nomination", fields: [movieId], references: [id])
+    movieId         String
+}
+
+model DB_AwardsBody {
+    id         String           @id @default(cuid())
+    name       String   
+    awards     DB_Award[]       @relation("awardsbody-award")
+}
+
+model DB_AwardsCategory {
+    id         String           @id @default(cuid())
+    name       String    
+    awards     DB_Award[]       @relation("awardscategory-award")
+}
+
+model DB_Award {
+    id                String             @id @default(cuid())
+    year              String  
+    awardsBody        DB_AwardsBody      @relation("awardsbody-award", fields: [awardsBodyId], references: [id])  
+    awardsBodyId      String
+    awardsCategory    DB_AwardsCategory  @relation("awardscategory-award", fields: [awardsCategoryId], references: [id])  
+    awardsCategoryId  String
 }
